@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "OneCommit",
+    "slug": "OneCommit",
+    "scheme" : "OneCommit",
+    "version": "1.0.0",
+    "facebookAppId": "YOUR_FACEBOOK_APP_ID",
+    "facebookDisplayName": "oneCommit",
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "plugins": [
+      "expo-web-browser"
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "usesAppleSignIn": true,
+      "bundleIdentifier": "com.onecommit.app"
+    },
+    "android": {
+      "package": "com.onecommit.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    }
+  }
+}
