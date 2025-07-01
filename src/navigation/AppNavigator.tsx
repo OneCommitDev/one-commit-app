@@ -13,6 +13,7 @@ import ResetPasswordScreen from '~/screens/forgotpassowrd/ResetPassword';
 import MultiStepSurvey from '~/screens/multi_info_screens/MultiStepSurvey';
 import GamesGrid from '~/screens/multi_info_screens/GamesGrid';
 import UserProfile from '~/screens/UserProfile';
+import SuccessScreen from '~/screens/SuccessScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -67,6 +68,13 @@ export default function AppNavigator() {
    <Stack.Screen name="UserProfile" 
           component={UserProfile} 
           options={{ headerShown: false,  animation: 'slide_from_right' }} />
+
+
+   <Stack.Screen name="Success" 
+          component={SuccessScreen} 
+          options={{ headerShown: false,  animation: 'slide_from_right' }} />
+
+
 
 
       </Stack.Navigator>

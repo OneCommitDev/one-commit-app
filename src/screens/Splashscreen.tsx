@@ -78,29 +78,55 @@
 
 
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, StatusBar } from 'react-native';
 import React, { useEffect } from 'react';
 import Logo from '~/components/Logo';
+import { getItem } from 'expo-secure-store';
+import { PREF_KEYS } from '~/utils/Prefs';
+import { NavigationProp, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RootStackParamList } from '~/navigation/types';
+import { removeItem } from '~/utils/storage';
 
-type RootStackParamList = {
-  Splash: undefined;
-  Intro: undefined;
-};
+ 
 
-type SplashScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Splash'>;
-};
+// type SplashScreenProps = {
+//     navigation: NativeStackNavigationProp<RootStackParamList, 'Splash'>;
+//     OtpVerification: { method: 'email' | 'mobile' , value : string , typeis : string };
+// };
 
-export default function SplashScreen({ navigation }: SplashScreenProps) {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-     navigation.replace('Intro');
+
+// export default function SplashScreen({ navigation }: SplashScreenProps) {
+    // const navigations = useNavigation<NavigationProp<RootStackParamList>>();
+    // const route = useRoute<RouteProp<RootStackParamList, 'OtpVerification'>>();
+    export default function SplashScreen() {
+
+      const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+ useEffect(() => {
+  const checkAndNavigate = async () => {
+    const token = await getItem(PREF_KEYS.accessToken);
+    const register_redirect = await getItem(PREF_KEYS.register_redirect);
+    const login_status = await getItem(PREF_KEYS.login_status);
+
+    
+
+     setTimeout(() => {
+       if (login_status === 'success') {
+        // navigation.replace('Login');
+          navigation.replace('UserProfile');
+      } else {
+        navigation.replace('Intro');
+      }
     }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+  };
+
+  checkAndNavigate();
+}, []);
+
 
   return (
     <View className="flex-1 bg-primary justify-between py-10">
+
       <View className="flex-1 justify-center items-center">
         {/* Uncomment this block to use image instead of colored box */}
         {/* <Image

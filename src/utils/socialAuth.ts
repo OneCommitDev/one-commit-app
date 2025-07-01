@@ -3,7 +3,7 @@ import * as AuthSession from 'expo-auth-session';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as WebBrowser from 'expo-web-browser';
 import { Alert } from 'react-native';
-import { APP_CONFIG_GOOGLE, APP_CONFIG_MICROSOFT } from './constants';
+import {  APP_CONFIG_MICROSOFT } from './constants';
 
 WebBrowser.maybeCompleteAuthSession(); // Required for auth flows
 
@@ -35,33 +35,6 @@ export const handleAppleLogin = async () => {
   }
 };
 
-// ---------------------------
-// 🔍 Google Login
-// ---------------------------
-export const useGoogleLogin = () => {
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
-    {
-      clientId: APP_CONFIG_GOOGLE.GOOGLE_CLIENT_ID,
-      redirectUri: APP_CONFIG_GOOGLE.REDIRECT_URI,
-      responseType: AuthSession.ResponseType.IdToken,
-      scopes: ['openid', 'profile', 'email'],
-      usePKCE: true,
-    },
-    {
-      authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-    }
-  );
-
-  const handleResponse = async () => {
-    if (response?.type === 'success') {
-      const { id_token } = response.params;
-      return { id_token };
-    }
-    return null;
-  };
-
-  return { request, response, promptAsync, handleResponse };
-};
 
 // ---------------------------
 // 💼 Microsoft Login
@@ -79,6 +52,12 @@ export const useMicrosoftLogin = () => {
       authorizationEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
     }
   );
+console.log(AuthSession.makeRedirectUri({
+  scheme: 'com.onecommit.app',
+  path: 'oauthredirect',
+}));
+
+
 
   const handleResponse = async () => {
     if (response?.type === 'success') {

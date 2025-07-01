@@ -11,4 +11,7 @@ export type RootStackParamList = {
   MultiStepSurvey: { selectedGames: string[] };
   GamesGrid : undefined;
   UserProfile : undefined;
+  SuccessScreen : { message : string; title?: string };
+    Success: { message: string; title?: string }; // ✅ Include this
+
 };

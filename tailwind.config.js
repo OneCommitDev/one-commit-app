@@ -29,6 +29,7 @@ module.exports = {
         tiny: 10,
         base: 14,
         btntextsize : 18,
+        12 : 12,
         16 : 16,
         18 : 18,
         20 : 20,

@@ -1,0 +1,38 @@
+# Node modules
+node_modules/
+
+# React Native
+ios/build/
+android/app/build/
+android/build/
+*.keystore
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Expo
+.expo/
+.expo-shared/
+
+# Metro cache
+.cache/
+babel-cache/
+metro-cache/
+
+# Misc
+.env
+.env.local
+*.log
+
+# VSCode
+.vscode/
+
+# macOS
+*.swp
+.idea/

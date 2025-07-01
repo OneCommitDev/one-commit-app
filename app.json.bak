@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "OneCommit",
+    "slug": "OneCommit",
+    "scheme": "OneCommit",
+    "deepLinks": [
+      "OneCommit://redirect"
+    ],
+    "version": "1.0.0",
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "plugins": [
+      "expo-web-browser",
+      "expo-build-properties",
+       "@react-native-google-signin/google-signin"
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "usesAppleSignIn": true,
+      "bundleIdentifier": "com.onecommit.app"
+      
+    },
+    "android": {
+       "package": "com.onecommit.app",
+         "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "OneCommit",
+              "host": "redirect"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
+     
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    }
+  }
+}

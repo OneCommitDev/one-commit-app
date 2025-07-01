@@ -1,27 +1,28 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Platform,
-  Modal,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {  View,  Text,  TouchableOpacity,  ScrollView,  Platform,  Modal,  Alert,} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-
 import AppInput from '~/components/AppInput';
 import AppText from '~/components/AppText';
 import ArrowButton from '~/components/ArrowButton';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '~/navigation/types';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { removeItem } from '~/utils/storage';
+import { clearAllPrefs, PREF_KEYS } from '~/utils/Prefs';
+import { Api_Url, CreateProfileRequest, getRequest, httpRequest2 } from '~/services/serviceRequest';
+import { CreateProfileResponse, SimpleResponse } from '~/services/DataModals';
+import Loader from '~/components/Loader';
+import { getItem } from 'expo-secure-store';
+import { Applog } from '~/utils/logger';
+import TestTypeToggle from './multi_info_screens/TestTypeToggle';
 
 export default function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 const [showAndroidPicker, setShowAndroidPicker] = useState(false); // ✅ For Android
+  const [genderType, setGenderType] = useState<'Male' | 'Female'>('Male');
 
   const [form, setForm] = useState({
     fullName: '',
@@ -39,20 +40,72 @@ const [showAndroidPicker, setShowAndroidPicker] = useState(false); // ✅ For An
 
   const [dobTemp, setDobTemp] = useState(new Date());
   const [showDatePickerModal, setShowDatePickerModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (key: keyof typeof form, value: any) => {
     setForm({ ...form, [key]: value });
   };
 
     const handleBack = () => {
-            navigation.goBack();
-
+           // navigation.goBack();
+           navigation.replace('Login');
+      clearAllPrefs();
+       // ProfileApiRequest();
     }
+
+const ProfileApiRequest = async () => {
+  try {
+   setLoading(true);
+
+    const email = 'Pardeep.Kumar@agilite.tech';
+    const accessToken = await getItem(PREF_KEYS.accessToken);
+     console.log(accessToken);
+
+    const res = await httpRequest2<CreateProfileResponse>(
+      Api_Url.userProfile,  
+      'get',
+      { email },           
+      accessToken ?? '',
+    );
+
+    console.log(res);
+
+    if (res.status) {
+      console.log('Profile:', res.message);
+      // handle success
+    } else {
+      Alert.alert('Error', res.message ?? 'Login failed');
+    }
+  } catch (err) {
+    console.error('ProfileApiRequest failed:', err);
+    Alert.alert('Error', 'Unexpected error occurred.');
+  } finally {
+   setLoading(false);
+  }
+
+ 
+};
+
+
+
+ useEffect(() => {
+  console.log('useEffect triggered on mount');
+  const fetchProfile = async () => {
+    console.log('Calling ProfileApiRequest...');
+    await ProfileApiRequest();
+  };
+  fetchProfile();
+}, []);
+
 
  
 
+ useEffect(() => {
+   form.email = getItem(PREF_KEYS.userEmailID) ?? '';
+}, []);
+
   return (
-        <View className="flex-1 px-2 pt-12">
+        <View className="flex-1 px-2 pt-7">
     
     <View className="flex-row mt-5">
   <TouchableOpacity 
@@ -75,6 +128,8 @@ const [showAndroidPicker, setShowAndroidPicker] = useState(false); // ✅ For An
     enableOnAndroid={true}
     extraScrollHeight={100} // adjust if needed
   >
+            <Loader show={loading} />
+    
             <View className="bg-background ml-5 mr-5">
           
     
@@ -97,13 +152,16 @@ const [showAndroidPicker, setShowAndroidPicker] = useState(false); // ✅ For An
       />
 
       <AppText text="Email" size="text-base" />
-      <AppInput
-        value={form.email}
-        leftIcon={<Ionicons name="mail-outline" size={20} color="#6B7280" />}
-        onChangeValue={(text) => handleChange('email', text)}
-        placeholder="Enter email"
-        keyboardType="email-address"
-      />
+   <AppInput
+  value={form.email}
+  editable={false}
+  className="bg-gray-100"
+  leftIcon={<Ionicons name="mail-outline" size={20} color="#6B7280" />}
+  onChangeValue={(text) => handleChange('email', text)}
+  placeholder="Enter email"
+  keyboardType="email-address"
+/>
+
 
       <AppText text="Phone Number" size="text-base" />
       <AppInput
@@ -171,53 +229,24 @@ const [showAndroidPicker, setShowAndroidPicker] = useState(false); // ✅ For An
 
  
  <AppText text="Gender" size="text-base" className="mb-1" />
+ <View className="mb-2">
+       <TestTypeToggle
+        options={['Male', 'Female']}
+        initialValue="Male"
+        onSelect={(selected) => {
+          setGenderType(selected as 'Male' | 'Female');
+          setForm((prev) => ({ ...prev, gender: selected }));
+        }}
+      />
 
-<View className="flex-row space-x-4 mb-5">
-  {/* Male */}
-  <TouchableOpacity
-    onPress={() => handleChange('gender', 'Male')}
-    className="flex-row items-center space-x-2 px-4 py-3 rounded-xl bg-gray-100 flex-1"
-  >
-    <View
-      className={`w-5 h-5 rounded-md items-center justify-center border ${
-        form.gender === 'Male'
-          ? 'bg-green-600 border-primary'
-          : 'bg-white border-gray-400'
-      }`}
-    >
-      {form.gender === 'Male' && (
-        <Ionicons name="checkmark" size={12} color="white" />
-      )}
-    </View>
- <AppText text="Male" size="text-base" className="mb-1 ml-5" />
+       
 
-  </TouchableOpacity>
-
-  {/* Female */}
-  <TouchableOpacity
-    onPress={() => handleChange('gender', 'Female')}
-    className="flex-row items-center space-x-2 px-4 py-3 rounded-xl bg-gray-100 flex-1"
-  >
-    <View
-      className={`w-5 h-5 rounded-md items-center justify-center border ${
-        form.gender === 'Female'
-          ? 'bg-green-600 border-primary'
-          : 'bg-white border-gray-400'
-      }`}
-    >
-      {form.gender === 'Female' && (
-        <Ionicons name="checkmark" size={12} color="white" />
-      )}
-    </View>
-     <AppText text="Female" size="text-base" className="mb-1 ml-5" />
-
-  </TouchableOpacity>
-</View>
-
-<View className='bg-graylight h-1' />
+      </View>
+ 
 
 
-    <View className='mt-4'>
+
+    <View>
                    <View className="flex-row space-x-4">
                        {/* Weight */}
                        <View className="flex-1">
@@ -313,3 +342,5 @@ const [showAndroidPicker, setShowAndroidPicker] = useState(false); // ✅ For An
     </View>
   );
 }
+ 
+

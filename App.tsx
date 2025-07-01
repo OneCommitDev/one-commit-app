@@ -24,20 +24,46 @@
 // }
 
 
-import './global.css';
+// import './global.css';
 
+// import React from 'react';
+// import AppNavigator from './src/navigation/AppNavigator';
+// import { useFonts } from 'expo-font';
+
+// export default function App() {
+//    const [fontsLoaded] = useFonts({
+//     'Nunito-ExtraBold': require('./assets/fonts/Nunito-ExtraBold.ttf'),
+//     'Nunito-Regular': require('./assets/fonts/Nunito-Regular.ttf'),
+//     'Nunito-SemiBold': require('./assets/fonts/Nunito-SemiBold.ttf'),
+//   });
+//    if (!fontsLoaded) return null;
+//   return <AppNavigator />;
+// }
+
+ 
+
+
+import './global.css';
 import React from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useFonts } from 'expo-font';
+import { StatusBar } from 'react-native';
 
 export default function App() {
-   const [fontsLoaded] = useFonts({
+  const [fontsLoaded] = useFonts({
     'Nunito-ExtraBold': require('./assets/fonts/Nunito-ExtraBold.ttf'),
     'Nunito-Regular': require('./assets/fonts/Nunito-Regular.ttf'),
     'Nunito-SemiBold': require('./assets/fonts/Nunito-SemiBold.ttf'),
   });
-   if (!fontsLoaded) return null;
-  return <AppNavigator />;
-}
 
- 
+  if (!fontsLoaded) return null;
+
+  return (
+    <>
+      {/* ✅ Global StatusBar */}
+      <StatusBar backgroundColor="#235D48" barStyle="light-content" />
+      
+      <AppNavigator />
+    </>
+  );
+}

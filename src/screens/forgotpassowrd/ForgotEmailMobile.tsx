@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
-import { useNavigation, NavigationProp, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import ArrowButton from '~/components/ArrowButton';
+import { Api_Url, httpRequest } from '~/services/serviceRequest';
+import { LoginResponse, SimpleResponse } from '~/services/DataModals';
+import { setItem } from 'expo-secure-store';
+import { PREF_KEYS, Temp_KEYS } from '~/utils/Prefs';
+import Loader from '~/components/Loader';
 
 type RootStackParamList = {
   // MobileEmailVerification: { method: 'email' | 'mobile' , value : string , maskedValue : string };
@@ -16,25 +21,72 @@ export default function ForgotEmailMobile() {
   const route = useRoute<RouteProp<RootStackParamList, 'OtpVerification'>>();
   const selectedMethod = route.params.method;
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
 
     const handleSubmit = () => {
+      if (!isFormValid) {
+    Alert.alert('Please enter a valid ' + (selectedMethod === 'email' ? 'email address' : 'mobile number'));
+    return;
+  }
+    ForgotPasswordRequest();
+    /*
   if (email.trim().length > 0 && selectedMethod) {
-    const maskedValue =
-      selectedMethod === 'email' ? '98******23' : 'par****@g****.com';
+    // const maskedValue =
+    //   selectedMethod === 'email' ? '98******23' : 'par****@g****.com';
 
-    navigation.navigate('OtpVerification', {
-      method: selectedMethod,
-      value: email.trim(),
-      typeis: maskedValue,
-    });
+    // navigation.navigate('OtpVerification', {
+    //   method: selectedMethod,
+    //   value: email.trim(),
+    //   typeis: maskedValue,
+    // });
+    ForgotPasswordRequest();
   } else {
     Alert.alert('Please enter a valid value');
   }
+    */
 };
 
 // MobileEmailVerification
+const ForgotPasswordRequest = async () => {
+  try {
+    setLoading(true);
+    const requestBody = {
+      email,
+    };
+    console.log(requestBody);
 
+    const res = await httpRequest<SimpleResponse>(
+      Api_Url.forgotpassword,    'post',    requestBody,    undefined,   true 
+    );
 
+    if (res.status) {
+       navigation.navigate('OtpVerification', {
+            method: selectedMethod,
+            value: email.trim(),
+            typeis: 'forgot_verify',
+      });
+    } else {
+      Alert.alert('Error', res.message ?? 'Request failed');
+    }
+  } catch (err) {
+    Alert.alert('Error', 'Unexpected error occurred.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const isFormValid =
+  selectedMethod === 'email'
+    ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) // simple email regex
+    : /^\d{10}$/.test(email); // assuming mobile number is 10 digits
+
+useFocusEffect(
+  React.useCallback(() => {
+    setEmail(Temp_KEYS.email);
+    setLoading(false); // if applicable
+    // clear validation errors if you use any
+  }, [])
+);
 
   return (
     <View className="flex-1 bg-background px-6 pt-14">
@@ -91,6 +143,7 @@ export default function ForgotEmailMobile() {
         value={email}
         style={{ letterSpacing: 1 }}
         onChangeText={setEmail}
+        autoCapitalize="none"
         keyboardType={selectedMethod === 'email' ? 'email-address' : 'phone-pad'}
       />
     </View>
@@ -100,9 +153,12 @@ export default function ForgotEmailMobile() {
 
                {/* Submit Button */}
                 <View className="my-4">
-                <ArrowButton text="Continue" onPress={handleSubmit} fullWidth />
+                <ArrowButton text="Continue" onPress={handleSubmit} fullWidth disabled={!isFormValid} />
                 </View>
+                 <Loader show={loading} />
    
     </View>
   );
 }
+ 
+

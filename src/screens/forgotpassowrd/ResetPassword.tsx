@@ -1,56 +1,107 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-} from 'react-native';
+import {  View,  Text,  TouchableOpacity,  TextInput,  Alert,} from 'react-native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
-import {
-  useNavigation,
-  NavigationProp,
-  useRoute,
-  RouteProp,
-} from '@react-navigation/native';
+import {  useNavigation,  NavigationProp,  useRoute,  RouteProp, useFocusEffect,} from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import ArrowButton from '~/components/ArrowButton';
+import Tooltip from 'react-native-walkthrough-tooltip';
+import { Api_Url, httpRequest, ResetPasswordRequest } from '~/services/serviceRequest';
+import { LoginResponse, ResetPasswordResponse, SimpleResponse } from '~/services/DataModals';
+import { getItem, setItem } from 'expo-secure-store';
+import { PREF_KEYS, Temp_KEYS } from '~/utils/Prefs';
+import Loader from '~/components/Loader';
+import { removeItem } from '~/utils/storage';
 
 type RootStackParamList = {
   ResetPasswordScreen: { userid: any };
   Login: undefined;
+  Success: { message: string; title?: string };
 };
 
 export default function ResetPasswordScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'ResetPasswordScreen'>>();
   const userid = route.params.userid;
-
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const isFormValid =
-    newPassword.length >= 9 &&
-    confirmPassword.length >= 9 &&
+    newPassword.length >= 8 &&
+    confirmPassword.length >= 8 &&
     newPassword === confirmPassword;
+
+      const isPasswordValid = (text: string) => {
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&/#^()_\-+={}[\]:;"'<>,.\\|~`]).{8,}$/;
+    return regex.test(text);
+  };
 
   const handleSubmit = () => {
     if (!newPassword || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
-    } else if (newPassword.length < 9) {
+    } else if (newPassword.length < 8) {
       Alert.alert('Error', 'Password must be at least 9 characters long');
     } else if (newPassword !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
     } else {
-      Alert.alert('Success', 'Password has been reset');
-      // navigation.reset({
-      //   index: 0,
-      //   routes: [{ name: 'Login' }],
-      // });
+    ResetPasswordRequestCall();
     }
   };
+
+    const delayedShowTooltip = () => {
+    setTimeout(() => {
+      setShowTooltip(true);
+    }, 100);
+  };
+
+ const ResetPasswordRequestCall = async () => {
+   try {
+     setLoading(true);
+
+   const emailID = await getItem(PREF_KEYS.forgot_email);
+const OTP = await getItem(PREF_KEYS.forgot_otp);
+
+  const requestBody: ResetPasswordRequest = {
+       email: emailID ?? '',  
+       code : OTP ?? '',
+       pass : confirmPassword
+     };
+     console.log(requestBody);
+ 
+     const res = await httpRequest<SimpleResponse>(
+       Api_Url.resetPassword,    'post',    requestBody,    undefined,   true 
+     );
+ console.log(res);
+     if (res.status) {
+        removeItem(PREF_KEYS.forgot_email);
+        removeItem(PREF_KEYS.forgot_otp);
+        // navigation.reset({ index: 0, routes: [{ name: 'Login' }], });
+       navigation.navigate('Success', {
+          message: 'Password Reset successfully!',
+        });
+     } else {
+       Alert.alert('Error', res.message ?? 'Request failed');
+     }
+   } catch (err) {
+     Alert.alert('Error', 'Unexpected error occurred.');
+   } finally {
+     setLoading(false);
+   }
+ };
+
+   useFocusEffect(
+     React.useCallback(() => {
+      setNewPassword(Temp_KEYS.newpass);
+       setConfirmPassword(Temp_KEYS.newpass);
+       setLoading(false); // if applicable
+       // clear validation errors if you use any
+     }, [])
+   );
 
   return (
     <View className="flex-1 bg-background px-6 pt-14">
@@ -81,8 +132,11 @@ export default function ResetPasswordScreen() {
 
         {/* New Password Field */}
         <Text className="text-14 font-nunitoextrabold text-title mb-2">New Password</Text>
-        <View className="flex-row items-center border border-gray-300 rounded-xl px-3 h-14 bg-white">
-          <MaterialIcons name="lock-outline" size={24} color="#124D3A" />
+      <View
+        className={`flex-row items-center rounded-xl px-3 h-14 mb-4 bg-white ${
+          newPassword && !isPasswordValid(newPassword)
+            ? 'border border-red-500'  : 'border border-gray-300'  }`} >      
+    <MaterialIcons name="lock-outline" size={24} color="#124D3A" />
           <TextInput
             className="ml-3 flex-1 text-black font-nunitosemibold text-base"
             placeholder="Enter new password"
@@ -99,14 +153,41 @@ export default function ResetPasswordScreen() {
           </TouchableOpacity>
         </View>
         {/* Password Requirements Label */}
-        <Text className="text-xs text-gray-500 mt-1 mb-4">
-          Password must be at least 9 characters long
-        </Text>
+         {/* Hint + Tooltip */}
+          <View className="flex-row items-center  ml-2 mb-4 mt-1">
+            <Text className="text-12 text-gray-600">
+              Password must be at least 8 characters
+            </Text>
+            <Tooltip
+              isVisible={showTooltip}
+              content={
+                <View style={{ backgroundColor: '#fff', padding: 12 }}>
+                  <Text style={{ fontSize: 14, color: '#333', lineHeight: 20 }}>
+                    • At least 8 characters{'\n'}
+                    • 1 uppercase & lowercase letter{'\n'}
+                    • 1 number & 1 special character{'\n'}
+                    • Example: Demo@123#
+                  </Text>
+                </View>
+              }
+              placement={keyboardVisible ? 'bottom' : 'top'}
+              onClose={() => setShowTooltip(false)}
+              showChildInTooltip={false}
+              backgroundColor="rgba(0,0,0,0.3)"
+            >
+              <TouchableOpacity onPress={delayedShowTooltip} className="ml-1">
+                <MaterialIcons name="help-outline" size={20} color="#4A4A4A" />
+              </TouchableOpacity>
+            </Tooltip>
+          </View>
 
         {/* Confirm Password Field */}
         <Text className="text-14 font-nunitoextrabold text-title mb-2">Confirm Password</Text>
-        <View className="flex-row items-center border border-gray-300 rounded-xl px-3 h-14 mb-4 bg-white">
-          <MaterialIcons name="lock-outline" size={24} color="#124D3A" />
+<View
+  className={`flex-row items-center rounded-xl px-3 h-14 mb-4 bg-white ${
+    confirmPassword && (!isPasswordValid(confirmPassword) || confirmPassword !== newPassword)
+      ? 'border border-red-500'   : 'border border-gray-300'  }`} >
+        <MaterialIcons name="lock-outline" size={24} color="#124D3A" />
           <TextInput
             className="ml-3 flex-1 text-black font-nunitosemibold text-base"
             placeholder="Re-enter new password"
@@ -132,7 +213,12 @@ export default function ResetPasswordScreen() {
             disabled={!isFormValid}
           />
         </View>
+                <Loader show={loading} />
+        
       </KeyboardAwareScrollView>
     </View>
   );
 }
+
+
+ 

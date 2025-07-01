@@ -22,19 +22,8 @@ const IntroScreen = () => {
 
      
 
-  const [loading, setLoading] = useState(false);
-
-  const simulateApiCall = () => {
-    setLoading(true);
-    setTimeout(() => setLoading(false), 3000);
-  };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+ 
+ 
 
   const fetchUsers = async () => {
     try {

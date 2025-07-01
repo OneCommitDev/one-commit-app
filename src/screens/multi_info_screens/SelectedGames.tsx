@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import ArrowButton from '~/components/ArrowButton';
 
 type Props = {
   options: string[];
@@ -15,7 +16,9 @@ type Props = {
   selectedItems: string[][];
   setSelectedItems: React.Dispatch<React.SetStateAction<string[][]>>;
   step: number;
+  onNext?: () => void; // ✅ optional
 };
+
 
 export default function SelectedGames({
   options,
@@ -24,6 +27,7 @@ export default function SelectedGames({
   selectedItems,
   setSelectedItems,
   step,
+  onNext,
 }: Props) {
   const filtered = options.filter((opt) =>
     opt.toLowerCase().includes(searchText.toLowerCase())
@@ -81,6 +85,37 @@ export default function SelectedGames({
         contentContainerStyle={{ paddingBottom: 20 }}
         keyboardShouldPersistTaps="handled"
       />
+
+      {selectedItems[step].length > 0 && (
+        <View className="mt-1 px-1 py-1">
+          <Text className="text-green-800 mb-2">Selected:</Text>
+          <View className="flex-row flex-wrap gap-1">
+            {selectedItems[step].map((item) => (
+              <TouchableOpacity
+                key={item}
+                onPress={() => {
+                  const newSelection = [...selectedItems];
+                  newSelection[step] = newSelection[step].filter((i) => i !== item);
+                  setSelectedItems(newSelection);
+                }}
+                className="flex-row items-center px-4 py-2 bg-gray-200 rounded-full"
+              >
+                <Text className="text-pretty mr-1">{item}</Text>
+                <Ionicons name="close" size={14} color="#065F46" />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
+
+      <View className="px-2 py-4 mb-20">
+        <ArrowButton
+          text="Continue"
+          onPress={() => onNext?.()} // ✅ safe call
+           disabled={selectedItems[step].length === 0}
+          fullWidth
+        />
+      </View>
     </>
   );
 }

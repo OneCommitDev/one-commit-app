@@ -1,26 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { NavigationProp, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import {  NavigationProp,  RouteProp,  useNavigation,  useRoute,} from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ArrowButton from '~/components/ArrowButton';
 import OTPInput from '~/components/OTPInput';
+import { Api_Url, ForgotOTPVerifyRequest, httpRequest, httpRequest2, postFormUrlEncoded, RegisterOTPRequest, RegisterRequest } from '~/services/serviceRequest';
+import { LoginResponse, RegisterOTPResponse, RegisterResponse, SimpleResponse } from '~/services/DataModals';
+import { logAllPrefs, PREF_KEYS } from '~/utils/Prefs';
+import { removeItem } from '~/utils/storage';
+import { getItem, setItem } from 'expo-secure-store';
+import Loader from '~/components/Loader';
 
 type RootStackParamList = {
-  OtpVerification: { method: 'email' | 'mobile'; value: string , typeis : string};
-    ResetPasswordScreen: { userid : any};
+  OtpVerification: { method: 'email' | 'mobile'; value: string; typeis: string };
+  ResetPasswordScreen: { userid: any };
+    Login: undefined;
+UserProfile : undefined;
+  Success: { message: string; title?: string };
+
 };
 
 type OtpVerificationRouteProp = RouteProp<RootStackParamList, 'OtpVerification'>;
+type OtpVerificationNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'OtpVerification'
+>;
 
 export default function OtpVerification() {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-   const route = useRoute<OtpVerificationRouteProp>();
+  const navigation = useNavigation<OtpVerificationNavigationProp>();
+  const route = useRoute<OtpVerificationRouteProp>();
+  const [loading, setLoading] = useState(false);
 
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(120); // 2 minutes
   const [canResend, setCanResend] = useState(false);
 
-  const { method, value } = route.params;
+  const { method, value, typeis } = route.params;
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -39,19 +55,35 @@ export default function OtpVerification() {
   const handleVerify = () => {
     if (otp.length === 6) {
       Keyboard.dismiss();
-       navigation.navigate('ResetPasswordScreen', {
-      userid: '123'
-    });
+      
+if (typeis === 'register_verify' || typeis === 'login_verify') {
+              OTP_Verification();
+         }else{
+              ForgotPasswordEmailVerification();
+         }
     } else {
-      Alert.alert('Invalid OTP', 'Please enter a 5-digit code');
+      Alert.alert('Invalid OTP', 'Please enter a 6-digit code');
     }
   };
 
   const handleResend = () => {
-    Alert.alert(`OTP resent to your ${method}`);
     setTimer(120);
     setCanResend(false);
-    // Resend OTP API call
+      if (typeis === 'register_verify' || typeis === 'login_verify') {
+         const requestBody: RegisterOTPRequest = {
+              email: value, // 'value' should hold the email string
+              code : otp
+            };
+            ResenedOTPcall(Api_Url.otpResend, requestBody);
+      }else{
+         const requestBody: ForgotOTPVerifyRequest = {
+              email: value, // 'value' should hold the email string
+              code : otp
+            };
+          ResenedOTPcall(Api_Url.resendForgotOTP, requestBody);
+      }
+      //  Alert.alert(`OTP resent to your ${method}`);
+
   };
 
   const formatTimer = () => {
@@ -60,15 +92,120 @@ export default function OtpVerification() {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
+
+
+ const OTP_Verification = async () => {
+  try {
+    setLoading(true);
+   // logAllPrefs();
+
+    const email = await getItem(PREF_KEYS.registerEmail); // ✅ get actual value
+    const accessToken = await getItem(PREF_KEYS.accessToken);
+    
+    const requestBody: RegisterOTPRequest = {
+      email: email ?? '',
+      code: otp, 
+    };
+       console.log('Sending data:', accessToken);
+
+    const getResponse = await postFormUrlEncoded<RegisterOTPResponse>(
+      Api_Url.verifyUser,
+      requestBody,
+      accessToken ?? undefined
+    );
+
+    if (getResponse.status) {
+      await removeItem(PREF_KEYS.register_redirect);
+      await setItem(PREF_KEYS.userVerification, 'success');
+
+       if (typeis === 'login_verify') {
+        navigation.navigate('UserProfile');
+      } 
+     else if (typeis === 'register_verify' || typeis === 'login_verify') {
+       // navigation.navigate('Login');
+        navigation.navigate('Success', {
+          message: 'User Verified Successfully!',
+        });
+      } else {
+        navigation.navigate('ResetPasswordScreen', { userid: '' });
+      }
+    } else {
+      Alert.alert('Error', getResponse.message || 'Verification failed.');
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Something went wrong.';
+    Alert.alert('Error', errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
+
+ 
+const ForgotPasswordEmailVerification = async () => {
+  try {
+    setLoading(true);
+ const requestBody: ForgotOTPVerifyRequest = {
+      email: value, // 'value' should hold the email string
+      code : otp
+    };
+   // console.log(requestBody);
+
+    const res = await httpRequest<SimpleResponse>(
+      Api_Url.forgotPassverifyUser,    'post',    requestBody,    undefined,   true 
+    );
+
+    if (res.status) {
+      setItem(PREF_KEYS.forgot_email, value);
+       setItem(PREF_KEYS.forgot_otp, otp);
+     navigation.navigate('ResetPasswordScreen', {
+        userid: '',
+      });
+    } else {
+      Alert.alert('Error', res.message ?? 'Request failed');
+    }
+  } catch (err) {
+    Alert.alert('Error', 'Unexpected error occurred.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const ResenedOTPcall = async (resendurl: string, requestBody: any) => {
+  try {
+    setLoading(true);
+    console.log(requestBody);
+    const res = await httpRequest2<SimpleResponse>(
+      resendurl,    'post',    requestBody,    undefined,   true // 👈 for form-url-encoded
+    );
+
+    if (res.status ) {
+  
+    } else {
+      Alert.alert('Error', res.message ?? 'Login failed');
+    }
+  } catch (err) {
+    Alert.alert('Error', 'Unexpected error occurred.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   return (
     <View className="flex-1 bg-background px-8 pt-14">
-      {/* Back Button */}
-       <TouchableOpacity
-             onPress={() => navigation.goBack()}
-             className="w-16 h-16 rounded-3xl bg-[#E3E9E5] items-center justify-center mb-6"
-           >
-             <Ionicons name="chevron-back" size={24} color="#1A322E" />
-           </TouchableOpacity>
+      {/* Back Button or empty view */}
+{/* {typeis !== 'register_verify' && typeis !== 'login_verify' ? ( */}
+    {!['register_verify', 'login_verify'].includes(typeis) ? (
+
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="w-16 h-16 rounded-3xl bg-[#E3E9E5] items-center justify-center mb-6"
+        >
+          <Ionicons name="chevron-back" size={24} color="#1A322E" />
+        </TouchableOpacity>
+      ) : (
+        <View className="w-16 h-16 mb-6" />
+      )}
 
       {/* Header */}
       <View className="items-center mb-4">
@@ -76,8 +213,10 @@ export default function OtpVerification() {
           Enter Verification Code
         </Text>
         <Text className="text-light text-16 font-nunitoregular text-center px-2">
-          We've sent a 5-digit code to your{' '}
-          <Text className="font-nunitoextrabold">{method === 'email' ? 'email address' : 'mobile number'}</Text>
+          We've sent a 6-digit code to your{' '}
+          <Text className="font-nunitoextrabold">
+            {method === 'email' ? 'email address' : 'mobile number'}
+          </Text>
         </Text>
       </View>
 
@@ -102,8 +241,14 @@ export default function OtpVerification() {
         text="Verify"
         fullWidth
         onPress={handleVerify}
-        disabled={otp.length !== 6} 
+        disabled={otp.length !== 6}
       />
+              <Loader show={loading} />
+      
     </View>
   );
 }
+function setLoading(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+
