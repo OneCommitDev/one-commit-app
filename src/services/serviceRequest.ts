@@ -194,6 +194,15 @@ export async function httpRequest_social_token<T>(
             }
           };
 
+             let fullUrl = url;
+    if (method === 'get' && data) {
+      const queryString = qs.stringify(data, { addQueryPrefix: true });
+      fullUrl += queryString;
+    }
+
+    console.log(`📡 Requesting [${method.toUpperCase()}] ${fullUrl}`);
+
+
     const response = await api.request<T>({
       url,
       method,
@@ -203,7 +212,7 @@ export async function httpRequest_social_token<T>(
 
     return response.data;
   } catch (error: any) {
-    console.log('❌ HTTP error (social token)', {
+    console.log('❌ HTTP error', {
       message: error.message,
       response: error.response,
       request: error.request,

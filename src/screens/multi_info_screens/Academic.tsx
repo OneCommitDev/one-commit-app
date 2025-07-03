@@ -312,7 +312,7 @@ const Academic: React.FC<Props> = ({ onNext }) => {
           initialValue="SAT"
           onSelect={(selected) => setTestType(selected as 'SAT' | 'ACT')}
         />
-        <MySliderComponent min={0} max={100} step={1} initialValue={10} labelInterval={20} />
+        {/* <MySliderComponent min={0} max={100} step={1} initialValue={10} labelInterval={20} /> */}
         {/* <WeightRuler /> */}
 
       </View>

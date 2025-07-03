@@ -45,10 +45,10 @@ function generateStepsData(selectedGames: string[]): Step[] {
 
   const staticSteps: Step[] = [
     {
-      title: 'Athletic Information',
+      title: 'Personal Records',
       subtitle: 'Showcase your physical stats and achievements',
       options: ['Build Muscle', 'Lose Fat', 'Endurance', 'Flexibility', 'Balance'],
-      type: 'Athletic',
+      type: 'PersonalRecords',
     },
     {
       title: 'Academic Information',
@@ -209,7 +209,7 @@ function renderExtraInfoForStep(
 ) {
   switch (type) {
 
-    case 'Athletic':
+    case 'PersonalRecords':
       return <Athletic onNext={onNext} />;
    case 'Academic':
   return <Academic onNext={onNext} />;

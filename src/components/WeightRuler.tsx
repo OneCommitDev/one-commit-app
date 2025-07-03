@@ -147,7 +147,7 @@
 
 
 
-import React, { useRef, useState, useEffect } from 'react';
+ import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -157,17 +157,16 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   StyleSheet,
+  AccessibilityInfo,
 } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { AccessibilityInfo } from 'react-native';
 
-// Create Animated TouchableOpacity
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 const { width } = Dimensions.get('window');
 const ITEM_WIDTH = 16;
 const VISIBLE_ITEMS = Math.floor(width / ITEM_WIDTH);
-const LABEL_WIDTH = 40; // Wide enough for multi-digit numbers
+const LABEL_WIDTH = 40;
 
 interface WeightRulerProps {
   initialUnit?: 'kg' | 'lb';
@@ -181,9 +180,8 @@ interface WeightRulerProps {
 const generateWeights = (unit: 'kg' | 'lb'): number[] => {
   const max = unit === 'kg' ? 200 : 440;
   const step = 0.1;
-  return Array.from(
-    { length: Math.floor(max / step) + 1 },
-    (_, i) => Number((i * step).toFixed(1))
+  return Array.from({ length: Math.floor(max / step) + 1 }, (_, i) =>
+    Number((i * step).toFixed(1))
   );
 };
 
@@ -199,24 +197,33 @@ const WeightRuler: React.FC<WeightRulerProps> = ({
   const [selectedWeight, setSelectedWeight] = useState<number>(initialValue);
   const flatListRef = useRef<FlatList>(null);
   const weights = generateWeights(unit);
-  const toggleAnimation = useSharedValue(0);
   const isProgrammaticScroll = useRef<boolean>(false);
 
-  // Handle initial scroll and unit toggle scroll
-  useEffect(() => {
-    const index = weights.findIndex(w => Math.abs(w - selectedWeight) < 0.1);
-    if (index >= 0 && index < weights.length) {
-      isProgrammaticScroll.current = true;
-      scrollToIndex(index);
-    }
-  }, [unit]);
+const [flatListReady, setFlatListReady] = useState(false);
 
-  // Notify parent of weight/unit changes
+useEffect(() => {
+  if (!flatListReady) return;
+
+  const index = weights.findIndex((w) => Math.abs(w - selectedWeight) < 0.1);
+  if (index >= 0 && index < weights.length && flatListRef.current) {
+    // Delay to ensure layout is ready
+    setTimeout(() => {
+      flatListRef.current?.scrollToIndex({
+        index,
+        animated: false,
+        viewPosition: 0.5,
+      });
+    }, 50); // small delay fixes race condition
+  }
+}, [unit, flatListReady]);
+
+
+
   useEffect(() => {
     if (onWeightChange) {
       onWeightChange(selectedWeight, unit);
     }
-  }, [selectedWeight, unit, onWeightChange]);
+  }, [selectedWeight, unit]);
 
   const scrollToIndex = (index: number) => {
     if (!flatListRef.current || index < 0 || index >= weights.length) return;
@@ -246,28 +253,9 @@ const WeightRuler: React.FC<WeightRulerProps> = ({
     }
   };
 
-  const toggleUnit = () => {
-    toggleAnimation.value = withSpring(1, { damping: 15, stiffness: 100 });
-    const newUnit = unit === 'kg' ? 'lb' : 'kg';
-    const convertedWeight = unit === 'kg'
-      ? Number((selectedWeight * 2.20462).toFixed(1))
-      : Number((selectedWeight / 2.20462).toFixed(1));
-
-    setUnit(newUnit);
-    setSelectedWeight(convertedWeight);
-
-    setTimeout(() => {
-      toggleAnimation.value = withSpring(0);
-    }, 150);
-  };
-
-  const animatedToggleStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: toggleAnimation.value * 0.05 + 1 }],
-  }));
-
   const renderItem = ({ item }: { item: number }) => {
     const isMajorTick = item % 1 === 0;
-    const isLabeledTick = item % 1 === 0; // Show label for every whole number
+    const isLabeledTick = item % 1 === 0;
 
     return (
       <View style={styles.tickContainer}>
@@ -275,7 +263,7 @@ const WeightRuler: React.FC<WeightRulerProps> = ({
           style={[
             styles.tick,
             {
-              height: isMajorTick ? 30 : 12,
+              height: isMajorTick ? 26 : 12,
               backgroundColor: isMajorTick ? primaryColor : secondaryColor,
             },
           ]}
@@ -293,31 +281,21 @@ const WeightRuler: React.FC<WeightRulerProps> = ({
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
-      {/* Header with Toggle and Weight Display */}
-      <View style={styles.header}>
-        <AnimatedTouchableOpacity
-          style={[styles.toggleButton, animatedToggleStyle, { backgroundColor: primaryColor }]}
-          onPress={toggleUnit}
-          accessibilityLabel={`Switch to ${unit === 'kg' ? 'pounds' : 'kilograms'}`}
-          accessibilityRole="button"
-        >
-          <Text style={styles.toggleText}>
-            {unit === 'kg' ? 'Switch to lb' : 'Switch to kg'}
-          </Text>
-        </AnimatedTouchableOpacity>
-        <Text
-          style={[styles.weightText, { color: primaryColor }]}
-          accessibilityLiveRegion="polite"
-        >
-          {selectedWeight.toFixed(1)} {unit}
-        </Text>
-      </View>
-
+      {/* Weight Display */}
+      <View style={styles.weightContainer}>
+      <Text
+        style={[styles.weightText, { color: primaryColor }]}
+        accessibilityLiveRegion="polite"
+      >
+        {selectedWeight.toFixed(1)} {unit}
+      </Text>
+</View>
       {/* Ruler */}
       <FlatList
+      onLayout={() => setFlatListReady(true)}
         ref={flatListRef}
         data={weights}
-        keyExtractor={item => item.toString()}
+        keyExtractor={(item) => item.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
         snapToInterval={ITEM_WIDTH}
@@ -328,7 +306,7 @@ const WeightRuler: React.FC<WeightRulerProps> = ({
           offset: ITEM_WIDTH * index,
           index,
         })}
-        initialScrollIndex={weights.findIndex(w => Math.abs(w - selectedWeight) < 0.1)}
+        initialScrollIndex={weights.findIndex((w) => Math.abs(w - selectedWeight) < 0.1)}
         contentContainerStyle={styles.rulerContent}
         renderItem={renderItem}
         extraData={unit}
@@ -336,6 +314,57 @@ const WeightRuler: React.FC<WeightRulerProps> = ({
 
       {/* Center Marker */}
       <View style={[styles.centerMarker, { backgroundColor: primaryColor }]} />
+
+      {/* Floating Unit Toggle */}
+      <View style={styles.unitToggleContainer}>
+        <AnimatedTouchableOpacity
+          style={[
+            styles.unitButton,
+            unit === 'kg' && styles.unitButtonActive,
+          ]}
+          onPress={() => {
+            if (unit !== 'kg') {
+              setUnit('kg');
+              setSelectedWeight(Number((selectedWeight / 2.20462).toFixed(1)));
+            }
+          }}
+          accessibilityLabel="Select kilograms"
+          accessibilityRole="button"
+        >
+          <Text
+            style={[
+              styles.unitText,
+              unit === 'kg' && styles.unitTextActive,
+            ]}
+          >
+            kg
+          </Text>
+        </AnimatedTouchableOpacity>
+
+        <AnimatedTouchableOpacity
+          style={[
+            styles.unitButton,
+            unit === 'lb' && styles.unitButtonActive,
+          ]}
+          onPress={() => {
+            if (unit !== 'lb') {
+              setUnit('lb');
+              setSelectedWeight(Number((selectedWeight * 2.20462).toFixed(1)));
+            }
+          }}
+          accessibilityLabel="Select pounds"
+          accessibilityRole="button"
+        >
+          <Text
+            style={[
+              styles.unitText,
+              unit === 'lb' && styles.unitTextActive,
+            ]}
+          >
+            lb
+          </Text>
+        </AnimatedTouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -347,34 +376,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 20,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '90%',
-    marginBottom: 20,
-  },
-  toggleButton: {
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  toggleText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
   weightText: {
-    fontSize: 24,
+    alignItems: 'flex-end',
+    fontSize: 28,
     fontWeight: 'bold',
+    marginBottom: 10,
+    marginTop:20
   },
   rulerContent: {
     paddingHorizontal: width / 2 - ITEM_WIDTH / 2,
+    marginTop:30
   },
   tickContainer: {
     width: ITEM_WIDTH,
@@ -389,23 +400,63 @@ const styles = StyleSheet.create({
     width: LABEL_WIDTH,
     position: 'absolute',
     alignItems: 'center',
-    justifyContent: 'center',
+     justifyContent: 'center',
   },
   tickLabel: {
     fontSize: 12,
     textAlign: 'center',
     width: LABEL_WIDTH,
-    marginTop: 20,
+    marginTop: 30,
   },
   centerMarker: {
     position: 'absolute',
-    top: 0,
-    bottom: 0,
+    top: '38%',
+    bottom: '38%',
     left: '50%',
-    width: 2,
-    transform: [{ translateX: -1 }],
+    width: 3,
+    transform: [{ translateX: -1.5 }],
     opacity: 0.8,
+    zIndex: 1,
   },
+  unitToggleContainer: {
+    position: 'absolute',
+    top: '38%',
+    left: '45%',
+    transform: [{ translateX: -60 }, { translateY: -50 }],
+    flexDirection: 'row',
+    backgroundColor: '#e5e7e9', // default
+    borderRadius: 20,
+    overflow: 'hidden',
+    zIndex: 2,
+    elevation: 6,
+    borderColor: '#bfc9ca',
+  borderWidth: 1,  
+  },
+  unitButton: {
+    paddingVertical: 5,
+    minWidth: 80,  
+    alignItems: 'center',
+  },
+  unitButtonActive: {
+    backgroundColor: '#fdfefe',
+  },
+  unitText: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  unitTextActive: {
+  },
+
+
+  weightContainer: {
+  width: '90%',
+  alignItems: 'flex-end',
+  marginBottom: 20,
+  marginTop:20
+},
+
+ 
 });
 
 export default WeightRuler;

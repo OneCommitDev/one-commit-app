@@ -46,12 +46,15 @@ export const useMicrosoftLogin = () => {
       redirectUri: APP_CONFIG_MICROSOFT.REDIRECT_URI,
       responseType: AuthSession.ResponseType.Code,
       scopes: ['openid', 'profile', 'email', 'offline_access'],
-      usePKCE: true,
+      usePKCE: false,
     },
     {
       authorizationEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
     }
   );
+
+  //console.log('request' , request);
+
 console.log(AuthSession.makeRedirectUri({
   scheme: 'com.onecommit.app',
   path: 'oauthredirect',
@@ -62,6 +65,8 @@ console.log(AuthSession.makeRedirectUri({
   const handleResponse = async () => {
     if (response?.type === 'success') {
       const { code } = response.params;
+
+     // exchangeMicrosoftCode(code);
       return { code };
     }
     return null;
@@ -80,7 +85,6 @@ const exchangeMicrosoftCode = async (code: string) => {
       code,
       redirect_uri: APP_CONFIG_MICROSOFT.REDIRECT_URI,
       grant_type: 'authorization_code',
-      client_secret: 'YOUR_CLIENT_SECRET', 
     }).toString(),
   });
 

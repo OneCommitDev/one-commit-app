@@ -79,9 +79,9 @@ export default function GamesGrid() {
     <View className="items-center justify-center m-2">
   <Image
     source={item.image}
-    className="w-[70px] h-[70px] mb-2"
+    className="w-[70px] h-[70px] mb-2 mt-4"
   />
-  <AppText size='text-18'>
+  <AppText size='text-18' className='-mt-2'>
     {item.title}
   </AppText>
 </View>
@@ -132,8 +132,8 @@ export default function GamesGrid() {
         </View>
       )}
 
-      <View className="px-4 my-6">
-        <ArrowButton text="Continue" onPress={handleNext} fullWidth />
+      <View className="px-4 my-6 mb-10">
+        <ArrowButton text="Continue" onPress={handleNext} fullWidth disabled={selected.length === 0} />
       </View>
     </View>
   );

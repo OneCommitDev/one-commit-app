@@ -27,13 +27,17 @@ import { Applog, Applogerror } from '~/utils/logger';
  import * as Google from 'expo-auth-session/providers/google';
 import {  GoogleSignin,  GoogleSigninButton,  isErrorWithCode,  isSuccessResponse,
   SignInResponse,  statusCodes,} from '@react-native-google-signin/google-signin';
- 
+ import { State, City } from 'country-state-city';
+
  
  
  
   WebBrowser.maybeCompleteAuthSession();
 
 GoogleSignin.configure({
+  scopes: ['profile', 'email' ],
+  offlineAccess: true, 
+  forceCodeForRefreshToken: true,
   webClientId: '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com', // client ID of type WEB for your server. Required to get the `idToken` on the user object, and for offline access.
   iosClientId: '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com', // [iOS] if you want to specify the client ID of type iOS (otherwise, it is taken from GoogleService-Info.plist)
   profileImageSize: 120, // [iOS] The desired height (and width) of the profile image. Defaults to 120px
@@ -104,25 +108,32 @@ const GooglesignOutApp = async () => {
 // };
 
 const GooglesignInApp = async () => {
+ // await GoogleSignin.signOut(); // Force clean login
+
   try {
     await GoogleSignin.hasPlayServices();
-    const userInfo = await GoogleSignin.signIn();
+const userInfo = await GoogleSignin.signIn() as any;
     const tokens = await GoogleSignin.getTokens(); // Get access & id token
+
+//console.log('FULL userInfo:', JSON.stringify(userInfo, null, 2));
+
+const serverAuthCode = userInfo.data.serverAuthCode ?? userInfo.data.user?.serverAuthCode;
+    console.log(serverAuthCode);
 
     // console.log('Google SignIn success:', userInfo);
     // console.log('Access Token:', tokens.accessToken);
-    // console.log('ID Token:', tokens.idToken);
+  //  console.log('ID Token:', tokens.idToken);
 
     // Save details
     await setItem(PREF_KEYS.login_status, 'success');
     await setItem(PREF_KEYS.accessToken, tokens.accessToken);
     await setItem(PREF_KEYS.refreshToken, tokens.idToken);
     await setItem(PREF_KEYS.userEmailID, userInfo.data?.user.email ?? '');
-         await  SocialLoginRequestVerifyTokens(tokens.idToken , Api_Url.google_token );
+    await  SocialLoginRequestVerifyTokens(serverAuthCode , Api_Url.google_token );
 
     // await setItem(PREF_KEYS.userName, userInfo.data?.user.givenName ?? '');
     // await setItem(PREF_KEYS.userPhoto, userInfo.data?.user.photo ?? '');
-    navigation.navigate('UserProfile');
+    // navigation.navigate('UserProfile');
   } catch (error: unknown) {
     if (typeof error === 'object' && error !== null && 'code' in error) {
       const err = error as { code: string; message?: string };
@@ -152,6 +163,9 @@ useEffect(() => {
     const microsoftData = await handleMicrosoftResponse();
 
     if (microsoftData?.code) {
+      const codeVerifier = microsoftData;
+       console.log("microsoftData.codee", microsoftData.code);
+      console.log("codeVerifier", request?.codeVerifier);
       console.log('🪟 Microsoft Code:', microsoftData.code);
       setItem('microsoftCode', microsoftData.code);
     await  SocialLoginRequestVerifyTokens(microsoftData.code , Api_Url.microsoft_token );
@@ -261,32 +275,35 @@ const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string
      "authCodeToken" :authCode,
     };
 
-    console.log(requestBody);
+   // console.log(requestBody);
 
     const res = await httpRequest_social_token<SocialTokenResponse>(
       api_url,
       'post',
       requestBody,
+      undefined,
+      true
     );
 
-    if (res.access_token) {
+    console.log(res);
+    if (res.data?.accessToken) {
       await setItem(PREF_KEYS.login_status, 'success');
-      await setItem(PREF_KEYS.accessToken, res.access_token);
-      if (res.refresh_token) {
-        await setItem(PREF_KEYS.refreshToken, res.refresh_token);
+      await setItem(PREF_KEYS.accessToken, res.data?.accessToken);
+      if (res.data.refreshToken) {
+        await setItem(PREF_KEYS.refreshToken, res.data?.refreshToken);
       }
-      console.log('access_token:', res.access_token);
-      console.log('refresh_token:', res.refresh_token);
+     // console.log('access_token:', res.access_token);
+      //console.log('refresh_token:', res.refresh_token);
 
       // Optional: navigate or fetch user profile
-      navigation.navigate('UserProfile');
+       navigation.navigate('UserProfile');
 
     } else {
-      Alert.alert('Error', res?.error_description || 'Social login failed');
+      Alert.alert('Error',  'Login failed');
     }
   } catch (err) {
     Alert.alert('Error', 'Unexpected error occurred.');
-    console.log('Social Login Error:', err);
+    console.log('Social Login Errors:', err);
   } finally {
     setLoading(false);
   }
@@ -338,7 +355,12 @@ useEffect(() => {
     // Use access token to get user info
   }
 }, [response]);
-
+ useEffect(() => {
+  const states = State.getStatesOfCountry("US");
+  const cities = City.getCitiesOfState("US", "CA"); // CA for California
+//console.log('states' , states);
+///console.log('cities' , cities);
+}, []);
 
   return (
  <KeyboardAwareScrollView
