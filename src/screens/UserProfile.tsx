@@ -1,15 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Platform,
-  Modal,
-  Alert,
-  Keyboard,
-  KeyboardAvoidingView,
-} from 'react-native';
+import {  View,  Text,  TouchableOpacity,  ScrollView,  Platform,  Modal,  Alert,  Keyboard,  KeyboardAvoidingView,
+  Dimensions,  Pressable,} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,35 +12,48 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '~/navigation/types';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { clearAllPrefs, PREF_KEYS } from '~/utils/Prefs';
-import { Api_Url, httpRequest2 } from '~/services/serviceRequest';
-import { CreateProfileResponse } from '~/services/DataModals';
+import { Api_Url, CreateProfileRequest, httpRequest2 } from '~/services/serviceRequest';
+import { ProfileResponse, ProfileSaveResponse } from '~/services/DataModals';
 import Loader from '~/components/Loader';
 import { getItem } from 'expo-secure-store';
 import TestTypeToggle from './multi_info_screens/TestTypeToggle';
 import WeightRuler from '~/components/WeightRuler';
 import WhiteCustomButton from '~/components/WhiteCustomButton';
 import HeightRuler from '~/components/HeightRuler';
+ import WheelPickerExpo from 'react-native-wheel-picker-expo';
+import { HeightPickerModal } from '~/components/HeightPickerModal';
+import { autoformatUSPhoneNumber, cleanPhoneNumber, formatInchesToFeetAndInches, formatUSPhoneNumber, isAtLeast13YearsOld, parseHeightToInches } from '~/utils/AppFunctions';
+
+ 
 
 export default function ProfileScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [showAndroidPicker, setShowAndroidPicker] = useState(false);
-  const [genderType, setGenderType] = useState<'Male' | 'Female'>('Male');
-  const [loading, setLoading] = useState(false);
-              const [showWeightModal, setShowWeightModal] = useState(false);
-              const [showHeightModal, setShowHeightModal] = useState(false);
+const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+const [showAndroidPicker, setShowAndroidPicker] = useState(false);
+const [genderType, setGenderType] = useState<'Male' | 'Female'>('Male');
+const [loading, setLoading] = useState(false);
+const [showWeightModal, setShowWeightModal] = useState(false);
+const [showHeightModal, setShowHeightModal] = useState(false);
+type CityState = { city: string; state: string } | null;
+
+  const handleBack = () => {
+    navigation.replace('Login');
+    clearAllPrefs();
+  };
 
   const [form, setForm] = useState({
-    fullName: '',
-    preferredName: '',
-    email: '',
-    phone: '',
-  dob: null as Date | null, // 👈 updated here
-    city: '',
-    states: '',
-    zip: '',
-    gender: '',
-    weightis: '',
-    heightis: '',
+      fullName: '',
+      preferredName: '',
+      email: '',
+      phone: '',
+      dob: null as Date | null, // 👈 updated here
+      city: '',
+      states: '',
+      zip: '',
+      gender: '',
+      weightis: '',     
+      heightis: '',     
+      weight_unit: '',  
+      height_unit: '',  
   });
 
   const [dobTemp, setDobTemp] = useState(new Date());
@@ -59,61 +63,119 @@ export default function ProfileScreen() {
     setForm({ ...form, [key]: value });
   };
 
-  const handleBack = () => {
-    navigation.replace('Login');
-    clearAllPrefs();
-  };
+   const isFormValid =
+  (form.fullName || '').trim() !== '' &&
+  (form.preferredName || '').trim() !== '' &&
+  (form.email || '').trim() !== '' &&
+  (form.phone || '').trim() !== '' &&
+  form.dob !== null &&
+  (form.city || '').trim() !== '' &&
+  (form.states || '').trim() !== '' &&
+  (form.zip || '').trim() !== '' &&
+  (form.gender || '').trim() !== '' &&
+  (form.weightis || '').toString().trim() !== '' &&
+  (form.heightis || '').toString().trim() !== '';
+
+  
+
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      await ProfileApiRequest();
+    };
+   fetchProfile();
+  }, []);
 
   const ProfileApiRequest = async () => {
     try {
       setLoading(true);
-            const email = await getItem(PREF_KEYS.userEmailID);
-
-      const accessToken = await getItem(PREF_KEYS.accessToken);
-
-      const res = await httpRequest2<CreateProfileResponse>(
-        Api_Url.userProfile,
-        'get',
-        { email },
-        accessToken ?? '',
-      );
+        const email = await getItem(PREF_KEYS.userEmailID);
+        const userId = await getItem(PREF_KEYS.userId);
+        const accessToken = await getItem(PREF_KEYS.accessToken);
+        const profileUrl = Api_Url.userProfile(userId ?? '', email ?? '');
+        const res = await httpRequest2<ProfileResponse>(
+          profileUrl,
+          'get',
+          { email },
+          accessToken ?? '',
+        );
 
       console.log('resresresresres', res);
       if (res.status) {
-        console.log('Profile:', res.message);
+        const genderFromAPI = res.data?.gender?.toLowerCase() === 'female' ? 'Female' : 'Male';
+          setForm((form) => ({
+            ...form,
+            fullName: res.data?.full_name ?? '',
+            preferredName: res.data?.prefferred_name ?? '',
+            phone: autoformatUSPhoneNumber(res.data?.phone_number ?? ''), // 👈 Format here
+            dob: res.data?.dob ? new Date(res.data.dob) : null,
+            city: res.data?.city ?? '',
+            states: res.data?.state ?? '',
+            zip: res.data?.zipcode ?? '',
+            gender: genderFromAPI,
+             weightis: res.data?.weight && res.data?.weight_unit  ? `${res.data.weight} ${res.data.weight_unit}`  : '',
+             heightis: res.data?.height  ? formatInchesToFeetAndInches(Number(res.data.height)) : '',
+            height_unit: res.data?.height_unit ?? 'inch',
+            weight_unit: res.data?.weight_unit ?? 'lbs',
+          }));
+          
+          console.log('heightheight ',res.data?.height);
       } else {
-        Alert.alert('Error', res.message ?? 'Login failed');
+        Alert.alert('Error', res.message ?? 'Something went wrong');
       }
     } catch (err) {
-      console.error('ProfileApiRequest failed:', err);
       Alert.alert('Error', 'Unexpected error occurred.');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      await ProfileApiRequest();
-    };
-   // fetchProfile();
-  }, []);
+  const SaveProfileRequest = async () => {
+    try {
+      setLoading(true);
+      const email = await getItem(PREF_KEYS.userEmailID);
+      const userId = await getItem(PREF_KEYS.userId);
+      const accessToken = await getItem(PREF_KEYS.accessToken);
+      const profileUrl = Api_Url.userProfile(userId ?? '', email ?? '');
 
- 
+    const requestBody: CreateProfileRequest = {
+        full_name: form.fullName,
+        prefferred_name: form.preferredName,
+        phone_number: cleanPhoneNumber(form.phone),
+         dob: form.dob ? format(form.dob, 'yyyy-MM-dd') : '', // ✅ ISO format
+        city: form.city,
+        state: form.states,
+        zipcode: form.zip,
+        gender: form.gender,
+        weight: form.weightis?.toString().replace(/[^0-9.]/g, '') ?? '',
+        weight_unit: form.weight_unit ?? '',
+        height: form.heightis ? parseHeightToInches(form.heightis).toString() : '',  // 👈
+        height_unit: form.height_unit ?? '',
+      };
 
 
-  const isFormValid =
-  form.fullName.trim() !== '' &&
-  form.preferredName.trim() !== '' &&
-  form.email.trim() !== '' &&
-  form.phone.trim() !== '' &&
-  form.dob !== null && // 👈 changed from instanceof Date
-  form.city.trim() !== '' &&
-  form.states.trim() !== '' &&
-  form.zip.trim() !== '' &&
-  form.gender.trim() !== '' &&
-  form.weightis.trim() !== '' &&
-  form.heightis.trim() !== '';
+      console.log('requestBody ', requestBody);
+
+      const res = await httpRequest2<ProfileSaveResponse>(
+        profileUrl,
+        'post',
+        requestBody,
+        accessToken ?? '',
+        true
+      );
+
+      console.log('resresresresres', res);
+      if (res.status) {
+         navigation.navigate('GamesGrid');
+      } else {
+        Alert.alert('Error', res.message ?? 'Login failed');
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
 useEffect(() => {
   const fillFormDefaults = async () => {
@@ -121,22 +183,13 @@ useEffect(() => {
 
     setForm((prev) => ({
       ...prev,
-      preferredName: 'Demo',
-      fullName: 'Jhon Doe',
       email: email || '',
-      phone: '9876543210',
-      weightis: '80',
-      heightis: '5.8',
       gender: 'Male',
     }));
   };
 
   fillFormDefaults();
 }, []);
-
-
-
-type CityState = { city: string; state: string } | null;
 
 const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
   try {
@@ -162,34 +215,39 @@ const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
   }
 };
 
+const screenWidth = Dimensions.get('window').width;
+const weightValues_kg = Array.from({ length: 2001 }, (_, i) => ({
+  label: (i * 0.1).toFixed(1), // '0.0', '0.1', ..., '200.0'
+  value: i * 0.1,
+}));
 
+const weightValues_lb = Array.from({ length: 401 }, (_, i) => ({
+  label: `${i}`,
+  value: i,
+}));
 
-const formatUSPhoneNumber = (text: string): string => {
-  const cleaned = text.replace(/\D/g, ''); // Remove non-digits
-  const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
+const units: ('kg' | 'lb')[] = ['kg', 'lb'];
+const [selectedUnit, setSelectedUnit] = useState<'kg' | 'lb'>('lb');
 
-  if (!match) return cleaned;
+// ⬇️ default indexes
+const defaultKgValue = 50;   // in kg
+const defaultLbValue = 90;   // in lb
 
-  const [, area, prefix, line] = match;
-  if (prefix) {
-    if (line) {
-      return `(${area}) ${prefix}-${line}`;
-    }
-    return `(${area}) ${prefix}`;
-  }
-  if (area) return `(${area}`;
-  return '';
-};
+const defaultKgIndex = weightValues_kg.findIndex(
+  (item) => item.value === defaultKgValue
+);
 
-const isAtLeast13YearsOld = (date: Date): boolean => {
-  const today = new Date();
-  const thirteenYearsAgo = new Date(
-    today.getFullYear() - 13,
-    today.getMonth(),
-    today.getDate()
-  );
-  return date <= thirteenYearsAgo;
-};
+const defaultLbIndex = weightValues_lb.findIndex(
+  (item) => item.value === defaultLbValue
+);
+ const [tempIndex, setTempIndex] = useState(
+  selectedUnit === 'kg' ? defaultKgIndex : defaultLbIndex
+);
+
+// If unit changes, reset temporary index
+useEffect(() => {
+  setTempIndex(selectedUnit === 'kg' ? defaultKgIndex : defaultLbIndex);
+}, [selectedUnit]);
 
 
 
@@ -346,7 +404,7 @@ const isAtLeast13YearsOld = (date: Date): boolean => {
           <View className="mb-2">
             <TestTypeToggle
               options={['Male', 'Female']}
-              initialValue="Male"
+              initialValue={genderType}
               onSelect={(selected) => {
                 setGenderType(selected as 'Male' | 'Female');
                 setForm((prev) => ({ ...prev, gender: selected }));
@@ -358,6 +416,8 @@ const isAtLeast13YearsOld = (date: Date): boolean => {
             <View className="flex-1">
 
               <AppText text="Weight" size="text-base" />
+              <TouchableOpacity onPress={() => setShowWeightModal(true)} activeOpacity={1}>
+
               <AppInput
                 value={form.weightis}
                 onPress={() => setShowWeightModal(true)}
@@ -365,6 +425,8 @@ const isAtLeast13YearsOld = (date: Date): boolean => {
                 onChangeValue={(text) => handleChange('weightis', text)}
                 placeholder="Enter Weight"
               />
+              </TouchableOpacity>
+
             </View>
 
 
@@ -372,13 +434,23 @@ const isAtLeast13YearsOld = (date: Date): boolean => {
             <View className="flex-1 ml-5">
               <AppText text="Height" size="text-base" />
               
-              <AppInput
+              {/* <AppInput
               onPress={() => setShowHeightModal(true)}
                 value={form.heightis}
                 editable={false}
                 onChangeValue={(text) => handleChange('heightis', text)}
                 placeholder="Enter Height"
+              /> */}
+              <TouchableOpacity onPress={() => setShowHeightModal(true)} activeOpacity={1}>
+              <AppInput
+                value={form.heightis}
+                editable={false}
+                placeholder="Enter Height"
+                onChangeValue={(text) => handleChange('heightis', text)}
+                onPress={() => setShowHeightModal(true)} // optional fallback
               />
+            </TouchableOpacity>
+
             </View>
           </View>
 
@@ -386,8 +458,7 @@ const isAtLeast13YearsOld = (date: Date): boolean => {
             <ArrowButton
               text="Save Changes"
               onPress={() => {
-                console.log('Saved:', form);
-                navigation.navigate('GamesGrid');
+                SaveProfileRequest();
               }}
               fullWidth
               disabled={!isFormValid}
@@ -457,6 +528,10 @@ const isAtLeast13YearsOld = (date: Date): boolean => {
   />
 )}
  
+
+
+ 
+ {/* Weight */}
 <Modal
   visible={showWeightModal}
   transparent
@@ -468,44 +543,158 @@ const isAtLeast13YearsOld = (date: Date): boolean => {
     className="flex-1 justify-end bg-black/40"
   >
     <View className="bg-white rounded-t-2xl pt-2">
-      {/* Top Header Row */}
+      {/* Header */}
       <View className="flex-row items-center justify-between mb-4 px-2">
-        {/* Close Icon */}
         <TouchableOpacity onPress={() => setShowWeightModal(false)}>
           <Ionicons name="close" size={24} color="#111827" />
         </TouchableOpacity>
 
-        {/* Title */}
         <AppText className="text-center text-base font-nunitoextrabold">
           Weight
         </AppText>
 
-        {/* Save / Done Icon */}
-        <TouchableOpacity onPress={() => setShowWeightModal(false)}>
-          <Ionicons name="checkmark" size={26} color="#235D48" />
-        </TouchableOpacity>
+      <TouchableOpacity
+  onPress={() => {
+    const selectedItem =
+      selectedUnit === 'kg'
+        ? weightValues_kg[tempIndex]
+        : weightValues_lb[tempIndex];
+
+    handleChange('weightis', `${selectedItem.label} ${selectedUnit}`);
+    setShowWeightModal(false);
+  }}
+>
+  <Ionicons name="checkmark" size={26} color="#235D48" />
+</TouchableOpacity>
       </View>
 
-      {/* Ruler */}
-      <View style={{ height: 250 }}>
-        <WeightRuler
-          initialUnit="lb"
-          primaryColor="#235D48"
-          secondaryColor="#647067"
-          backgroundColor="#eaeded"
-          initialValue={Number(form.weightis) || 160}
-          onWeightChange={(value, unit) => {
-            const formatted = `${value.toFixed(1)} ${unit}`;
-            handleChange('weightis', formatted);
+      {/* Unit Toggle */}
+ <View
+  style={{
+    flexDirection: 'row',
+    alignSelf: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 999,
+    padding: 4,
+    marginBottom: 12,
+  }}
+>
+  {units.map((unit) => {
+    const isSelected = selectedUnit === unit;
+    return (
+      <Pressable
+        key={unit}
+        onPress={() => setSelectedUnit(unit as 'kg' | 'lb')}
+        style={{
+          paddingVertical: 8,
+          paddingHorizontal: 24,
+          borderRadius: 999,
+          backgroundColor: isSelected ? '#235D48' : 'transparent',
+        }}
+      >
+        <Text
+          style={{
+            color: isSelected ? '#ffffff' : '#000000', // white if selected, black otherwise
+            fontWeight: isSelected ? '700' : '500',
+            fontSize: 15,
           }}
-        />
+        >
+          {unit.toUpperCase()}
+        </Text>
+      </Pressable>
+    );
+  })}
+</View>
+
+
+
+      {/* Wheel Picker */}
+      <View style={{ height: 250, alignItems: 'center' }}>
+     <WheelPickerExpo
+        key={selectedUnit}
+        height={250}
+        width={screenWidth}
+        items={selectedUnit === 'kg' ? weightValues_kg : weightValues_lb}
+        initialSelectedIndex={tempIndex}
+        onChange={({ index }) => setTempIndex(index)} // just store temp value
+        backgroundColor="#eaeded"
+        selectedStyle={{ borderColor: '#647067', borderWidth: 0.3 }}
+      />
+
       </View>
     </View>
   </KeyboardAvoidingView>
 </Modal>
 
 
-<Modal
+          <HeightPickerModal
+            visible={showHeightModal}
+            onClose={() => setShowHeightModal(false)}
+            form={form}
+            handleChange={handleChange}
+          />
+
+
+
+    </View>
+  );
+}
+
+
+
+// <Modal
+//   visible={showWeightModal}
+//   transparent
+//   animationType="slide"
+//   onRequestClose={() => setShowWeightModal(false)}
+// >
+//   <KeyboardAvoidingView
+//     behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+//     className="flex-1 justify-end bg-black/40"
+//   >
+//     <View className="bg-white rounded-t-2xl pt-2">
+//       {/* Top Header Row */}
+//       <View className="flex-row items-center justify-between mb-4 px-2">
+//         {/* Close Icon */}
+//         <TouchableOpacity onPress={() => setShowWeightModal(false)}>
+//           <Ionicons name="close" size={24} color="#111827" />
+//         </TouchableOpacity>
+
+//         {/* Title */}
+//         <AppText className="text-center text-base font-nunitoextrabold">
+//           Weight
+//         </AppText>
+
+//         {/* Save / Done Icon */}
+//         <TouchableOpacity onPress={() => setShowWeightModal(false)}>
+//           <Ionicons name="checkmark" size={26} color="#235D48" />
+//         </TouchableOpacity>
+//       </View>
+
+//       {/* Ruler */}
+//       <View style={{ height: 250 }}>
+//         <WeightRuler
+//           initialUnit="lb"
+//           primaryColor="#235D48"
+//           secondaryColor="#647067"
+//           backgroundColor="#eaeded"
+//           initialValue={Number(form.weightis) || 160}
+//           onWeightChange={(value, unit) => {
+//             const formatted = `${value.toFixed(1)} ${unit}`;
+//             handleChange('weightis', formatted);
+//           }}
+//         />
+//       </View>
+//     </View>
+//   </KeyboardAvoidingView>
+// </Modal>
+
+
+
+
+
+
+{/* <Modal
   visible={showHeightModal}
   transparent
   animationType="slide"
@@ -516,25 +705,20 @@ const isAtLeast13YearsOld = (date: Date): boolean => {
     className="flex-1 justify-end bg-black/40"
   >
     <View className="bg-white rounded-t-2xl pt-2">
-      {/* Top Header Row */}
       <View className="flex-row items-center justify-between mb-4 px-2">
-        {/* Close Icon */}
         <TouchableOpacity onPress={() => setShowHeightModal(false)}>
           <Ionicons name="close" size={24} color="#111827" />
         </TouchableOpacity>
 
-        {/* Title */}
         <AppText className="text-center text-base font-nunitoextrabold">
           Height
         </AppText>
 
-        {/* Save / Done Icon */}
         <TouchableOpacity onPress={() => setShowHeightModal(false)}>
           <Ionicons name="checkmark" size={26} color="#235D48" />
         </TouchableOpacity>
       </View>
 
-      {/* Ruler */}
       <View style={{ height: 250 }}>
         <HeightRuler
           primaryColor="#235D48"
@@ -549,8 +733,6 @@ const isAtLeast13YearsOld = (date: Date): boolean => {
       </View>
     </View>
   </KeyboardAvoidingView>
-</Modal>
+</Modal> */}
 
-    </View>
-  );
-}
+ 

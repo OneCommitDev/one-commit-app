@@ -14,6 +14,7 @@ import MultiStepSurvey from '~/screens/multi_info_screens/MultiStepSurvey';
 import GamesGrid from '~/screens/multi_info_screens/GamesGrid';
 import UserProfile from '~/screens/UserProfile';
 import SuccessScreen from '~/screens/SuccessScreen';
+import FillProfileInfoScreen from '~/screens/intoroScreeens/FillProfileInfoScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -74,6 +75,8 @@ export default function AppNavigator() {
           component={SuccessScreen} 
           options={{ headerShown: false,  animation: 'slide_from_right' }} />
 
+<Stack.Screen name="FillProfileInfoScreen" component={FillProfileInfoScreen}
+options={{ headerShown: false,  animation: 'slide_from_right' }} />
 
 
 

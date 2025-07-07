@@ -13,5 +13,6 @@ export type RootStackParamList = {
   UserProfile : undefined;
   SuccessScreen : { message : string; title?: string };
     Success: { message: string; title?: string }; // ✅ Include this
+    FillProfileInfoScreen : undefined;
 
 };

@@ -25,7 +25,7 @@ export default function SuccessScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#F0FAF4] justify-center items-center p-5">
+    <View className="flex-1 bg-background justify-center items-center p-5">
       <Animated.View
         entering={FadeInUp}
         className=" w-full max-w-md rounded-2xl items-center p-8"

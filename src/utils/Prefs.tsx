@@ -13,6 +13,7 @@ export const PREF_KEYS = {
     forgot_email : 'FORGOT_EMAIL',
     forgot_otp : 'FORGOT_OTP',
     userEmailID : 'USER_EMIAL_ID',
+    hasSeenProfileIntro : 'hasSeenProfileIntro',
 }as const;
 
 export const logAllPrefs = async () => {

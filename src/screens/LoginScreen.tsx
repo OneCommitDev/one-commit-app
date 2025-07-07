@@ -22,7 +22,7 @@ import { LoginResponse, RegisterOTPResponse, SocialTokenResponse } from '~/servi
 import { PREF_KEYS, Temp_KEYS } from '~/utils/Prefs';
 import Loader from '~/components/Loader';
 import axios from 'axios';
-import { decodeAccessToken } from '~/utils/decodeAccessToken';
+import { decodeAccessToken, Savedetailsafterlogin } from '~/utils/decodeAccessToken';
 import { Applog, Applogerror } from '~/utils/logger';
  import * as Google from 'expo-auth-session/providers/google';
 import {  GoogleSignin,  GoogleSigninButton,  isErrorWithCode,  isSuccessResponse,
@@ -245,8 +245,10 @@ if (res.status && res.data) {
       await setItem(PREF_KEYS.accessToken, res.data.accessToken);
       await setItem(PREF_KEYS.refreshToken, res.data.refreshToken);
        await setItem(PREF_KEYS.userEmailID, email);
-      console.log('accesss_token ', res.data.accessToken);
-      console.log('refresh_Token ', res.data.refreshToken);
+                   await Savedetailsafterlogin();
+
+      // console.log('accesss_token ', res.data.accessToken);
+      // console.log('refresh_Token ', res.data.refreshToken);
         if(res.redirect == "verify"){
             navigation.navigate('OtpVerification', {
             method: 'email',
@@ -254,7 +256,8 @@ if (res.status && res.data) {
             typeis: 'login_verify',
         });
         }else if(res.redirect == "profile"){
-           navigation.navigate('UserProfile');
+          // navigation.navigate('UserProfile');
+           navigation.replace('FillProfileInfoScreen');
         }
 
     } else {
@@ -292,6 +295,9 @@ const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string
       if (res.data.refreshToken) {
         await setItem(PREF_KEYS.refreshToken, res.data?.refreshToken);
       }
+
+            await Savedetailsafterlogin();
+      
      // console.log('access_token:', res.access_token);
       //console.log('refresh_token:', res.refresh_token);
 

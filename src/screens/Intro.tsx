@@ -12,7 +12,7 @@ const IntroScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     const handleSubmit = () => {
-        navigation.navigate('Login');
+        navigation.navigate('Register');
      };
 
      const handleSubmit_demo = () => {

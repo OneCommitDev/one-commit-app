@@ -72,6 +72,7 @@ export const isTokenExpiringSoon = (token: string, bufferSeconds = 120): boolean
 
 
 export const getValidAccessToken = async (): Promise<string | null> => {
+
   let accessToken = await getItem(PREF_KEYS.accessToken);
   if (isTokenExpiringSoon(accessToken!)) {
      accessToken = await refreshAccessToken();
@@ -79,3 +80,18 @@ export const getValidAccessToken = async (): Promise<string | null> => {
   }
   return accessToken;
 };
+
+
+export const Savedetailsafterlogin = async () => {
+  const accessToken = await getItem(PREF_KEYS.accessToken); // Ensure you fetch the token first
+  const payload = decodeAccessToken(accessToken ?? '');
+  console.log('ididiidididdiid',String(payload.id));
+  if (payload && payload.email) {
+    await setItem(PREF_KEYS.userEmailID, payload.email);
+    await setItem(PREF_KEYS.userId, String(payload.id)); // Optional: convert ID to string if needed
+  } else {
+    console.warn('Token payload is invalid or missing email');
+  }
+};
+
+

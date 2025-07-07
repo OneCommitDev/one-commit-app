@@ -175,7 +175,7 @@ export default function MultiStepSurvey() {
           <Text className="text-20 font-nunitosemibold text-black text-center mb-1">
             {current.title}
           </Text>
-          <Text className="text-16 text-light text-center mb-5">
+          <Text className="text-12 text-light text-center mb-5">
             {current.subtitle}
           </Text>
         </View>

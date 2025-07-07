@@ -35,10 +35,7 @@ export interface SimpleResponse {
  status: boolean;
   message?: string;
 }
-export interface CreateProfileResponse {
- status: boolean;
-  message?: string;
-}
+
 
 export  interface TokenResponse {
  success: boolean;
@@ -57,3 +54,44 @@ export interface SocialTokenResponse {
     refreshToken: string;
   };
 }
+
+export interface ProfileResponse {
+ status: boolean;
+  message?: string;
+  redirect?: string;
+  data?: {
+        full_name: string;
+        prefferred_name: string;
+        phone_number: string;
+        dob: string;
+        city: string;
+        state: string;
+        zipcode: string;
+        gender: string;
+        weight: any;
+        weight_unit: string;
+        height: any;
+        height_unit: string;
+  };
+}
+
+export interface ProfileSaveResponse {
+ status: boolean;
+  message?: string;
+  redirect?: string;
+  data?: {
+        full_name: string;
+        prefferred_name: string;
+        phone_number: string;
+        dob: string;
+        city: string;
+        state: string;
+        zipcode: string;
+        gender: string;
+        weight: string;
+        weight_unit: string;
+        height: string;
+        height_unit: string;
+  };
+}
+ 

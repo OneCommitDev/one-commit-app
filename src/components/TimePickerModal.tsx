@@ -1,142 +1,120 @@
 // components/TimePickerModal.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Dimensions,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { Ionicons } from '@expo/vector-icons';
+import WheelPickerExpo from 'react-native-wheel-picker-expo';
 
-const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get('window').width;
 
-type Props = {
+type TimePickerModalProps = {
   visible: boolean;
-  initialValue?: string; // format "mm:ss:ms"
   onClose: () => void;
-  onSave: (value: string) => void;
+  initialValue?: { minutes: number; seconds: number; milliseconds: number };
+  onSave: (value: { minutes: number; seconds: number; milliseconds: number }) => void;
 };
 
-const TimePickerModal: React.FC<Props> = ({ visible, initialValue = "00:00:00", onClose, onSave }) => {
-  const [minute, setMinute] = useState("00");
-  const [second, setSecond] = useState("00");
-  const [millisecond, setMillisecond] = useState("00");
+const generateRange = (max: number) => {
+  return Array.from({ length: max }, (_, i) => ({
+    label: i.toString().padStart(2, '0'),
+    value: i,
+    key: i.toString(),
+  }));
+};
 
-  // Parse initial value
-  React.useEffect(() => {
-    const [mm = "00", ss = "00", ms = "00"] = initialValue.split(':');
-    setMinute(mm.padStart(2, '0'));
-    setSecond(ss.padStart(2, '0'));
-    setMillisecond(ms.padStart(2, '0'));
-  }, [initialValue]);
+export const TimePickerModal: React.FC<TimePickerModalProps> = ({
+  visible,
+  onClose,
+  initialValue = { minutes: 0, seconds: 0, milliseconds: 0 },
+  onSave,
+}) => {
+  const [minuteIndex, setMinuteIndex] = useState(initialValue.minutes);
+  const [secondIndex, setSecondIndex] = useState(initialValue.seconds);
+  const [msIndex, setMsIndex] = useState(initialValue.milliseconds);
 
-  const handleSave = () => {
-    const value = `${minute.padStart(2, '0')}:${second.padStart(2, '0')}:${millisecond.padStart(2, '0')}`;
-    onSave(value);
-    onClose();
-  };
+  useEffect(() => {
+    if (visible) {
+      setMinuteIndex(initialValue.minutes);
+      setSecondIndex(initialValue.seconds);
+      setMsIndex(initialValue.milliseconds);
+    }
+  }, [visible]);
+
+  const minuteItems = generateRange(60);
+  const secondItems = generateRange(60);
+  const msItems = generateRange(100);
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.title}>Select Time</Text>
-
-          <View style={styles.pickerRow}>
-            <Picker
-              selectedValue={minute}
-              onValueChange={(itemValue) => setMinute(itemValue)}
-              style={styles.picker}
-            >
-              {Array.from({ length: 60 }, (_, i) => (
-                <Picker.Item key={i} label={i.toString().padStart(2, '0')} value={i.toString().padStart(2, '0')} />
-              ))}
-            </Picker>
-            <Text style={styles.colon}>:</Text>
-            <Picker
-              selectedValue={second}
-              onValueChange={(itemValue) => setSecond(itemValue)}
-              style={styles.picker}
-            >
-              {Array.from({ length: 60 }, (_, i) => (
-                <Picker.Item key={i} label={i.toString().padStart(2, '0')} value={i.toString().padStart(2, '0')} />
-              ))}
-            </Picker>
-            <Text style={styles.colon}>:</Text>
-            <Picker
-              selectedValue={millisecond}
-              onValueChange={(itemValue) => setMillisecond(itemValue)}
-              style={styles.picker}
-            >
-              {Array.from({ length: 100 }, (_, i) => (
-                <Picker.Item key={i} label={i.toString().padStart(2, '0')} value={i.toString().padStart(2, '0')} />
-              ))}
-            </Picker>
-          </View>
-
-          <View style={styles.buttonRow}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        className="flex-1 justify-end bg-black/40"
+      >
+        <View className="bg-white rounded-t-2xl pt-2 pb-4">
+          <View className="flex-row items-center justify-between mb-4 px-4">
             <TouchableOpacity onPress={onClose}>
-              <Text style={styles.cancel}>Cancel</Text>
+              <Ionicons name="close" size={24} color="#111827" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleSave}>
-              <Text style={styles.save}>Done</Text>
+            <Text className="text-base font-semibold text-black">Select Time</Text>
+            <TouchableOpacity
+              onPress={() => {
+                onSave({
+                  minutes: minuteIndex,
+                  seconds: secondIndex,
+                  milliseconds: msIndex,
+                });
+                onClose();
+              }}
+            >
+              <Ionicons name="checkmark" size={26} color="#235D48" />
             </TouchableOpacity>
           </View>
+<View className="flex-row justify-between px-4 mt-4 mb-1">
+  <Text className="w-1/3 text-center text-sm font-medium text-gray-500">MIN</Text>
+  <Text className="w-1/3 text-center text-sm font-medium text-gray-500">SEC</Text>
+  <Text className="w-1/3 text-center text-sm font-medium text-gray-500">MS</Text>
+</View>
+
+          <View className="flex-row justify-around px-4 mt-5 bg-[#eaeded]">
+            <WheelPickerExpo
+              height={250}
+              width={screenWidth / 3.2}
+              items={minuteItems}
+              initialSelectedIndex={minuteIndex}
+              onChange={({ index }) => setMinuteIndex(index)}
+              backgroundColor="#eaeded"
+              selectedStyle={{ borderColor: '#647067', borderWidth: 0.3 }}
+            />
+            <WheelPickerExpo
+              height={250}
+              width={screenWidth / 3.2}
+              items={secondItems}
+              initialSelectedIndex={secondIndex}
+              onChange={({ index }) => setSecondIndex(index)}
+              backgroundColor="#eaeded"
+              selectedStyle={{ borderColor: '#647067', borderWidth: 0.3 }}
+            />
+            <WheelPickerExpo
+              height={250}
+              width={screenWidth / 3.2}
+              items={msItems}
+              initialSelectedIndex={msIndex}
+              onChange={({ index }) => setMsIndex(index)}
+              backgroundColor="#eaeded"
+              selectedStyle={{ borderColor: '#647067', borderWidth: 0.3 }}
+            />
+          </View>
+
+         
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
-
-export default TimePickerModal;
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: '#00000088',
-  },
-  modalContainer: {
-    backgroundColor: 'white',
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  pickerRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  picker: {
-    width: 80,
-    height: screenHeight * 0.2,
-  },
-  colon: {
-    fontSize: 24,
-    marginHorizontal: 5,
-  },
-  buttonRow: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 40,
-  },
-  cancel: {
-    fontSize: 16,
-    color: 'gray',
-  },
-  save: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-});

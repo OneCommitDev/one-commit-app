@@ -265,6 +265,12 @@ export async function httpRequest_social_token<T>(
       headers.Authorization = `Bearer ${finalToken}`;
     }
 
+     const fullUrl =
+      method === 'get' && data
+        ? `${url}?${qs.stringify(data)}`
+        : url;
+
+    console.log(`📡 [${method.toUpperCase()}] ${fullUrl}`);
     const response = await api.request<T>({
       url,
       method,
@@ -350,8 +356,11 @@ export const Api_Url = {
   register: '/register',
   verifyUser: '/register-verify',
   otpResend : '/resend-otp',
-  userProfile : `/profile`,
+ // ✅ MAKE THIS A FUNCTION
+  userProfile: (userId: string | number, email: string) =>
+    `/user/profile/?email=${encodeURIComponent(email)}`,
 
+  gamesList : '/gamelist',
 
 };
 
@@ -386,7 +395,18 @@ export interface ResetPasswordRequest {
 }
 
 export interface CreateProfileRequest {
-  email: string;
+ full_name: string;
+        prefferred_name: string;
+        phone_number: string;
+        dob: string;
+        city: string;
+        state: string;
+        zipcode: string;
+        gender: string;
+        weight: string;
+        weight_unit: string;
+        height: string;
+        height_unit: string;
 
 }
 
