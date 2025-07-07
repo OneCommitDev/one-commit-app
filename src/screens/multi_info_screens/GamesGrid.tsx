@@ -22,7 +22,6 @@ import { PREF_KEYS } from '~/utils/Prefs';
 import { Api_Url, httpRequest2 } from '~/services/serviceRequest';
 import { ProfileResponse } from '~/services/DataModals';
 import Loader from '~/components/Loader';
- const [loading, setLoading] = useState(false);
  
 type GameItem = {
   id: string;
@@ -47,6 +46,7 @@ const ITEM_WIDTH = Dimensions.get('window').width / 2.5 - 16; // 🔽 Reduced wi
 
 export default function GamesGrid() {
   const [selected, setSelected] = useState<string[]>([]);
+ const [loading, setLoading] = useState(false);
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 

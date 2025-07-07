@@ -107,7 +107,6 @@ import { removeItem } from '~/utils/storage';
     const token = await getItem(PREF_KEYS.accessToken);
     const register_redirect = await getItem(PREF_KEYS.register_redirect);
     const login_status = await getItem(PREF_KEYS.login_status);
-    const hasSeenProfileIntro = await getItem(PREF_KEYS.hasSeenProfileIntro);
 
     
 
