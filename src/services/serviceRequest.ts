@@ -5,7 +5,8 @@ import { getValidAccessToken } from '~/utils/decodeAccessToken';
 import { PREF_KEYS } from '~/utils/Prefs';
 
 // ✅ Create a reusable Axios instance
-export const  base_url = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:8080/v1/';
+export const  base_url_images = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:8080/';
+export const  base_url = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:8080/v1';
 const api = axios.create({
   baseURL: base_url, 
   timeout: 60000,
@@ -360,8 +361,17 @@ export const Api_Url = {
   userProfile: (userId: string | number, email: string) =>
     `/user/profile/?email=${encodeURIComponent(email)}`,
 
-  gamesList : '/gamelist',
 
+  academic : '/user/academic/',
+
+  gamesList : '/list/sports',
+ 
+ sportsEvents: (sportsid: string | number) =>
+  `/list/${sportsid}/events`,
+
+  save_sports : '/user/profile/sports',
+
+ 
 };
 
 
@@ -410,4 +420,27 @@ export interface CreateProfileRequest {
 
 }
 
+export interface AcademicRequest {
+weighted_gpa: string;
+        unweighted_gpa: string;
+        test_score_type: string;
+        test_score: string;
+        intended_major: string;
+        school_name: string;
+        school_type: string;
+        ncaa_eligibility_status: string;
 
+}
+
+export interface SaveSportsRequest {
+  sports_profile: profilData[];
+  additional_info: string;
+  media_links: string;
+}
+
+export interface profilData {
+  sport_id : string;
+    event_id : string;
+      eventValue : string;
+        eventUnit : string;
+}

@@ -1,10 +1,6 @@
+// ✅ MultiStepSurvey.tsx
 import React, { useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Animated,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ArrowButton from '~/components/ArrowButton';
 import EmailConnectionUI from './EmailConnectionUI';
@@ -16,68 +12,60 @@ import Athletic from './Athletic';
 import CollegePreferences from './CollegePreferences';
 import CollegeMatches from './CollegeMatches';
 
-const sportOptions: Record<string, string[]> = {
-  'Track & Field': ['100m Sprint', '200m Sprint', '400m Run', '500m Run', '600m Run', '700m Run', '800m Run', '900m Run', '1000m Run', 'Long Jump', 'High Jump'],
-  Swimming: ['Freestyle', 'Backstroke', 'Breaststroke', 'Butterfly'],
-  Soccer: ['Forward', 'Midfielder', 'Defender', 'Goalkeeper'],
-  Basketball: ['Point Guard', 'Shooting Guard', 'Small Forward', 'Power Forward', 'Center'],
-  Baseball: ['Pitcher', 'Catcher', 'First Base', 'Second Base', 'Shortstop', 'Outfielder'],
-  Hockey: ['Goalie', 'Defenseman', 'Winger', 'Center'],
-  Tennis: ['Singles', 'Doubles'],
-};
-
 type Step = {
   title: string;
   subtitle: string;
-  options: string[];
   type: string;
+    sportId?: number; // optional, only needed for 'games' steps
+
+};
+ type SelectedGame = {
+  sportName: string;
+  sportId: number;
 };
 
 type MultiStepSurveyRouteProp = RouteProp<RootStackParamList, 'MultiStepSurvey'>;
 
-function generateStepsData(selectedGames: string[]): Step[] {
+
+ function generateStepsData(selectedGames: SelectedGame[]): Step[] {
   const dynamicSteps: Step[] = selectedGames.map((sport) => ({
-    title: sport,
+    title: sport.sportName,
     subtitle: 'Select the options as per your specialty.',
-    options: sportOptions[sport] || [],
     type: 'games',
+    sportId: sport.sportId, // Make sure `Step` type has `sportId?: number`
   }));
 
   const staticSteps: Step[] = [
     {
       title: 'Personal Records',
       subtitle: 'Showcase your physical stats and achievements',
-      options: ['Build Muscle', 'Lose Fat', 'Endurance', 'Flexibility', 'Balance'],
       type: 'PersonalRecords',
     },
     {
       title: 'Academic Information',
       subtitle: 'Help colleges see your academic strengths',
-      options: ['Beginner', 'Intermediate', 'Advanced', 'Pro'],
       type: 'Academic',
     },
     {
       title: 'College Preferences',
       subtitle: 'Choose your college preferences',
-      options: ['Vegan', 'Vegetarian', 'Keto', 'Paleo', 'No Preference'],
       type: 'College',
     },
     {
       title: 'Connect Your Email Account',
       subtitle: 'Required to send emails directly to coaches from your own account',
-      options: [],
       type: 'Accounts',
     },
     {
       title: 'Your Top College Matches',
       subtitle: 'Choose best one & start outreach',
-      options: [],
       type: 'CollegeMatches',
     },
   ];
 
   return [...dynamicSteps, ...staticSteps];
 }
+
 
 export default function MultiStepSurvey() {
   const route = useRoute<MultiStepSurveyRouteProp>();
@@ -183,13 +171,15 @@ export default function MultiStepSurvey() {
         <View className="flex-1 px-3">
           {renderExtraInfoForStep(
             current.type,
-            current.options,
+            current.title,
+            current.sportId ?? 0,  
             searchText,
             setSearchText,
             selectedItems,
             setSelectedItems,
             step,
-            handleNext
+            handleNext,
+            selectedGames  
           )}
         </View>
       </Animated.View>
@@ -199,41 +189,54 @@ export default function MultiStepSurvey() {
 
 function renderExtraInfoForStep(
   type: string,
-  options: string[],
+  sportName: string,
+    sportId: number,
+
   searchText: string,
   setSearchText: (text: string) => void,
   selectedItems: string[][],
   setSelectedItems: React.Dispatch<React.SetStateAction<string[][]>>,
   step: number,
-  onNext?: () => void // ✅ optional now
+  onNext?: () => void,
+    selectedGames?: SelectedGame[]  
+
 ) {
   switch (type) {
-
     case 'PersonalRecords':
       return <Athletic onNext={onNext} />;
-   case 'Academic':
-  return <Academic onNext={onNext} />;
+    case 'Academic':
+      return <Academic onNext={onNext} />;
     case 'College':
-     return <CollegePreferences onNext={onNext} />;
+      return <CollegePreferences onNext={onNext} />;
     case 'Accounts':
-      
-  return <EmailConnectionUI onNext={onNext} />;
-      case 'CollegeMatches':
-      
-  return <CollegeMatches onNext={onNext} />;
+      return <EmailConnectionUI onNext={onNext} />;
+    case 'CollegeMatches':
+      return <CollegeMatches onNext={onNext} />;
     case 'games':
       return (
-        <SelectedGames
-          options={options}
-          searchText={searchText}
-          setSearchText={setSearchText}
-          selectedItems={selectedItems}
-          setSelectedItems={setSelectedItems}
-          step={step}
-          onNext={onNext} // ✅ only here
-        />
+        // <SelectedGames
+        //   sportName={sportName}
+        //   sportId={sportId}
+        //   searchText={searchText}
+        //   setSearchText={setSearchText}
+        //   selectedItems={selectedItems}
+        //   setSelectedItems={setSelectedItems}
+        //   step={step}
+        //   onNext={onNext}
+        // />
+       <SelectedGames
+        sportName={sportName}
+        sportId={sportId}
+        searchText={searchText}
+        setSearchText={setSearchText}
+        selectedItems={selectedItems}
+        setSelectedItems={setSelectedItems}
+        step={step}
+        onNext={onNext}
+        selectedGames={selectedGames ?? []} // ✅ fallback to empty array if undefined
+      />
       );
     default:
       return null;
   }
-} 
+}

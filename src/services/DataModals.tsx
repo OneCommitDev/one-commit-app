@@ -95,3 +95,60 @@ export interface ProfileSaveResponse {
   };
 }
  
+
+export interface AcademicResponse {
+ status: boolean;
+  message?: string;
+  data?: {
+        weighted_gpa: string;
+        unweighted_gpa: string;
+        test_score_type: string;
+        test_score: string;
+        intended_major: string;
+        school_name: string;
+        school_type: string;
+        ncaa_eligibility_status: string;
+  };
+}
+ 
+
+export interface GamesResponse {
+ status: boolean;
+  message?: string;
+  sportMergedData?: {
+    sport_id : any;
+        sportName: string;
+        displayName: string;
+        user_selected: string;
+        img_path: string;
+  };
+}
+
+ export interface EventsResponse {
+  status: boolean;
+  message?: string;
+  eventMergedData?: {
+    event_id: any;
+    sport_id: any;
+    display_name: string;
+    event_category: string;
+    gender: string;
+    measurement_type: string;
+    measurement_unit: string;
+    user_selected: string;
+    event_value: string;
+    event_unit: string;
+  }[];
+}
+ export type HoldSportsdata = {
+   event_id: any;
+    sport_id: any;
+    display_name: string;
+    event_category: string;
+    gender: string;
+    measurement_type: string;
+    measurement_unit: string;
+    user_selected: string;
+    event_value: string;
+    event_unit: string;
+};

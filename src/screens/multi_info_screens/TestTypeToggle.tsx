@@ -103,7 +103,12 @@ type Props = {
 
 export default function TestTypeToggle({ options, initialValue, onSelect }: Props) {
   const [containerWidth, setContainerWidth] = useState(0);
-  const [selected, setSelected] = useState(initialValue || options[0]);
+const [selected, setSelected] = useState(options[0]);
+useEffect(() => {
+  if (initialValue && options.includes(initialValue)) {
+    setSelected(initialValue);
+  }
+}, [initialValue, options]);
 
   const translateX = useSharedValue(0);
 

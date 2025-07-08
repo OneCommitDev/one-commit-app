@@ -23,6 +23,7 @@ import HeightRuler from '~/components/HeightRuler';
  import WheelPickerExpo from 'react-native-wheel-picker-expo';
 import { HeightPickerModal } from '~/components/HeightPickerModal';
 import { autoformatUSPhoneNumber, cleanPhoneNumber, formatInchesToFeetAndInches, formatUSPhoneNumber, isAtLeast13YearsOld, parseHeightToInches } from '~/utils/AppFunctions';
+import CustomDualPicker, { weightValues_kg, weightValues_lb } from '~/components/CustomDualPicker';
 
  
 
@@ -216,6 +217,7 @@ const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
 };
 
 const screenWidth = Dimensions.get('window').width;
+/*
 const weightValues_kg = Array.from({ length: 2001 }, (_, i) => ({
   label: (i * 0.1).toFixed(1), // '0.0', '0.1', ..., '200.0'
   value: i * 0.1,
@@ -249,7 +251,19 @@ useEffect(() => {
   setTempIndex(selectedUnit === 'kg' ? defaultKgIndex : defaultLbIndex);
 }, [selectedUnit]);
 
+*/
 
+ const [selectedUnit, setSelectedUnit] = useState<'kg' | 'lbs'>('lbs');
+  const [highlightedKgIndex, setHighlightedKgIndex] = useState(50);
+  const [highlightedLbIndex, setHighlightedLbIndex] = useState(90);
+  const [tempWeightValue, setTempWeightValue] = useState('');
+const [tempWeightUnit, setTempWeightUnit] = useState<'kg' | 'lbs'>('lbs');
+
+  const getSelectedValue = () => {
+    return selectedUnit === 'kg'
+      ? `${weightValues_kg[highlightedKgIndex]} kg`
+      : `${weightValues_lb[highlightedLbIndex]} lbs`;
+  };
 
   return (
     <View className="flex-1 px-2 pt-7">
@@ -419,12 +433,13 @@ useEffect(() => {
               <TouchableOpacity onPress={() => setShowWeightModal(true)} activeOpacity={1}>
 
               <AppInput
-                value={form.weightis}
-                onPress={() => setShowWeightModal(true)}
-                editable={false}
-                onChangeValue={(text) => handleChange('weightis', text)}
-                placeholder="Enter Weight"
-              />
+            value={showWeightModal ? tempWeightValue : form.weightis}
+            editable={false}
+            placeholder="Enter Weight"
+            onChangeValue={(text) => handleChange('weightis', text)}
+            onPress={() => setShowWeightModal(true)}
+          />
+
               </TouchableOpacity>
 
             </View>
@@ -542,34 +557,45 @@ useEffect(() => {
     behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     className="flex-1 justify-end bg-black/40"
   >
-    <View className="bg-white rounded-t-2xl pt-2">
+    <View className=" bg-gray-300 rounded-t-2xl overflow-hidden h-[70%]">
       {/* Header */}
-      <View className="flex-row items-center justify-between mb-4 px-2">
+      <View className="flex-row items-center justify-between px-4 py-3 bg-gray-300">
         <TouchableOpacity onPress={() => setShowWeightModal(false)}>
           <Ionicons name="close" size={24} color="#111827" />
         </TouchableOpacity>
 
-        <AppText className="text-center text-base font-nunitoextrabold">
+        <AppText className="text-center" size='text-16' fontFamily='font-nunitoextrabold'>
           Weight
         </AppText>
+        <TouchableOpacity
+          onPress={() => {
+            const selectedWeight =
+              selectedUnit === 'kg'
+                ? `${weightValues_kg[highlightedKgIndex]} kg`
+                : `${weightValues_lb[highlightedLbIndex]} lbs`;
 
-      <TouchableOpacity
-  onPress={() => {
-    const selectedItem =
-      selectedUnit === 'kg'
-        ? weightValues_kg[tempIndex]
-        : weightValues_lb[tempIndex];
+            handleChange('weightis', selectedWeight);
+            handleChange('weight_unit', selectedUnit);
+            setShowWeightModal(false);
 
-    handleChange('weightis', `${selectedItem.label} ${selectedUnit}`);
-    setShowWeightModal(false);
-  }}
->
-  <Ionicons name="checkmark" size={26} color="#235D48" />
-</TouchableOpacity>
+                        setForm(prev => ({
+              ...prev,
+              weightis: selectedWeight,
+              weight_unit: selectedUnit,
+            }));
+
+          }}
+        >
+          <Ionicons name="checkmark" size={26} color="#235D48" />
+        </TouchableOpacity>
+
+
+
+
       </View>
 
       {/* Unit Toggle */}
- <View
+ {/* <View
   style={{
     flexDirection: 'row',
     alignSelf: 'center',
@@ -604,22 +630,30 @@ useEffect(() => {
       </Pressable>
     );
   })}
-</View>
+</View> */}
 
 
 
       {/* Wheel Picker */}
-      <View style={{ height: 250, alignItems: 'center' }}>
-     <WheelPickerExpo
-        key={selectedUnit}
-        height={250}
-        width={screenWidth}
-        items={selectedUnit === 'kg' ? weightValues_kg : weightValues_lb}
-        initialSelectedIndex={tempIndex}
-        onChange={({ index }) => setTempIndex(index)} // just store temp value
-        backgroundColor="#eaeded"
-        selectedStyle={{ borderColor: '#647067', borderWidth: 0.3 }}
-      />
+      <View className="flex-1 h-[55%]">
+    
+            <CustomDualPicker
+              selectedUnit={selectedUnit}
+              setSelectedUnit={(unit) => {
+                setSelectedUnit(unit);
+                setTempWeightUnit(unit); // keep unit in sync
+              }}
+              highlightedKgIndex={highlightedKgIndex}
+              setHighlightedKgIndex={setHighlightedKgIndex}
+              highlightedLbIndex={highlightedLbIndex}
+              setHighlightedLbIndex={setHighlightedLbIndex}
+              onValueChange={(value, unit) => {
+                setTempWeightValue(value);
+                setTempWeightUnit(unit);
+              }}
+            />
+
+
 
       </View>
     </View>
@@ -736,3 +770,13 @@ useEffect(() => {
 </Modal> */}
 
  
+ {/* <WheelPickerExpo
+        key={selectedUnit}
+        height={250}
+        width={screenWidth}
+        items={selectedUnit === 'kg' ? weightValues_kg : weightValues_lb}
+        initialSelectedIndex={tempIndex}
+        onChange={({ index }) => setTempIndex(index)} // just store temp value
+        backgroundColor="#eaeded"
+        selectedStyle={{ borderColor: '#647067', borderWidth: 0.3 }}
+      /> */}
