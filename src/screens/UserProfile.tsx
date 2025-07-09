@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {  View,  Text,  TouchableOpacity,  ScrollView,  Platform,  Modal,  Alert,  Keyboard,  KeyboardAvoidingView,
-  Dimensions,  Pressable,} from 'react-native';
+  Dimensions,  Pressable,
+  Button,} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,9 +22,10 @@ import WeightRuler from '~/components/WeightRuler';
 import WhiteCustomButton from '~/components/WhiteCustomButton';
 import HeightRuler from '~/components/HeightRuler';
  import WheelPickerExpo from 'react-native-wheel-picker-expo';
-import { HeightPickerModal } from '~/components/HeightPickerModal';
 import { autoformatUSPhoneNumber, cleanPhoneNumber, formatInchesToFeetAndInches, formatUSPhoneNumber, isAtLeast13YearsOld, parseHeightToInches } from '~/utils/AppFunctions';
 import CustomDualPicker, { weightValues_kg, weightValues_lb } from '~/components/CustomDualPicker';
+import { CustomDualPickerModal } from '~/components/CustomDualPickerModal';
+import { HeightPickerModal2 } from '~/components/HeightPickerModal2';
 
  
 
@@ -114,8 +116,13 @@ type CityState = { city: string; state: string } | null;
             states: res.data?.state ?? '',
             zip: res.data?.zipcode ?? '',
             gender: genderFromAPI,
-             weightis: res.data?.weight && res.data?.weight_unit  ? `${res.data.weight} ${res.data.weight_unit}`  : '',
-             heightis: res.data?.height  ? formatInchesToFeetAndInches(Number(res.data.height)) : '',
+            //  weightis: res.data?.weight && res.data?.weight_unit  ? `${res.data.weight} ${res.data.weight_unit}`  : '',
+             weightis:
+  res.data?.weight && res.data?.weight_unit
+    ? `${parseFloat(res.data.weight).toFixed(1)} ${res.data.weight_unit}`
+    : '',
+
+            heightis: res.data?.height  ? formatInchesToFeetAndInches(Number(res.data.height)) : '',
             height_unit: res.data?.height_unit ?? 'inch',
             weight_unit: res.data?.weight_unit ?? 'lbs',
           }));
@@ -169,7 +176,9 @@ type CityState = { city: string; state: string } | null;
       if (res.status) {
          navigation.navigate('GamesGrid');
       } else {
-        Alert.alert('Error', res.message ?? 'Login failed');
+        Alert.alert('Error', res.message ?? 'Request failed');
+                //  navigation.navigate('GamesGrid');
+
       }
     } catch (err) {
       Alert.alert('Error', 'Unexpected error occurred.');
@@ -265,6 +274,10 @@ const [tempWeightUnit, setTempWeightUnit] = useState<'kg' | 'lbs'>('lbs');
       : `${weightValues_lb[highlightedLbIndex]} lbs`;
   };
 
+
+  const [pickerVisible, setPickerVisible] = useState(false);
+const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
+
   return (
     <View className="flex-1 px-2 pt-7">
       <View className="flex-row mt-5">
@@ -290,7 +303,7 @@ const [tempWeightUnit, setTempWeightUnit] = useState<'kg' | 'lbs'>('lbs');
         extraScrollHeight={100}
       >
         <Loader show={loading} />
-
+ 
         <View className="bg-background ml-5 mr-5">
           <AppText text="Full Name" size="text-base" />
           <AppInput
@@ -430,17 +443,16 @@ const [tempWeightUnit, setTempWeightUnit] = useState<'kg' | 'lbs'>('lbs');
             <View className="flex-1">
 
               <AppText text="Weight" size="text-base" />
-              <TouchableOpacity onPress={() => setShowWeightModal(true)} activeOpacity={1}>
+            <TouchableOpacity onPress={() => setShowWeightModal(true)} activeOpacity={1}>
+            <AppInput
+              value={form.weightis}
+              editable={false}
+              placeholder="Enter Weight"
+              onChangeValue={(text) => handleChange('weightis', text)}
+              onPress={() => setShowWeightModal(true)}
+            />
+          </TouchableOpacity>
 
-              <AppInput
-            value={showWeightModal ? tempWeightValue : form.weightis}
-            editable={false}
-            placeholder="Enter Weight"
-            onChangeValue={(text) => handleChange('weightis', text)}
-            onPress={() => setShowWeightModal(true)}
-          />
-
-              </TouchableOpacity>
 
             </View>
 
@@ -456,15 +468,19 @@ const [tempWeightUnit, setTempWeightUnit] = useState<'kg' | 'lbs'>('lbs');
                 onChangeValue={(text) => handleChange('heightis', text)}
                 placeholder="Enter Height"
               /> */}
-              <TouchableOpacity onPress={() => setShowHeightModal(true)} activeOpacity={1}>
-              <AppInput
-                value={form.heightis}
-                editable={false}
-                placeholder="Enter Height"
-                onChangeValue={(text) => handleChange('heightis', text)}
-                onPress={() => setShowHeightModal(true)} // optional fallback
-              />
-            </TouchableOpacity>
+             <TouchableOpacity onPress={() => setShowHeightModal(true)} activeOpacity={1}>
+            <AppInput
+              value={form.heightis}
+              editable={false}
+              placeholder="Enter Height"
+              onChangeValue={(text) => handleChange('heightis', text)}
+              onPress={() => setShowHeightModal(true)}
+            />
+          </TouchableOpacity>
+
+ 
+
+
 
             </View>
           </View>
@@ -545,128 +561,56 @@ const [tempWeightUnit, setTempWeightUnit] = useState<'kg' | 'lbs'>('lbs');
  
 
 
- 
- {/* Weight */}
-<Modal
-  visible={showWeightModal}
-  transparent
-  animationType="slide"
-  onRequestClose={() => setShowWeightModal(false)}
->
-  <KeyboardAvoidingView
-    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    className="flex-1 justify-end bg-black/40"
-  >
-    <View className=" bg-gray-300 rounded-t-2xl overflow-hidden h-[70%]">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-gray-300">
-        <TouchableOpacity onPress={() => setShowWeightModal(false)}>
-          <Ionicons name="close" size={24} color="#111827" />
-        </TouchableOpacity>
-
-        <AppText className="text-center" size='text-16' fontFamily='font-nunitoextrabold'>
-          Weight
-        </AppText>
-        <TouchableOpacity
-          onPress={() => {
-            const selectedWeight =
-              selectedUnit === 'kg'
-                ? `${weightValues_kg[highlightedKgIndex]} kg`
-                : `${weightValues_lb[highlightedLbIndex]} lbs`;
-
-            handleChange('weightis', selectedWeight);
-            handleChange('weight_unit', selectedUnit);
-            setShowWeightModal(false);
-
-                        setForm(prev => ({
-              ...prev,
-              weightis: selectedWeight,
-              weight_unit: selectedUnit,
-            }));
-
-          }}
-        >
-          <Ionicons name="checkmark" size={26} color="#235D48" />
-        </TouchableOpacity>
-
-
-
-
-      </View>
-
-      {/* Unit Toggle */}
- {/* <View
-  style={{
-    flexDirection: 'row',
-    alignSelf: 'center',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 999,
-    padding: 4,
-    marginBottom: 12,
-  }}
->
-  {units.map((unit) => {
-    const isSelected = selectedUnit === unit;
-    return (
-      <Pressable
-        key={unit}
-        onPress={() => setSelectedUnit(unit as 'kg' | 'lb')}
-        style={{
-          paddingVertical: 8,
-          paddingHorizontal: 24,
-          borderRadius: 999,
-          backgroundColor: isSelected ? '#235D48' : 'transparent',
-        }}
-      >
-        <Text
-          style={{
-            color: isSelected ? '#ffffff' : '#000000', // white if selected, black otherwise
-            fontWeight: isSelected ? '700' : '500',
-            fontSize: 15,
-          }}
-        >
-          {unit.toUpperCase()}
-        </Text>
-      </Pressable>
-    );
-  })}
-</View> */}
-
-
-
-      {/* Wheel Picker */}
-      <View className="flex-1 h-[55%]">
-    
-            <CustomDualPicker
+            <CustomDualPickerModal
+              visible={showWeightModal}
+              onClose={() => setShowWeightModal(false)}
               selectedUnit={selectedUnit}
-              setSelectedUnit={(unit) => {
-                setSelectedUnit(unit);
-                setTempWeightUnit(unit); // keep unit in sync
+              onUnitChange={(newUnit) => {
+                setSelectedUnit(newUnit);
               }}
-              highlightedKgIndex={highlightedKgIndex}
-              setHighlightedKgIndex={setHighlightedKgIndex}
-              highlightedLbIndex={highlightedLbIndex}
-              setHighlightedLbIndex={setHighlightedLbIndex}
-              onValueChange={(value, unit) => {
-                setTempWeightValue(value);
-                setTempWeightUnit(unit);
+              onSave={(main, decimal, unit) => {
+                const selectedWeight = `${main}.${decimal} ${unit}`;
+
+                handleChange('weightis', selectedWeight);
+                handleChange('weight_unit', unit);
+
+                setForm((prev) => ({
+                  ...prev,
+                  weightis: selectedWeight,
+                  weight_unit: unit,
+                }));
+
+                setShowWeightModal(false); // close after save
               }}
             />
 
+          <HeightPickerModal2
+            visible={showHeightModal}
+            onClose={() => setShowHeightModal(false)}
+            onSave={(feet, inches) => {
+              const formatted = `${feet}'${inches}"`;
+
+              // Save height as formatted string (e.g., 5'6") and unit as "inch"
+              setForm((prev) => ({
+                ...prev,
+                heightis: formatted,
+                height_unit: 'inch',
+              }));
+
+              // Close modal after a small delay to ensure state is applied
+              setTimeout(() => setShowHeightModal(false), 50);
+            }}
+          />
 
 
-      </View>
-    </View>
-  </KeyboardAvoidingView>
-</Modal>
 
 
-          <HeightPickerModal
+          {/* <HeightPickerModal
             visible={showHeightModal}
             onClose={() => setShowHeightModal(false)}
             form={form}
             handleChange={handleChange}
-          />
+          /> */}
 
 
 

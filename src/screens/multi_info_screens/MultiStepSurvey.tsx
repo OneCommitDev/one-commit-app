@@ -229,8 +229,6 @@ function renderExtraInfoForStep(
         sportId={sportId}
         searchText={searchText}
         setSearchText={setSearchText}
-        selectedItems={selectedItems}
-        setSelectedItems={setSelectedItems}
         step={step}
         onNext={onNext}
         selectedGames={selectedGames ?? []} // ✅ fallback to empty array if undefined

@@ -272,6 +272,11 @@ export async function httpRequest_social_token<T>(
         : url;
 
     console.log(`📡 [${method.toUpperCase()}] ${fullUrl}`);
+
+ console.log('🔍 Final data payload:', data);
+// console.log('🔍 Headers:', headers);
+
+
     const response = await api.request<T>({
       url,
       method,
@@ -439,8 +444,8 @@ export interface SaveSportsRequest {
 }
 
 export interface profilData {
-  sport_id : string;
+    sport_id : string;
     event_id : string;
-      eventValue : string;
-        eventUnit : string;
+    eventValue : string;
+    eventUnit : string;
 }

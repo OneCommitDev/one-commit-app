@@ -88,3 +88,80 @@ export function isAtLeast13YearsOld(date: Date): boolean {
 }
 
  
+ 
+export const validateGPA = (
+  value: string,
+  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
+) => {
+  const regex = /^(?:[0-3](?:\.\d)?|4(?:\.[0-4])?|4\.5)?$/;
+
+  if (value === '') {
+    setErrors((e) => ({ ...e, unweighted_gpa: '' }));
+    return;
+  }
+
+  if (!regex.test(value)) {
+    setErrors((e) => ({
+      ...e,
+      unweighted_gpa: 'GPA must be between 0 and 4.5 (1 decimal max)',
+    }));
+  } else {
+    setErrors((e) => ({ ...e, unweighted_gpa: '' }));
+  }
+};
+
+
+// ~/utils/formValidators.ts
+
+export const validateScore = (
+  value: string,
+  type: 'SAT' | 'ACT',
+  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
+) => {
+  const score = parseInt(value, 10);
+  const isValid = type === 'SAT' ? score <= 1600 : score <= 36;
+
+  if (value === '' || !/^\d{1,4}$/.test(value) || !isValid) {
+    setErrors((e) => ({
+      ...e,
+      test_score:
+        type === 'SAT'
+          ? 'SAT score must be a number ≤ 1600'
+          : 'ACT score must be a number ≤ 36',
+    }));
+  } else {
+    setErrors((e) => ({ ...e, test_score: '' }));
+  }
+};
+
+
+  // const validateGPA = (value: string) => {
+  //   const regex = /^(?:[0-3](?:\.\d)?|4(?:\.[0-4])?|4\.5)?$/;
+  //   if (value === '') {
+  //     setErrors((e) => ({ ...e, unweighted_gpa: '' }));
+  //     return;
+  //   }
+  //   if (!regex.test(value)) {
+  //     setErrors((e) => ({
+  //       ...e,
+  //       unweighted_gpa: 'GPA must be between 0 and 4.5 (1 decimal max)',
+  //     }));
+  //   } else {
+  //     setErrors((e) => ({ ...e, unweighted_gpa: '' }));
+  //   }
+  // };
+
+  // const validateScore = (value: string, type: 'SAT' | 'ACT') => {
+  //   const score = parseInt(value, 10);
+  //   const isValid = type === 'SAT' ? score <= 1600 : score <= 36;
+
+  //   if (value === '' || !/^\d{1,4}$/.test(value) || !isValid) {
+  //     setErrors((e) => ({
+  //       ...e,
+  //       test_score:
+  //         type === 'SAT' ? 'SAT score must be a number ≤ 1600' : 'ACT score must be a number ≤ 36',
+  //     }));
+  //   } else {
+  //     setErrors((e) => ({ ...e, test_score: '' }));
+  //   }
+  // };

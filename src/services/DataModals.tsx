@@ -100,6 +100,7 @@ export interface AcademicResponse {
  status: boolean;
   message?: string;
   data?: {
+        lists: any;
         weighted_gpa: string;
         unweighted_gpa: string;
         test_score_type: string;
@@ -109,6 +110,15 @@ export interface AcademicResponse {
         school_type: string;
         ncaa_eligibility_status: string;
   };
+   lists?: {
+      AcademicMajors: AcademicMajor[];
+    };
+}
+export interface AcademicMajor {
+  id: string;
+  major_name: string;
+  display_name: string;
+  major_category: string;
 }
  
 
@@ -151,4 +161,5 @@ export interface GamesResponse {
     user_selected: string;
     event_value: string;
     event_unit: string;
+      selected: boolean;
 };

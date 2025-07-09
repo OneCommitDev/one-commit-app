@@ -1,155 +1,155 @@
 import React, { useEffect, useState } from 'react';
-import {  View,  Text,  TextInput,  FlatList,  TouchableOpacity,  Alert,} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ArrowButton from '~/components/ArrowButton';
 import Loader from '~/components/Loader';
 import { getItem } from 'expo-secure-store';
-import { AcademicRequest, Api_Url, httpRequest2, profilData, SaveSportsRequest } from '~/services/serviceRequest';
+import {
+  Api_Url,
+  httpRequest2,
+  profilData,
+  SaveSportsRequest,
+} from '~/services/serviceRequest';
 import { PREF_KEYS } from '~/utils/Prefs';
-import { AcademicResponse, EventsResponse, SimpleResponse } from '~/services/DataModals';
+import { EventsResponse, SimpleResponse } from '~/services/DataModals';
+import qs from 'qs';
 
-// type SelectedGame = {
-//   sportName: string;
-//   sportId: number;
-// };
-
-
-// type Props = {
-//   sportName: string;
-//   sportId: number;
-//   searchText: string;
-//   setSearchText: (text: string) => void;
-//   selectedItems: string[][];
-//   setSelectedItems: React.Dispatch<React.SetStateAction<string[][]>>;
-//   step: number;
-//   onNext?: () => void;
-// };
+export type HoldSportsdata = {
+  event_id: any;
+  sport_id: any;
+  display_name: string;
+  event_category: string;
+  gender: string;
+  measurement_type: string;
+  measurement_unit: string;
+  user_selected: string;
+  event_value: string;
+  event_unit: string;
+  selected: boolean;
+};
 
 type Props = {
   sportName: string;
   sportId: number;
   searchText: string;
   setSearchText: (text: string) => void;
-  selectedItems: string[][];
-  setSelectedItems: React.Dispatch<React.SetStateAction<string[][]>>;
   step: number;
   onNext?: () => void;
-  selectedGames: { sportName: string; sportId: any }[]; // ✅ Add this
+  selectedGames: { sportName: string; sportId: any }[];
 };
-
-
- 
 
 export default function SelectedGames({
   sportName,
   sportId,
   searchText,
   setSearchText,
-  selectedItems,
-  setSelectedItems,
   step,
   onNext,
-  selectedGames, // ✅ You must include this!
-
+  selectedGames,
 }: Props) {
   const [loading, setLoading] = useState(false);
-  const [options, setOptions] = useState<string[]>([]);
-const [eventList, setEventList] = useState<{ id: number; display_name: string }[]>([]);
+  const [events, setEvents] = useState<HoldSportsdata[]>([]);
 
-  useEffect(() => {
-    const fetchOptions = async () => {
-      console.log('selectedGames', selectedGames);
-            console.log('selectedItems', selectedItems);
+ useEffect(() => {
+  setSearchText('');
+  const fetchAPIRequest = async () => {
+    try {
+      setLoading(true);
+      setEvents([]); // ✅ Clear previous data
+      const accessToken = await getItem(PREF_KEYS.accessToken);
 
-      try {
-        setLoading(true);
-        const accessToken = await getItem(PREF_KEYS.accessToken);
+      const res = await httpRequest2<EventsResponse>(
+        Api_Url.sportsEvents(sportId),
+        'get',
+        {},
+        accessToken ?? '',
+      );
 
- 
+      if (res.status && res.eventMergedData) {
+        const parsedEvents: HoldSportsdata[] = res.eventMergedData.map((event) => ({
+          event_id: event.event_id,
+          sport_id: sportId,
+          display_name: event.display_name,
+          event_category: event.event_category,
+          gender: event.gender,
+          measurement_type: event.measurement_type,
+          measurement_unit: event.measurement_unit,
+          user_selected: event.user_selected,
+          event_value: event.event_value,
+          event_unit: event.event_unit,
+          selected: event.user_selected === '1',
+        }));
 
-        const res = await httpRequest2<EventsResponse>(
-          Api_Url.sportsEvents(sportId),
-          'get',
-          {},
-          accessToken ?? '',
-        );
-
-        if (res.status && res.eventMergedData) {
-          const eventList =
-            res.eventMergedData.map((event) => event.display_name).filter(Boolean);
-
-          setOptions(eventList);
-          console.log('Fetched Events:', eventList);
-        } else {
-          Alert.alert('Error', res.message ?? 'Something went wrong');
-        }
-      } catch (err) {
-        Alert.alert('Error', 'Unexpected error occurred.');
-      } finally {
-        setLoading(false);
+        setEvents(parsedEvents);
+      } else {
+        Alert.alert('Error', res.message ?? 'Something went wrong');
       }
-    };
+    } catch (err) {
+      Alert.alert('Error', 'Unexpected error occurred.');
+    } finally {
+      setLoading(false); // ✅ Show button again
+    }
+  };
 
-    fetchOptions();
-  }, [sportName]);
+  fetchAPIRequest();
+}, [sportName]);
 
- const SaveEventRequest = async () => {
+
+  const toggleSelection = (displayName: string) => {
+    setEvents((prev) =>
+      prev.map((e) =>
+        e.display_name === displayName ? { ...e, selected: !e.selected } : e
+      )
+    );
+  };
+
+ const handleSubmit = async () => {
   try {
     setLoading(true);
-
-    const email = await getItem(PREF_KEYS.userEmailID);
-    const userId = await getItem(PREF_KEYS.userId);
     const accessToken = await getItem(PREF_KEYS.accessToken);
     const soprtsUrl = Api_Url.save_sports;
 
-    // 🔄 Build allEvents safely in memory
-    const allEvents: profilData[] = [];
-
-    for (let i = 0; i < selectedGames.length; i++) {
-      const game = selectedGames[i];
-      const events = selectedItems[i] ?? [];
-
-      for (const eventName of events) {
-        const foundEvent = eventList.find(e => e.display_name === eventName);
-        if (foundEvent) {
-          allEvents.push({
-            sport_id: game.sportId,
-            event_id: foundEvent.id.toString(), // ✅ Send ID, not name
-            eventValue: '0',
-            eventUnit: '',
-          });
-        }
-      }
-    }
-
-    console.log('allEvents' , selectedItems);
-
-    if (allEvents.length === 0) {
-      Alert.alert('Error', 'No valid events found to submit.');
+    const selectedEvents = events.filter((e) => e.selected);
+    if (selectedEvents.length === 0) {
+      Alert.alert('Error', 'No valid events selected.');
+      setLoading(false);
       return;
     }
 
-    const requestBody: SaveSportsRequest = {
-      sports_profile: allEvents,
+    const data = selectedEvents.map((e) => ({
+      sport_id: e.sport_id,
+      event_id: e.event_id,
+      eventValue: e.event_value,
+      eventUnit: e.event_unit,
+    }));
+
+    const payload = qs.stringify({
+      sports_profile: JSON.stringify(data),
       additional_info: '',
       media_links: '',
-    };
+    });
 
-    // ⚠️ Optional: Remove or limit large console logs
-    console.log('Sending sports data count:', allEvents.length);
+    console.log('📦 Final form body:', payload);
 
     const res = await httpRequest2<SimpleResponse>(
       soprtsUrl,
       'post',
-      requestBody,
+      payload,
       accessToken ?? '',
-      true
+      true // x-www-form-urlencoded
     );
 
     if (res.status) {
       onNext?.();
     } else {
-      Alert.alert('Error', res.message ?? 'Request failed');
+      Alert.alert('Error', res.message ?? 'Failed to submit.');
     }
   } catch (err) {
     Alert.alert('Error', 'Unexpected error occurred.');
@@ -161,23 +161,9 @@ const [eventList, setEventList] = useState<{ id: number; display_name: string }[
 
 
 
-  const filtered = options.filter((opt) =>
-    opt.toLowerCase().includes(searchText.toLowerCase())
+  const filtered = events.filter((opt) =>
+    opt.display_name.toLowerCase().includes(searchText.toLowerCase())
   );
-
-  const toggleSelection = (option: string) => {
-    const newSelection = [...selectedItems];
-    const currentSelections = new Set(newSelection[step]);
-
-    if (currentSelections.has(option)) {
-      currentSelections.delete(option);
-    } else {
-      currentSelections.add(option);
-    }
-
-    newSelection[step] = Array.from(currentSelections);
-    setSelectedItems(newSelection);
-  };
 
   return (
     <>
@@ -197,18 +183,20 @@ const [eventList, setEventList] = useState<{ id: number; display_name: string }[
       ) : (
         <FlatList
           data={filtered}
-          keyExtractor={(item) => item}
+          keyExtractor={(item) => item.event_id.toString()}
           renderItem={({ item }) => {
-            const isChecked = selectedItems[step]?.includes(item);
+            const isChecked = item.selected;
             return (
               <TouchableOpacity
-                onPress={() => toggleSelection(item)}
+                onPress={() => toggleSelection(item.display_name)}
                 className="flex-row justify-between items-center px-4 py-3 mb-2"
               >
-                <Text className="text-base text-title">{item}</Text>
+                <Text className="text-base text-title">{item.display_name}</Text>
                 <View
                   className={`w-6 h-6 rounded-lg items-center justify-center border ${
-                    isChecked ? 'bg-green-900 border-green-600' : 'bg-white border-gray-400'
+                    isChecked
+                      ? 'bg-green-900 border-green-600'
+                      : 'bg-white border-gray-400'
                   } shadow-sm`}
                 >
                   {isChecked && (
@@ -223,24 +211,22 @@ const [eventList, setEventList] = useState<{ id: number; display_name: string }[
         />
       )}
 
-      {selectedItems[step].length > 0 && (
+      {events.filter((e) => e.selected).length > 0 && (
         <View className="mt-1 px-1 py-1">
           <Text className="text-green-800 mb-2">Selected:</Text>
           <View className="flex-row flex-wrap gap-1">
-            {selectedItems[step].map((item) => (
-              <TouchableOpacity
-                key={item}
-                onPress={() => {
-                  const newSelection = [...selectedItems];
-                  newSelection[step] = newSelection[step].filter((i) => i !== item);
-                  setSelectedItems(newSelection);
-                }}
-                className="flex-row items-center px-4 py-2 bg-gray-200 rounded-full"
-              >
-                <Text className="text-pretty mr-1">{item}</Text>
-                <Ionicons name="close" size={14} color="#065F46" />
-              </TouchableOpacity>
-            ))}
+            {events
+              .filter((e) => e.selected)
+              .map((item) => (
+                <TouchableOpacity
+                  key={item.event_id}
+                  onPress={() => toggleSelection(item.display_name)}
+                  className="flex-row items-center px-4 py-2 bg-gray-200 rounded-full"
+                >
+                  <Text className="text-pretty mr-1">{item.display_name}</Text>
+                  <Ionicons name="close" size={14} color="#065F46" />
+                </TouchableOpacity>
+              ))}
           </View>
         </View>
       )}
@@ -248,25 +234,34 @@ const [eventList, setEventList] = useState<{ id: number; display_name: string }[
       <View className="px-2 py-4 mb-20">
         {/* <ArrowButton
           text="Continue"
-          onPress={() => onNext?.()}
-          disabled={selectedItems[step].length === 0}
           fullWidth
+          disabled={events.filter((e) => e.selected).length === 0}
+          onPress={async () => {
+            if (step === selectedGames.length - 1) {
+             await handleSubmit();
+              // onNext?.();
+            } else {
+              // onNext?.();
+              await handleSubmit();
+            }
+          }}
         /> */}
+        {!loading && (
+  <View className="px-2 py-4 mb-20">
     <ArrowButton
-  text="Continue"
-  fullWidth
-  disabled={selectedItems[step].length === 0}
-  onPress={async () => {
-    if (step == selectedGames.length -1) {
-      // await SaveEventRequest();
-       onNext?.();
-    } else {
-      onNext?.();
-    }
-  }}
-/>
-
-
+      text="Continue"
+      fullWidth
+      disabled={events.filter((e) => e.selected).length === 0}
+      onPress={async () => {
+        if (step === selectedGames.length - 1) {
+          await handleSubmit();
+        } else {
+          await handleSubmit();
+        }
+      }}
+    />
+  </View>
+)}
 
       </View>
     </>
