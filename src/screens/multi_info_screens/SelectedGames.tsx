@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -14,12 +14,9 @@ import { getItem } from 'expo-secure-store';
 import {
   Api_Url,
   httpRequest2,
-  profilData,
-  SaveSportsRequest,
 } from '~/services/serviceRequest';
 import { PREF_KEYS } from '~/utils/Prefs';
-import { EventsResponse, SimpleResponse } from '~/services/DataModals';
-import qs from 'qs';
+import { EventsResponse, SavedSportResponse } from '~/services/DataModals';
 
 export type HoldSportsdata = {
   event_id: any;
@@ -57,50 +54,50 @@ export default function SelectedGames({
   const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState<HoldSportsdata[]>([]);
 
- useEffect(() => {
-  setSearchText('');
-  const fetchAPIRequest = async () => {
-    try {
-      setLoading(true);
-      setEvents([]); // ✅ Clear previous data
-      const accessToken = await getItem(PREF_KEYS.accessToken);
+  const cachedSportsData = useRef<{ [sportId: number]: any[] }>({});
 
-      const res = await httpRequest2<EventsResponse>(
-        Api_Url.sportsEvents(sportId),
-        'get',
-        {},
-        accessToken ?? '',
-      );
+  useEffect(() => {
+    setSearchText('');
+    const fetchAPIRequest = async () => {
+      try {
+        setLoading(true);
+        setEvents([]);
+        const accessToken = await getItem(PREF_KEYS.accessToken);
 
-      if (res.status && res.eventMergedData) {
-        const parsedEvents: HoldSportsdata[] = res.eventMergedData.map((event) => ({
-          event_id: event.event_id,
-          sport_id: sportId,
-          display_name: event.display_name,
-          event_category: event.event_category,
-          gender: event.gender,
-          measurement_type: event.measurement_type,
-          measurement_unit: event.measurement_unit,
-          user_selected: event.user_selected,
-          event_value: event.event_value,
-          event_unit: event.event_unit,
-          selected: event.user_selected === '1',
-        }));
+        const res = await httpRequest2<EventsResponse>(
+          Api_Url.sportsEvents(sportId),
+          'get',
+          {},
+          accessToken ?? '',
+        );
 
-        setEvents(parsedEvents);
-      } else {
-        Alert.alert('Error', res.message ?? 'Something went wrong');
+        if (res.status && res.eventMergedData) {
+          const parsedEvents: HoldSportsdata[] = res.eventMergedData.map((event) => ({
+            event_id: event.event_id,
+            sport_id: sportId,
+            display_name: event.display_name,
+            event_category: event.event_category,
+            gender: event.gender,
+            measurement_type: event.measurement_type,
+            measurement_unit: event.measurement_unit,
+            user_selected: event.user_selected,
+            event_value: event.event_value,
+            event_unit: event.event_unit,
+            selected: event.user_selected === '1',
+          }));
+          setEvents(parsedEvents);
+        } else {
+          Alert.alert('Error', res.message ?? 'Something went wrong');
+        }
+      } catch (err) {
+        Alert.alert('Error', 'Unexpected error occurred.');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      Alert.alert('Error', 'Unexpected error occurred.');
-    } finally {
-      setLoading(false); // ✅ Show button again
-    }
-  };
+    };
 
-  fetchAPIRequest();
-}, [sportName]);
-
+    fetchAPIRequest();
+  }, [sportName]);
 
   const toggleSelection = (displayName: string) => {
     setEvents((prev) =>
@@ -110,56 +107,69 @@ export default function SelectedGames({
     );
   };
 
- const handleSubmit = async () => {
-  try {
-    setLoading(true);
-    const accessToken = await getItem(PREF_KEYS.accessToken);
-    const soprtsUrl = Api_Url.save_sports;
+  const handleSubmit = async (allData: any[]) => {
+    try {
+      setLoading(true);
+      const accessToken = await getItem(PREF_KEYS.accessToken);
 
+      if (allData.length === 0) {
+        Alert.alert('Error', 'No valid events selected.');
+        return;
+      }
+
+      const payload = {
+        sports_profile: JSON.stringify(allData),
+        additional_info: '',
+        media_links: '',
+      };
+
+
+      const res = await httpRequest2<SavedSportResponse>(
+        Api_Url.save_sports,
+        'post',
+        payload,
+        accessToken ?? '',
+        true
+      );
+
+      if (res.status) {
+        onNext?.();
+      } else {
+        Alert.alert('Error', res.message ?? 'Failed to submit.');
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleContinue = async () => {
     const selectedEvents = events.filter((e) => e.selected);
     if (selectedEvents.length === 0) {
-      Alert.alert('Error', 'No valid events selected.');
-      setLoading(false);
+      Alert.alert('Error', 'Please select at least one event.');
       return;
     }
 
-    const data = selectedEvents.map((e) => ({
+    const mappedData = selectedEvents.map((e) => ({
       sport_id: e.sport_id,
       event_id: e.event_id,
       eventValue: e.event_value,
       eventUnit: e.event_unit,
     }));
 
-    const payload = qs.stringify({
-      sports_profile: JSON.stringify(data),
-      additional_info: '',
-      media_links: '',
-    });
+    // Save current step's selected sport data
+    cachedSportsData.current[sportId] = mappedData;
 
-    console.log('📦 Final form body:', payload);
-
-    const res = await httpRequest2<SimpleResponse>(
-      soprtsUrl,
-      'post',
-      payload,
-      accessToken ?? '',
-      true // x-www-form-urlencoded
-    );
-
-    if (res.status) {
-      onNext?.();
+    if (step === selectedGames.length - 1) {
+      // Combine all cached sport data
+      const allCached = Object.values(cachedSportsData.current).flat();
+     await handleSubmit(allCached);
+   // console.log('allCached' , allCached);
     } else {
-      Alert.alert('Error', res.message ?? 'Failed to submit.');
+      onNext?.();
     }
-  } catch (err) {
-    Alert.alert('Error', 'Unexpected error occurred.');
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
+  };
 
   const filtered = events.filter((opt) =>
     opt.display_name.toLowerCase().includes(searchText.toLowerCase())
@@ -231,39 +241,16 @@ export default function SelectedGames({
         </View>
       )}
 
-      <View className="px-2 py-4 mb-20">
-        {/* <ArrowButton
-          text="Continue"
-          fullWidth
-          disabled={events.filter((e) => e.selected).length === 0}
-          onPress={async () => {
-            if (step === selectedGames.length - 1) {
-             await handleSubmit();
-              // onNext?.();
-            } else {
-              // onNext?.();
-              await handleSubmit();
-            }
-          }}
-        /> */}
-        {!loading && (
-  <View className="px-2 py-4 mb-20">
-    <ArrowButton
-      text="Continue"
-      fullWidth
-      disabled={events.filter((e) => e.selected).length === 0}
-      onPress={async () => {
-        if (step === selectedGames.length - 1) {
-          await handleSubmit();
-        } else {
-          await handleSubmit();
-        }
-      }}
-    />
-  </View>
-)}
-
-      </View>
+      {!loading && (
+        <View className="px-2 py-4 mb-20">
+          <ArrowButton
+            text="Continue"
+            fullWidth
+            disabled={events.filter((e) => e.selected).length === 0}
+            onPress={handleContinue}
+          />
+        </View>
+      )}
     </>
   );
 }

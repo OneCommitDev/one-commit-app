@@ -431,6 +431,8 @@ weighted_gpa: string;
         test_score_type: string;
         test_score: string;
         intended_major: string;
+         intended_major_2: string;
+          intended_major_3: string;
         school_name: string;
         school_type: string;
         ncaa_eligibility_status: string;

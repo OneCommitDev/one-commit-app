@@ -1,5 +1,7 @@
 // cAppFunctions.ts
 
+import { AcademicMajor } from "~/services/DataModals";
+
 /**
  * Converts height in inches to a string like `5'7`.
  * @param inches Total inches
@@ -89,11 +91,12 @@ export function isAtLeast13YearsOld(date: Date): boolean {
 
  
  
-export const validateGPA = (
+ export const validateGPA = (
   value: string,
   setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
 ) => {
-  const regex = /^(?:[0-3](?:\.\d)?|4(?:\.[0-4])?|4\.5)?$/;
+  // Allow numbers from 0 to 4.5 with up to 2 decimal places
+  const regex = /^(?:[0-3](?:\.\d{1,2})?|4(?:\.([0-4]\d?|50?))?)?$/;
 
   if (value === '') {
     setErrors((e) => ({ ...e, unweighted_gpa: '' }));
@@ -103,12 +106,13 @@ export const validateGPA = (
   if (!regex.test(value)) {
     setErrors((e) => ({
       ...e,
-      unweighted_gpa: 'GPA must be between 0 and 4.5 (1 decimal max)',
+      unweighted_gpa: 'GPA must be between 0 and 4.5 (up to 2 decimal places)',
     }));
   } else {
     setErrors((e) => ({ ...e, unweighted_gpa: '' }));
   }
 };
+
 
 
 // ~/utils/formValidators.ts
@@ -165,3 +169,26 @@ export const validateScore = (
   //     setErrors((e) => ({ ...e, test_score: '' }));
   //   }
   // };
+
+
+type SetMajorsFn = React.Dispatch<React.SetStateAction<{ search: string; showList: boolean }[]>>;
+type HandleChangeFn = (key: string, value: string) => void;
+
+  export const setMajorFromAPI = (
+  majorId: string | undefined,
+  index: number,
+  majorList: AcademicMajor[],
+  setMajors: SetMajorsFn,
+  handleChange: HandleChangeFn
+) => {
+  if (!majorId) return;
+  const found = majorList.find((m) => m.id === majorId);
+  if (found) {
+    setMajors((prev) => {
+      const updated = [...prev];
+      updated[index].search = found.display_name;
+      return updated;
+    });
+    handleChange(`intended_major_${index + 1}`, found.id);
+  }
+};

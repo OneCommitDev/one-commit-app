@@ -15,6 +15,7 @@ import GamesGrid from '~/screens/multi_info_screens/GamesGrid';
 import UserProfile from '~/screens/UserProfile';
 import SuccessScreen from '~/screens/SuccessScreen';
 import FillProfileInfoScreen from '~/screens/intoroScreeens/FillProfileInfoScreen';
+import CollegePreferences from '~/screens/multi_info_screens/CollegePreferences';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -78,7 +79,8 @@ export default function AppNavigator() {
 <Stack.Screen name="FillProfileInfoScreen" component={FillProfileInfoScreen}
 options={{ headerShown: false,  animation: 'slide_from_right' }} />
 
-
+<Stack.Screen name="CollegePreferences" component={CollegePreferences}
+options={{ headerShown: false,  animation: 'slide_from_right' }} />
 
       </Stack.Navigator>
     </NavigationContainer>

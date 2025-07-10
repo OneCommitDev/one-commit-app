@@ -114,8 +114,11 @@ import { removeItem } from '~/utils/storage';
        if (login_status === 'success') {
         // navigation.replace('Login');
           navigation.replace('UserProfile');
+                  //  navigation.replace('CollegePreferences');
+
       } else {
         navigation.replace('Intro');
+        //  navigation.replace('CollegePreferences');
       }
     }, 3000);
   };

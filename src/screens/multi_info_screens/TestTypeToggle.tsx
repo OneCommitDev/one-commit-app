@@ -170,7 +170,7 @@ useEffect(() => {
           >
             <Text
               className={`text-[16px] font-nunitoextrabold ${
-                selected === item ? 'text-black' : 'text-gray-500'
+                selected === item ? 'text-primary' : 'text-gray-500'
               }`}
             >
               {item}

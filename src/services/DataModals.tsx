@@ -106,6 +106,8 @@ export interface AcademicResponse {
         test_score_type: string;
         test_score: string;
         intended_major: string;
+        intended_major_2: string;
+        intended_major_3: string;
         school_name: string;
         school_type: string;
         ncaa_eligibility_status: string;
@@ -162,4 +164,36 @@ export interface GamesResponse {
     event_value: string;
     event_unit: string;
       selected: boolean;
+};
+
+export interface SavedSportResponse {
+ status: boolean;
+   requestedSportsProfile? : any;
+
+  message?: string;
+}
+
+
+ export type GetSportsAlldata = {
+    status: any;
+    message?: string;
+    sportUserData: sportUserData[];
+};
+
+ export type sportUserData = {
+   sport_id: any;
+    sport_name: any;
+     display_name: any;
+    img_path: any;
+    events : sportUsereventsData[];
+};
+
+ export type sportUsereventsData = {
+   event_id: any;
+    eventValue: any;
+     eventUnit: any;
+    event_name: any;
+     display_name: any;
+     measurement_type: any;
+    measurement_unit: any;
 };
