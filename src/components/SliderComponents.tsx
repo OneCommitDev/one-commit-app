@@ -22,9 +22,9 @@ const SliderComponents: React.FC<SliderComponentsProps> = ({ onValueChange }) =>
     <View style={styles.container}>
       <Slider
         style={styles.slider}
-        minimumValue={2000}
+        minimumValue={0}
         maximumValue={60000}
-        step={100}
+        step={1000}
         value={value}
         onValueChange={handleValueChange}
         minimumTrackTintColor="#235D48"
@@ -32,7 +32,7 @@ const SliderComponents: React.FC<SliderComponentsProps> = ({ onValueChange }) =>
         thumbTintColor="#647067"
       />
       <View style={styles.labelContainer}>
-        <Text style={styles.label}>2000</Text>
+        <Text style={styles.label}>0</Text>
         <Text style={styles.value}>{Math.round(value)}</Text>
         <Text style={styles.label}>60000</Text>
       </View>

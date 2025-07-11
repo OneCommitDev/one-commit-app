@@ -10,7 +10,7 @@ interface AcademicRigorSliderProps {
 const AcademicRigorSlider: React.FC<AcademicRigorSliderProps> = ({ onValueChange }) => {
   const [value, setValue] = useState(0);
   
-  const options = ['Just get me in', 'Balanced', 'Very selective'] as const;
+  const options = ['Low', 'Medium', 'High'] as const;
   
   const handleValueChange = (newValue: number) => {
     const roundedValue = Math.round(newValue);

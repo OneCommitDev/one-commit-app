@@ -119,7 +119,7 @@ export default function GamesGrid() {
       }}
     >
       <View className="items-center justify-center m-2">
-        <Image source={item.image} className="w-[70px] h-[70px] mb-2 mt-4" />
+        <Image source={item.image} className="w-[70px] h-[70px] mb-2 mt-4 rounded-md" />
         <AppText size="text-18" className="-mt-2">
           {item.title}
         </AppText>
@@ -132,7 +132,7 @@ export default function GamesGrid() {
       <Loader show={loading} />
 
       <View className="items-center mb-4 mt-5">
-        <Text className="text-24 font-nunitoextrabold text-title text-center mb-1">
+        <Text className="text-24 font-nunitoextrabold text-primary text-center mb-1">
           Choose Games
         </Text>
       </View>

@@ -1170,6 +1170,362 @@
 
 
 
+// import React, { useEffect, useState } from 'react';
+// import {
+//   View,
+//   Text,
+//   TouchableOpacity,
+//   ScrollView,
+//   Alert,
+//   Keyboard,
+//   TouchableWithoutFeedback,
+// } from 'react-native';
+// import TestTypeToggle from './TestTypeToggle';
+// import AppText from '~/components/AppText';
+// import AppInput from '~/components/AppInput';
+// import ArrowButton from '~/components/ArrowButton';
+// import { PREF_KEYS } from '~/utils/Prefs';
+// import { getItem } from 'expo-secure-store';
+// import { AcademicRequest, Api_Url, httpRequest2 } from '~/services/serviceRequest';
+// import { AcademicMajor, AcademicResponse } from '~/services/DataModals';
+// import Loader from '~/components/Loader';
+// import { setMajorFromAPI, validateGPA, validateScore } from '~/utils/AppFunctions';
+
+// type Props = {
+//   onNext?: () => void;
+// };
+
+// const Academic: React.FC<Props> = ({ onNext }) => {
+//   const [testType, setTestType] = useState<'SAT' | 'ACT'>('SAT');
+//   const [schoolType, setSchoolType] = useState<'Public' | 'Private' | 'Boarding'>('Public');
+//   const [NCAAType, setNCAAType] = useState<'Yes' | 'No' | 'Unsure'>('Yes');
+//   const [loading, setLoading] = useState(false);
+//   const [apiMajors, setApiMajors] = useState<AcademicMajor[]>([]);
+//   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+//   const [majors, setMajors] = useState([
+//     { search: '', showList: false },
+//     { search: '', showList: false },
+//     { search: '', showList: false },
+//   ]);
+
+//   const [form, setForm] = useState({
+//     weighted_gpa: '0',
+//     unweighted_gpa: '',
+//     test_score_type: '',
+//     test_score: '',
+//     intended_major_1: '',
+//     intended_major_2: '',
+//     intended_major_3: '',
+//     school_name: '',
+//     school_type: '',
+//     ncaa_eligibility_status: '0',
+//   });
+
+//   const handleChange = (key: string, val: string) => {
+//     setForm((prev) => ({ ...prev, [key]: val }));
+//     if (key === 'unweighted_gpa') validateGPA(val, setErrors);
+//     if (key === 'test_score') validateScore(val, form.test_score_type as 'SAT' | 'ACT', setErrors);
+//   };
+
+//   const getFilteredMajors = (search: string) =>
+//     apiMajors.filter((item) =>
+//       item.display_name.toLowerCase().includes(search.toLowerCase())
+//     );
+
+//   const isFormValid = () => {
+//     const requiredFields: (keyof typeof form)[] = [
+//       'unweighted_gpa',
+//       'test_score',
+//       'intended_major_1',
+//       'intended_major_2',
+//       'intended_major_3',
+//       'school_name',
+//       'school_type',
+//       'test_score_type',
+//     ];
+
+//     const hasErrors = Object.values(errors).some((e) => e);
+//     const isEmptyField = requiredFields.some((field) => !form[field]);
+
+//     return !hasErrors && !isEmptyField;
+//   };
+
+//   useEffect(() => {
+//     const fetchAcademic = async () => {
+//       await AcademicApiRequest();
+//     };
+//     fetchAcademic();
+//   }, []);
+
+//   const AcademicApiRequest = async () => {
+//     try {
+//       setLoading(true);
+//       const accessToken = await getItem(PREF_KEYS.accessToken);
+//       const profileUrl = Api_Url.academic;
+
+//       const res = await httpRequest2<AcademicResponse>(
+//         profileUrl,
+//         'get',
+//         {},
+//         accessToken ?? ''
+//       );
+
+//       if (res.status && res.data) {
+//         const testScoreType = res.data.test_score_type?.toUpperCase() === 'ACT' ? 'ACT' : 'SAT';
+//         setTestType(testScoreType);
+//         handleChange('test_score_type', testScoreType);
+
+//         const schoolTypeAPI = res.data.school_type;
+//         const validSchoolTypes = ['Public', 'Private', 'Boarding'];
+//         if (validSchoolTypes.includes(schoolTypeAPI)) {
+//           setSchoolType(schoolTypeAPI as 'Public' | 'Private' | 'Boarding');
+//           handleChange('school_type', schoolTypeAPI);
+//         } else {
+//           setSchoolType('Public');
+//           handleChange('school_type', 'Public');
+//         }
+
+//         const ncaaStatusAPI = res.data.ncaa_eligibility_status;
+//         const validNCAA = ['Yes', 'No', 'Unsure'];
+//         if (validNCAA.includes(ncaaStatusAPI)) {
+//           setNCAAType(ncaaStatusAPI as 'Yes' | 'No' | 'Unsure');
+//           handleChange('ncaa_eligibility_status', ncaaStatusAPI);
+//         }
+
+//         const majorList = res.lists?.AcademicMajors ?? [];
+//         setApiMajors(majorList);
+
+         
+
+//         setMajorFromAPI(res.data?.intended_major, 0, majorList, setMajors, handleChange);
+//         setMajorFromAPI(res.data?.intended_major_2, 1, majorList, setMajors, handleChange);
+//         setMajorFromAPI(res.data?.intended_major_3, 2, majorList, setMajors, handleChange);
+
+
+
+
+
+//         setForm((prev) => ({
+//           ...prev,
+//           weighted_gpa: res.data?.weighted_gpa ?? '',
+//           unweighted_gpa: res.data?.unweighted_gpa
+//             ? parseFloat(res.data.unweighted_gpa).toFixed(1)
+//             : '',
+//           test_score: res.data?.test_score ?? '',
+//           school_name: res.data?.school_name ?? '',
+//         }));
+//       } else {
+//         Alert.alert('Error', res.message ?? 'Something went wrong');
+//       }
+//     } catch (err) {
+//       Alert.alert('Error', 'Unexpected error occurred.');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const SaveProfileRequest = async () => {
+//     try {
+//       setLoading(true);
+//       const accessToken = await getItem(PREF_KEYS.accessToken);
+//       const profileUrl = Api_Url.academic;
+
+//       const requestBody: AcademicRequest = {
+//         weighted_gpa: '0',
+//         unweighted_gpa: form.unweighted_gpa,
+//         test_score_type: form.test_score_type,
+//         test_score: form.test_score,
+//         intended_major: form.intended_major_1, 
+//          intended_major_2: form.intended_major_2,
+//           intended_major_3: form.intended_major_3,
+//         school_name: form.school_name,
+//         school_type: form.school_type,
+//         ncaa_eligibility_status: form.ncaa_eligibility_status,
+//       };
+
+//       console.log('requestBody', requestBody);
+
+//       const res = await httpRequest2<AcademicResponse>(
+//         profileUrl,
+//         'post',
+//         requestBody,
+//         accessToken ?? '',
+//         true
+//       );
+
+//       if (res.status) {
+//         onNext?.();
+//       } else {
+//         Alert.alert('Error', res.message ?? 'Request failed');
+//       }
+//     } catch (err) {
+//       Alert.alert('Error', 'Unexpected error occurred.');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <ScrollView
+//       keyboardShouldPersistTaps="handled"
+//       showsVerticalScrollIndicator={false}
+//       contentContainerStyle={{ paddingBottom: 100 }}
+//     >
+//       <Loader show={loading} />
+
+//       {/* GPA */}
+//       <View className="flex-row">
+//         <View className="flex-1">
+//           <AppText text="Unweighted GPA" />
+//           <AppInput
+//             value={form.unweighted_gpa}
+//             keyboardType="decimal-pad"
+//             onChangeValue={(text) => handleChange('unweighted_gpa', text)}
+//             placeholder="Enter GPA (0 - 4.5)"
+//           />
+//           {errors.unweighted_gpa ? (
+//             <Text style={{ color: 'red', marginTop: 4 }}>{errors.unweighted_gpa}</Text>
+//           ) : null}
+//         </View>
+//       </View>
+
+//       {/* Test Score */}
+//       <AppText className="mt-4">Test Scores</AppText>
+//       <View className="mb-2">
+//         <TestTypeToggle
+//           options={['SAT', 'ACT']}
+//           initialValue={testType}
+//           onSelect={(selected) => {
+//             const upper = selected as 'SAT' | 'ACT';
+//             setTestType(upper);
+//             handleChange('test_score_type', upper);
+//             validateScore(form.test_score, upper, setErrors);
+//           }}
+//         />
+//       </View>
+
+//       <View className="px-2">
+//         <AppInput
+//           value={form.test_score}
+//           keyboardType="numeric"
+//           onChangeValue={(text) => handleChange('test_score', text)}
+//           placeholder={`Enter ${testType} score`}
+//         />
+//         {form.test_score !== '' && errors.test_score ? (
+//           <Text style={{ color: 'red', marginTop: 4 }}>{errors.test_score}</Text>
+//         ) : null}
+//       </View>
+
+//       {/* Intended Majors (1 to 3) */}
+//       {majors.map((major, index) => (
+//         <TouchableWithoutFeedback
+//           key={index}
+//           onPress={() => {
+//             Keyboard.dismiss();
+//             setMajors((prev) => {
+//               const updated = [...prev];
+//               updated[index].showList = false;
+//               return updated;
+//             });
+//           }}
+//         >
+//           <View className="px-2">
+//             <AppText className="mb-1">
+//               Intended Major(s) {index + 1} {index === 0 && ' (Select upto 3 in order of preference)'}
+//             </AppText>
+
+//             <AppInput
+//               placeholder="Search or type a major"
+//               value={major.search}
+//               onFocus={() =>
+//                 setMajors((prev) => {
+//                   const updated = [...prev];
+//                   updated[index].showList = true;
+//                   return updated;
+//                 })
+//               }
+//               onChangeValue={(text) =>
+//                 setMajors((prev) => {
+//                   const updated = [...prev];
+//                   updated[index].search = text;
+//                   updated[index].showList = true;
+//                   return updated;
+//                 })
+//               }
+//             />
+
+//             {major.showList && getFilteredMajors(major.search).length > 0 && (
+//               <View className="bg-white rounded-lg max-h-[250px] -mt-2 w-[100%]">
+//                 <ScrollView keyboardShouldPersistTaps="handled">
+//                   {getFilteredMajors(major.search).map((item) => (
+//                     <TouchableOpacity
+//                       key={item.id}
+//                       onPress={() => {
+//                         setMajors((prev) => {
+//                           const updated = [...prev];
+//                           updated[index].search = item.display_name;
+//                           updated[index].showList = false;
+//                           return updated;
+//                         });
+
+//                         handleChange(`intended_major_${index + 1}`, item.id);
+//                         Keyboard.dismiss();
+//                       }}
+//                       className="py-1 px-4"
+//                     >
+//                       <AppText className="py-1 mt-5">{item.display_name}</AppText>
+//                     </TouchableOpacity>
+//                   ))}
+//                 </ScrollView>
+//               </View>
+//             )}
+//           </View>
+//         </TouchableWithoutFeedback>
+//       ))}
+
+//       {/* High School Name */}
+//       <AppText className="mb-1 mt-1">High School Name</AppText>
+//       <AppInput
+//         value={form.school_name}
+//         onChangeValue={(text) => handleChange('school_name', text)}
+//         placeholder="Enter School Name"
+//       />
+
+//       {/* School Type */}
+//       <AppText text="High School Type" size="text-base" className="mb-1 mt-4" />
+//       <View className="mb-2">
+//         <TestTypeToggle
+//           options={['Public', 'Private', 'Boarding']}
+//           initialValue={schoolType}
+//           onSelect={(selected) => {
+//             setSchoolType(selected as 'Public' | 'Private' | 'Boarding');
+//             handleChange('school_type', selected);
+//           }}
+//         />
+//       </View>
+
+//       {/* Continue Button */}
+//       <View className="px-2 py-4 mb-20">
+//         <ArrowButton
+//           text="Continue"
+//           onPress={async () => {
+//             if (!isFormValid()) return;
+//             await SaveProfileRequest();
+//           }}
+//           fullWidth
+//           disabled={!isFormValid()}
+//         />
+//       </View>
+//     </ScrollView>
+//   );
+// };
+
+// export default Academic;
+
+
+
+
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -1203,11 +1559,7 @@ const Academic: React.FC<Props> = ({ onNext }) => {
   const [apiMajors, setApiMajors] = useState<AcademicMajor[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  const [majors, setMajors] = useState([
-    { search: '', showList: false },
-    { search: '', showList: false },
-    { search: '', showList: false },
-  ]);
+  const [majors, setMajors] = useState([{ search: '', showList: false }]);
 
   const [form, setForm] = useState({
     weighted_gpa: '0',
@@ -1229,82 +1581,65 @@ const Academic: React.FC<Props> = ({ onNext }) => {
   };
 
   const getFilteredMajors = (search: string) =>
-    apiMajors.filter((item) =>
-      item.display_name.toLowerCase().includes(search.toLowerCase())
-    );
+    apiMajors.filter((item) => item.display_name.toLowerCase().includes(search.toLowerCase()));
 
   const isFormValid = () => {
-    const requiredFields: (keyof typeof form)[] = [
+    const requiredFields = [
       'unweighted_gpa',
       'test_score',
       'intended_major_1',
-      'intended_major_2',
-      'intended_major_3',
+       'intended_major_2',
+        'intended_major_3',
       'school_name',
       'school_type',
       'test_score_type',
     ];
-
     const hasErrors = Object.values(errors).some((e) => e);
-    const isEmptyField = requiredFields.some((field) => !form[field]);
-
-    return !hasErrors && !isEmptyField;
+    const isEmpty = requiredFields.some((f) => !form[f as keyof typeof form]);
+    return !hasErrors && !isEmpty;
   };
 
-  useEffect(() => {
-    const fetchAcademic = async () => {
-      await AcademicApiRequest();
-    };
-    fetchAcademic();
-  }, []);
+  const addMajor = () => {
+    if (majors.length < 3) {
+      setMajors((prev) => [...prev, { search: '', showList: false }]);
+    }
+  };
 
   const AcademicApiRequest = async () => {
     try {
       setLoading(true);
-      const accessToken = await getItem(PREF_KEYS.accessToken);
-      const profileUrl = Api_Url.academic;
-
-      const res = await httpRequest2<AcademicResponse>(
-        profileUrl,
-        'get',
-        {},
-        accessToken ?? ''
-      );
+      const token = await getItem(PREF_KEYS.accessToken);
+      const res = await httpRequest2<AcademicResponse>(Api_Url.academic, 'get', {}, token ?? '');
 
       if (res.status && res.data) {
-        const testScoreType = res.data.test_score_type?.toUpperCase() === 'ACT' ? 'ACT' : 'SAT';
-        setTestType(testScoreType);
-        handleChange('test_score_type', testScoreType);
+        const testType = res.data.test_score_type?.toUpperCase() === 'ACT' ? 'ACT' : 'SAT';
+        setTestType(testType);
+        handleChange('test_score_type', testType);
 
-        const schoolTypeAPI = res.data.school_type;
-        const validSchoolTypes = ['Public', 'Private', 'Boarding'];
-        if (validSchoolTypes.includes(schoolTypeAPI)) {
-          setSchoolType(schoolTypeAPI as 'Public' | 'Private' | 'Boarding');
-          handleChange('school_type', schoolTypeAPI);
-        } else {
-          setSchoolType('Public');
-          handleChange('school_type', 'Public');
+        const type = res.data.school_type;
+        if (['Public', 'Private', 'Boarding'].includes(type)) {
+          // setSchoolType(type);
+          handleChange('school_type', type);
         }
 
-        const ncaaStatusAPI = res.data.ncaa_eligibility_status;
-        const validNCAA = ['Yes', 'No', 'Unsure'];
-        if (validNCAA.includes(ncaaStatusAPI)) {
-          setNCAAType(ncaaStatusAPI as 'Yes' | 'No' | 'Unsure');
-          handleChange('ncaa_eligibility_status', ncaaStatusAPI);
+        const ncaa = res.data.ncaa_eligibility_status;
+        if (['Yes', 'No', 'Unsure'].includes(ncaa)) {
+          setNCAAType("Unsure"); // this is hardcoded  becuase item removed from the UI
+          handleChange('ncaa_eligibility_status', ncaa);
         }
 
-        const majorList = res.lists?.AcademicMajors ?? [];
-        setApiMajors(majorList);
+        const list = res.lists?.AcademicMajors ?? [];
+        setApiMajors(list);
 
-         
+        setMajors((prev) => {
+          const filled = [...prev];
+          while (filled.length < 3) filled.push({ search: '', showList: false });
+          return filled;
+        });
 
-        setMajorFromAPI(res.data?.intended_major, 0, majorList, setMajors, handleChange);
-        setMajorFromAPI(res.data?.intended_major_2, 1, majorList, setMajors, handleChange);
-        setMajorFromAPI(res.data?.intended_major_3, 2, majorList, setMajors, handleChange);
-
-
-
-
+        setMajorFromAPI(res.data?.intended_major, 0, list, setMajors, handleChange);
+        setMajorFromAPI(res.data?.intended_major_2, 1, list, setMajors, handleChange);
+        setMajorFromAPI(res.data?.intended_major_3, 2, list, setMajors, handleChange);
 
         setForm((prev) => ({
           ...prev,
@@ -1319,40 +1654,34 @@ const Academic: React.FC<Props> = ({ onNext }) => {
         Alert.alert('Error', res.message ?? 'Something went wrong');
       }
     } catch (err) {
-      Alert.alert('Error', 'Unexpected error occurred.');
+      Alert.alert('Error', 'Unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    AcademicApiRequest();
+  }, []);
+
   const SaveProfileRequest = async () => {
     try {
       setLoading(true);
-      const accessToken = await getItem(PREF_KEYS.accessToken);
-      const profileUrl = Api_Url.academic;
-
-      const requestBody: AcademicRequest = {
+      const token = await getItem(PREF_KEYS.accessToken);
+      const reqBody: AcademicRequest = {
         weighted_gpa: '0',
         unweighted_gpa: form.unweighted_gpa,
         test_score_type: form.test_score_type,
         test_score: form.test_score,
-        intended_major: form.intended_major_1, 
-         intended_major_2: form.intended_major_2,
-          intended_major_3: form.intended_major_3,
+        intended_major: form.intended_major_1,
+        intended_major_2: form.intended_major_2,
+        intended_major_3: form.intended_major_3,
         school_name: form.school_name,
         school_type: form.school_type,
         ncaa_eligibility_status: form.ncaa_eligibility_status,
       };
 
-      console.log('requestBody', requestBody);
-
-      const res = await httpRequest2<AcademicResponse>(
-        profileUrl,
-        'post',
-        requestBody,
-        accessToken ?? '',
-        true
-      );
+      const res = await httpRequest2<AcademicResponse>(Api_Url.academic, 'post', reqBody, token ?? '', true);
 
       if (res.status) {
         onNext?.();
@@ -1360,153 +1689,153 @@ const Academic: React.FC<Props> = ({ onNext }) => {
         Alert.alert('Error', res.message ?? 'Request failed');
       }
     } catch (err) {
-      Alert.alert('Error', 'Unexpected error occurred.');
+      Alert.alert('Error', 'Unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <ScrollView
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 100 }}
-    >
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 100 }}>
       <Loader show={loading} />
 
       {/* GPA */}
-      <View className="flex-row">
-        <View className="flex-1">
-          <AppText text="Unweighted GPA" />
-          <AppInput
-            value={form.unweighted_gpa}
-            keyboardType="decimal-pad"
-            onChangeValue={(text) => handleChange('unweighted_gpa', text)}
-            placeholder="Enter GPA (0 - 4.5)"
-          />
-          {errors.unweighted_gpa ? (
-            <Text style={{ color: 'red', marginTop: 4 }}>{errors.unweighted_gpa}</Text>
-          ) : null}
-        </View>
-      </View>
+      <View className="px-2">
+        <AppText text="Unweighted GPA" />
+        <AppInput
+          value={form.unweighted_gpa}
+          keyboardType="decimal-pad"
+          onChangeValue={(text) => handleChange('unweighted_gpa', text)}
+          placeholder="Enter GPA (0 - 4.5)"
+        />
+        {errors.unweighted_gpa && <Text className="text-red-500">{errors.unweighted_gpa}</Text>}
 
-      {/* Test Score */}
-      <AppText className="mt-4">Test Scores</AppText>
-      <View className="mb-2">
+        <AppText className="mt-4">Test Scores</AppText>
         <TestTypeToggle
           options={['SAT', 'ACT']}
           initialValue={testType}
-          onSelect={(selected) => {
-            const upper = selected as 'SAT' | 'ACT';
-            setTestType(upper);
-            handleChange('test_score_type', upper);
-            validateScore(form.test_score, upper, setErrors);
+          onSelect={(sel) => {
+            setTestType(sel as 'SAT' | 'ACT');
+            handleChange('test_score_type', sel);
+            validateScore(form.test_score, sel as 'SAT' | 'ACT', setErrors);
           }}
         />
-      </View>
 
-      <View className="px-2">
         <AppInput
           value={form.test_score}
           keyboardType="numeric"
           onChangeValue={(text) => handleChange('test_score', text)}
           placeholder={`Enter ${testType} score`}
         />
-        {form.test_score !== '' && errors.test_score ? (
-          <Text style={{ color: 'red', marginTop: 4 }}>{errors.test_score}</Text>
-        ) : null}
+        {form.test_score !== '' && errors.test_score && (
+          <Text className="text-red-500">{errors.test_score}</Text>
+        )}
       </View>
 
-      {/* Intended Majors (1 to 3) */}
-      {majors.map((major, index) => (
-        <TouchableWithoutFeedback
-          key={index}
-          onPress={() => {
-            Keyboard.dismiss();
-            setMajors((prev) => {
-              const updated = [...prev];
-              updated[index].showList = false;
-              return updated;
-            });
-          }}
-        >
-          <View className="px-2">
-            <AppText className="mb-1">
-              Intended Major(s) {index + 1} {index === 0 && ' (Select upto 3 in order of preference)'}
-            </AppText>
+      {/* Intended Majors Section */}
+        <AppText  className='mt-6 -mb-3'>
+          Intended Major 
+        </AppText>
+      <View className="px-4 py-4 mt-4  bg-gray-200 rounded-3xl">
+         <AppText size="text-14" className='text-gray-400'>
+          {/* Intended Major (<Text style={{ fontStyle: 'italic' , fontSize : 14 }}>Select upto 3 in order of preference</Text>) */}
+                Select upto 3 in order of preference
+        </AppText>
 
-            <AppInput
-              placeholder="Search or type a major"
-              value={major.search}
-              onFocus={() =>
-                setMajors((prev) => {
-                  const updated = [...prev];
+         {majors.map((major, index) => (
+          <TouchableWithoutFeedback key={index} onPress={Keyboard.dismiss}>
+            <View className="mb-3">
+              <View className="flex-row justify-between items-center mb-1">
+                <AppText>Intended Major {index + 1}</AppText>
+                {index > 0 && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setMajors((prev) => prev.filter((_, i) => i !== index));
+                      handleChange(`intended_major_${index + 1}`, '');
+                    }}
+                  >
+                    <Text className="text-red-600">🗑️</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <AppInput
+                placeholder="Search or type a major"
+                value={major.search}
+                onFocus={() => {
+                  const updated = [...majors];
                   updated[index].showList = true;
-                  return updated;
-                })
-              }
-              onChangeValue={(text) =>
-                setMajors((prev) => {
-                  const updated = [...prev];
+                  setMajors(updated);
+                }}
+                onChangeValue={(text) => {
+                  const updated = [...majors];
                   updated[index].search = text;
                   updated[index].showList = true;
-                  return updated;
-                })
-              }
-            />
+                  setMajors(updated);
+                }}
+              />
 
-            {major.showList && getFilteredMajors(major.search).length > 0 && (
-              <View className="bg-white rounded-lg max-h-[250px] -mt-2 w-[100%]">
-                <ScrollView keyboardShouldPersistTaps="handled">
-                  {getFilteredMajors(major.search).map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      onPress={() => {
-                        setMajors((prev) => {
-                          const updated = [...prev];
+              {major.showList && getFilteredMajors(major.search).length > 0 && (
+                <View className="bg-white rounded max-h-[250px] -mt-2 w-full">
+                  <ScrollView keyboardShouldPersistTaps="handled">
+                    {getFilteredMajors(major.search).map((item) => (
+                      <TouchableOpacity
+                        key={item.id}
+                        onPress={() => {
+                          const updated = [...majors];
                           updated[index].search = item.display_name;
                           updated[index].showList = false;
-                          return updated;
-                        });
+                          setMajors(updated);
+                          handleChange(`intended_major_${index + 1}`, item.id);
+                          Keyboard.dismiss();
+                        }}
+                        className="py-1 px-4"
+                      >
+                        <AppText>{item.display_name}</AppText>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        ))}
 
-                        handleChange(`intended_major_${index + 1}`, item.id);
-                        Keyboard.dismiss();
-                      }}
-                      className="py-1 px-4"
-                    >
-                      <AppText className="py-1 mt-5">{item.display_name}</AppText>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-          </View>
-        </TouchableWithoutFeedback>
-      ))}
+        {majors.length < 3 && (
+          <TouchableOpacity
+            onPress={addMajor}
+            className="mt-2 bg-primary py-2 px-4 rounded-full self-end"
+          >
+            <Text className="text-white">+ Add Major</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
-      {/* High School Name */}
-      <AppText className="mb-1 mt-1">High School Name</AppText>
-      <AppInput
-        value={form.school_name}
-        onChangeValue={(text) => handleChange('school_name', text)}
-        placeholder="Enter School Name"
-      />
+      {/* School Name */}
+      <View className="px-2 mt-6">
+        <AppText className="mb-1">High School Name</AppText>
+        <AppInput
+          value={form.school_name}
+          onChangeValue={(text) => handleChange('school_name', text)}
+          placeholder="Enter School Name"
+        />
+      </View>
 
       {/* School Type */}
-      <AppText text="High School Type" size="text-base" className="mb-1 mt-4" />
-      <View className="mb-2">
+      <View className="px-2 mt-4">
+        <AppText className="mb-1">High School Type</AppText>
         <TestTypeToggle
           options={['Public', 'Private', 'Boarding']}
           initialValue={schoolType}
-          onSelect={(selected) => {
-            setSchoolType(selected as 'Public' | 'Private' | 'Boarding');
-            handleChange('school_type', selected);
+          onSelect={(sel) => {
+            setSchoolType(sel as 'Public' | 'Private' | 'Boarding');
+            handleChange('school_type', sel);
           }}
         />
       </View>
 
-      {/* Continue Button */}
-      <View className="px-2 py-4 mb-20">
+      {/* Submit Button */}
+      <View className="px-2 py-6">
         <ArrowButton
           text="Continue"
           onPress={async () => {

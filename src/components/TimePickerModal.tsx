@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import WheelPickerExpo from 'react-native-wheel-picker-expo';
+import AppText from './AppText';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -62,7 +63,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#111827" />
             </TouchableOpacity>
-            <Text className="text-base font-semibold text-black">Select Time</Text>
+            <AppText>Select Time</AppText>
             <TouchableOpacity
               onPress={() => {
                 onSave({

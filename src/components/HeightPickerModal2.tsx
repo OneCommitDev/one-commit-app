@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import WheelPickerExpo from 'react-native-wheel-picker-expo';
+import AppText from './AppText';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -17,14 +18,17 @@ type HeightPickerModalProps = {
   visible: boolean;
   onClose: () => void;
   onSave: (feet: number, inches: number) => void;
+    title?: string; // <- NEW
+
 };
 
 export const HeightPickerModal2: React.FC<HeightPickerModalProps> = ({
   visible,
   onClose,
   onSave,
+  title, 
 }) => {
-  const feetRaw = [1, 2, 3, 4, 5, 6, 7];
+  const feetRaw = [1, 2, 3, 4, 5, 6, 7 ,8 , 9 , 10 , 11 , 12];
   const inchRaw = Array.from({ length: 12 }, (_, i) => i);
 
   const feetItems = feetRaw.map((val) => ({
@@ -61,7 +65,7 @@ export const HeightPickerModal2: React.FC<HeightPickerModalProps> = ({
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#111827" />
             </TouchableOpacity>
-            <Text className="text-base font-semibold text-black">Select Height</Text>
+            <AppText className="text-base font-semibold text-black"> {title || 'Select Height'}</AppText>
           <TouchableOpacity
   onPress={() => {
     onSave(feetItems[feetIndex].value, inchItems[inchIndex].value);

@@ -189,11 +189,11 @@ export interface SavedSportResponse {
 };
 
  export type sportUsereventsData = {
-   event_id: any;
+    event_id: any;
     eventValue: any;
-     eventUnit: any;
+    eventUnit: any;
     event_name: any;
-     display_name: any;
-     measurement_type: any;
+    display_name: any;
+    measurement_type: any;
     measurement_unit: any;
 };

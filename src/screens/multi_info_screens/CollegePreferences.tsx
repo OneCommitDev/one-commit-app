@@ -27,7 +27,9 @@ const recruitingOptions = [
   'Just want to keep playing and enjoy the experience',
 ];
 
-const divisionOptions = ['D1', 'D2', 'D3', 'NAIA', 'NJCAA'];
+// const divisionOptions = ['D1', 'D2', 'D3', 'NAIA', 'NJCAA'];
+ const divisionOptions = ['D1', 'D2', 'D3'];
+
 
 export default function CollegePreferences({ onNext }: Props) {
   const [loading, setLoading] = useState(false);
@@ -134,7 +136,7 @@ export default function CollegePreferences({ onNext }: Props) {
         {/* NCAA Division Interest */}
         <View className="mt-1">
           <View className="flex-row items-center justify-between mb-3">
-            <AppText size="text-18" className="font-semibold">
+            <AppText  className="font-semibold">
               NCAA Division Interest
             </AppText>
             <TouchableOpacity onPress={showDivisionAdvice}>
@@ -176,7 +178,7 @@ export default function CollegePreferences({ onNext }: Props) {
 
         {/* Preferred Region Placeholder */}
         <View className="mt-2">
-            <AppText size="text-18" className="font-semibold">
+            <AppText>
               Preferred Region
             </AppText>
          <AppInput
@@ -190,7 +192,7 @@ export default function CollegePreferences({ onNext }: Props) {
 
         {/* School Size Slider */}
            <View className="flex-1">
-            <AppText size="text-18" className="font-semibold text-gray-800">
+            <AppText>
               School Size
             </AppText>
                       <SliderComponents onValueChange={handleValueChange} />
@@ -199,17 +201,17 @@ export default function CollegePreferences({ onNext }: Props) {
  
         {/* Academic Rigor */}
            <View className="flex-1 mt-2">
-            <AppText size="text-18" className="font-semibold text-gray-800">
+            <AppText>
               Academic Rigor
             </AppText>
-                      <AcademicRigorSlider onValueChange={handleRigorChange} />
+                      {/* <AcademicRigorSlider onValueChange={handleRigorChange} /> */}
 
           </View>
  
 
   {/* Campus Type */}
            <View className="flex-1 mt-3">
-            <AppText size="text-18">
+            <AppText>
               Campus Type
             </AppText>
              <TestTypeToggle
@@ -226,7 +228,7 @@ export default function CollegePreferences({ onNext }: Props) {
 
         {/* Aid */}
             <View className="flex-1 mb-2">
-              <AppText size="text-18">
+              <AppText>
                 Do you need financial aid?
               </AppText>
 
@@ -240,7 +242,7 @@ export default function CollegePreferences({ onNext }: Props) {
               />
 
               {aidType === 'Yes' && (
-                <FinancialAidSlider onValueChange={handleFinancialChanges} />
+                 <SliderComponents onValueChange={handleValueChange} />
               )}
             </View>
 
@@ -255,7 +257,7 @@ export default function CollegePreferences({ onNext }: Props) {
 
           {/* Early Decision Willingness */}
            <View className="flex-1 mb-2">
-            <AppText size="text-18">
+            <AppText>
               Early Decision Willingness
             </AppText>
              <TestTypeToggle
@@ -275,7 +277,7 @@ export default function CollegePreferences({ onNext }: Props) {
 
             {/* Religious Affiliation */}
            <View className="flex-1 mb-2">
-            <AppText size="text-18">
+            <AppText>
               Religious Affiliation
             </AppText>
             <ReligiousAffiliationSlider onValueChange={handleReligiousChanges} />
