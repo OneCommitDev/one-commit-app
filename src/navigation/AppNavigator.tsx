@@ -16,6 +16,8 @@ import UserProfile from '~/screens/UserProfile';
 import SuccessScreen from '~/screens/SuccessScreen';
 import FillProfileInfoScreen from '~/screens/intoroScreeens/FillProfileInfoScreen';
 import CollegePreferences from '~/screens/multi_info_screens/CollegePreferences';
+import Splashscreen from '~/screens/Splashscreen';
+import EmailConnectionUI from '~/screens/multi_info_screens/EmailConnectionUI';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -25,7 +27,7 @@ export default function AppNavigator() {
       <Stack.Navigator initialRouteName="Splash">
         <Stack.Screen
           name="Splash"
-          component={SplashScreen}
+          component={Splashscreen}
           options={{ headerShown: false ,  animation: 'slide_from_left' }} 
         />
         <Stack.Screen
@@ -80,6 +82,9 @@ export default function AppNavigator() {
 options={{ headerShown: false,  animation: 'slide_from_right' }} />
 
 <Stack.Screen name="CollegePreferences" component={CollegePreferences}
+options={{ headerShown: false,  animation: 'slide_from_right' }} />
+
+<Stack.Screen name="EmailConnectionUI" component={EmailConnectionUI}
 options={{ headerShown: false,  animation: 'slide_from_right' }} />
 
       </Stack.Navigator>

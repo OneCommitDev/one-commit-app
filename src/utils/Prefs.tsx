@@ -18,7 +18,6 @@ export const PREF_KEYS = {
 
 export const logAllPrefs = async () => {
   const keys = Object.values(PREF_KEYS);
-
   for (const key of keys) {
     const value = await SecureStore.getItemAsync(key);
     console.log(`${key}:`, value);
@@ -36,8 +35,20 @@ export const clearAllPrefs = async () => {
 };
 
 
+export const MessagesText ={
+  School_Size_MSG : '',
+  Academic_Rigor_MSG : '',
+
+}
+
 export const Temp_KEYS = {  
-  pass: 'Dnd@12345',
+  pass: 'Dnd@123456',
   email: 'Pardeep.Kumar@agilite.tech',
   newpass : 'Dnd@123456',
 }as const;
+
+// export const Temp_KEYS = {  
+//   pass: '',
+//   email: '',
+//   newpass : '',
+// }as const;

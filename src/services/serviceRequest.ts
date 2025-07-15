@@ -5,8 +5,8 @@ import { getValidAccessToken } from '~/utils/decodeAccessToken';
 import { PREF_KEYS } from '~/utils/Prefs';
 
 // ✅ Create a reusable Axios instance
-export const  base_url_images = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:8080/';
-export const  base_url = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:8080/v1';
+export const  base_url_images = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:80/';
+export const  base_url = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:80/v1';
 const api = axios.create({
   baseURL: base_url, 
   timeout: 60000,
@@ -364,17 +364,13 @@ export const Api_Url = {
   otpResend : '/resend-otp',
  // ✅ MAKE THIS A FUNCTION
   userProfile: (userId: string | number, email: string) =>
-    `/user/profile/?email=${encodeURIComponent(email)}`,
-
-
-  academic : '/user/academic/',
-
+    `/user/profile/`,
   gamesList : '/list/sports',
- 
- sportsEvents: (sportsid: string | number) =>
+  sportsEvents: (sportsid: string | number) =>
   `/list/${sportsid}/events`,
-
   save_sports : '/user/profile/sports',
+  academic : '/user/academic/', // Use for bothe request types
+  collegePreferences : '/user/college-preferences', // Use for bothe request types
 
  
 };
@@ -411,8 +407,8 @@ export interface ResetPasswordRequest {
 
 export interface CreateProfileRequest {
  full_name: string;
-        prefferred_name: string;
-        phone_number: string;
+        preferred_name: string;
+        phone: string;
         dob: string;
         city: string;
         state: string;
@@ -450,4 +446,18 @@ export interface profilData {
     event_id : string;
     eventValue : string;
     eventUnit : string;
+}
+
+export interface CollegePreferencesRequest {
+  what_matter_most: string;
+  ncaa_division: string;
+  preferred_region: string;
+  school_size: string;
+  academic_rigor: string;
+  campus_type: string;
+  need_financial_aid: string;
+  early_decision_willingness: string;
+  religious_affiliation: string;
+  required_financial_aid : any;
+
 }

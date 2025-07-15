@@ -17,10 +17,11 @@ import {
 } from '~/services/serviceRequest';
 import { PREF_KEYS } from '~/utils/Prefs';
 import { EventsResponse, SavedSportResponse } from '~/services/DataModals';
+import AppText from '~/components/AppText';
 
 export type HoldSportsdata = {
   event_id: any;
-  sport_id: any;
+  sport_id: string;
   display_name: string;
   event_category: string;
   gender: string;
@@ -34,12 +35,12 @@ export type HoldSportsdata = {
 
 type Props = {
   sportName: string;
-  sportId: number;
+  sportId: string;
   searchText: string;
   setSearchText: (text: string) => void;
   step: number;
   onNext?: () => void;
-  selectedGames: { sportName: string; sportId: any }[];
+  selectedGames: { sportName: string; sportId: string }[];
 };
 
 export default function SelectedGames({
@@ -54,7 +55,7 @@ export default function SelectedGames({
   const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState<HoldSportsdata[]>([]);
 
-  const cachedSportsData = useRef<{ [sportId: number]: any[] }>({});
+  const cachedSportsData = useRef<{ [sportId: string]: any[] }>({});
 
   useEffect(() => {
     setSearchText('');
@@ -71,8 +72,8 @@ export default function SelectedGames({
           accessToken ?? '',
         );
 
-        if (res.status && res.eventMergedData) {
-          const parsedEvents: HoldSportsdata[] = res.eventMergedData.map((event) => ({
+        if (res.status && res.data) {
+          const parsedEvents: HoldSportsdata[] = res.data.map((event) => ({
             event_id: event.event_id,
             sport_id: sportId,
             display_name: event.display_name,
@@ -203,7 +204,7 @@ export default function SelectedGames({
                 onPress={() => toggleSelection(item.display_name)}
                 className="flex-row justify-between items-center px-4 py-3 mb-2"
               >
-                <Text className="text-base text-title">{item.display_name}</Text>
+                <AppText>{item.display_name}</AppText>
                 <View
                   className={`w-6 h-6 rounded-lg items-center justify-center border ${
                     isChecked

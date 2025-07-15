@@ -87,6 +87,102 @@
 
 
 
+// import React, { useEffect, useState } from 'react';
+// import { Text, TouchableOpacity, View, LayoutChangeEvent } from 'react-native';
+// import Animated, {
+//   useSharedValue,
+//   useAnimatedStyle,
+//   withTiming,
+// } from 'react-native-reanimated';
+
+// type Props = {
+//   options: string[];
+//   initialValue?: string;
+//   onSelect: (selected: string) => void;
+// };
+
+// export default function TestTypeToggle({ options, initialValue, onSelect }: Props) {
+//   const [containerWidth, setContainerWidth] = useState(0);
+// const [selected, setSelected] = useState(options[0]);
+// useEffect(() => {
+//   if (initialValue && options.includes(initialValue)) {
+//     setSelected(initialValue);
+//   }
+// }, [initialValue, options]);
+
+//   const translateX = useSharedValue(0);
+
+//   const handleLayout = (e: LayoutChangeEvent) => {
+//     setContainerWidth(e.nativeEvent.layout.width);
+//   };
+
+//   const buttonWidth = containerWidth / options.length;
+
+//   useEffect(() => {
+//     const index = options.indexOf(selected);
+//     translateX.value = withTiming(index * buttonWidth, { duration: 200 });
+//   }, [selected, containerWidth]);
+
+//   const highlightStyle = useAnimatedStyle(() => ({
+//     transform: [{ translateX: translateX.value }],
+//   }));
+
+//   const handleSelect = (value: string) => {
+//     setSelected(value);
+//     onSelect(value);
+//   };
+
+//   return (
+//     <View className="mt-3 mb-3 items-center">
+//       <View
+//         onLayout={handleLayout}
+//         className="relative flex-row bg-gray-200 rounded-full overflow-hidden"
+//         style={{ height: 50 }}
+//       >
+//         {/* Animated highlight */}
+//         {containerWidth > 0 && (
+//           <Animated.View
+//             style={[
+//               {
+//                 position: 'absolute',
+//                 width: buttonWidth,
+//                 height: '100%',
+//                 backgroundColor: 'white',
+//                 borderRadius: 999,
+//                 zIndex: 1,
+//               },
+//               highlightStyle,
+//             ]}
+//           />
+//         )}
+
+//         {/* Buttons */}
+//         {options.map((item) => (
+//           <TouchableOpacity
+//             key={item}
+//             onPress={() => handleSelect(item)}
+//             style={{
+//               flex: 1,
+//               justifyContent: 'center',
+//               alignItems: 'center',
+//               zIndex: 2,
+//             }}
+//           >
+//             <Text
+//               className={`${
+//                 selected === item ? 'text-primary font-nunitoextrabold text-16' : 'text-gray-500 text-14'
+//               }`}
+//             >
+//               {item}
+//             </Text>
+//           </TouchableOpacity>
+//         ))}
+//       </View>
+//     </View>
+//   );
+// }
+
+
 import React, { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, View, LayoutChangeEvent } from 'react-native';
 import Animated, {
@@ -103,12 +199,13 @@ type Props = {
 
 export default function TestTypeToggle({ options, initialValue, onSelect }: Props) {
   const [containerWidth, setContainerWidth] = useState(0);
-const [selected, setSelected] = useState(options[0]);
-useEffect(() => {
-  if (initialValue && options.includes(initialValue)) {
-    setSelected(initialValue);
-  }
-}, [initialValue, options]);
+  const [selected, setSelected] = useState(options[0]);
+
+  useEffect(() => {
+    if (initialValue && options.includes(initialValue)) {
+      setSelected(initialValue);
+    }
+  }, [initialValue, options]);
 
   const translateX = useSharedValue(0);
 
@@ -131,6 +228,9 @@ useEffect(() => {
     setSelected(value);
     onSelect(value);
   };
+
+  const capitalizeWords = (text: string) =>
+    text.replace(/\b\w/g, (char) => char.toUpperCase());
 
   return (
     <View className="mt-3 mb-3 items-center">
@@ -169,11 +269,13 @@ useEffect(() => {
             }}
           >
             <Text
-              className={`text-[16px] font-nunitoextrabold ${
-                selected === item ? 'text-primary' : 'text-gray-500'
+              className={`${
+                selected === item
+                  ? 'text-primary font-nunitoextrabold text-16'
+                  : 'text-gray-500 text-14'
               }`}
             >
-              {item}
+              {capitalizeWords(item)}
             </Text>
           </TouchableOpacity>
         ))}

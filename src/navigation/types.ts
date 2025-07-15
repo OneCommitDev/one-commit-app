@@ -17,4 +17,5 @@ export type RootStackParamList = {
   Success: { message: string; title?: string };
   FillProfileInfoScreen: undefined;
   CollegePreferences : undefined;
+  EmailConnectionUI : undefined;
 };

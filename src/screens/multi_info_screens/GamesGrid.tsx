@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  Image,
-  TouchableOpacity,
-  Dimensions,
-  ScrollView,
-  ImageSourcePropType,
-  Alert,
+import {  View,  Text,  FlatList,  Image,  TouchableOpacity,  Dimensions,  ScrollView,  ImageSourcePropType,  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ArrowButton from '~/components/ArrowButton';
@@ -26,7 +17,7 @@ import Loader from '~/components/Loader';
 // ✅ Define the type for selected game
 export type SelectedGame = {
   sportName: string;
-  sportId: number;
+  sportId: string;
 };
 
 // ✅ Define your internal GameItem type
@@ -61,17 +52,31 @@ export default function GamesGrid() {
         accessToken ?? '',
       );
 
-      if (res.status && Array.isArray(res.sportMergedData)) {
-        const merged: GameItem[] = res.sportMergedData.map((item) => ({
-          id: item.sport_id?.toString() ?? Math.random().toString(),
-          title: item.displayName || item.sportName,
+      if (res.status && Array.isArray(res.data)) {
+        const merged: GameItem[] = res.data.map((item) => ({
+          id: item.sport_id?.toString() ?? '',
+          title: item.display_name || item.sport_name,
           image: {
             uri: `${base_url_images}${item.img_path?.startsWith('/') ? item.img_path.slice(1) : item.img_path}`,
           },
           selectedids: item.user_selected,
         }));
 
+        
+
+        console.log('mergedmerged', merged);
         setGamesList(merged);
+
+ const preSelectedGames = merged
+          .filter((item) => item.selectedids === "1")
+          .map((item) => ({
+            sportName: item.title,
+            sportId: item.id,
+          }));
+
+        setSelected(preSelectedGames);
+
+
       } else {
         Alert.alert('Error', res.message ?? 'Something went wrong');
       }
@@ -91,7 +96,7 @@ export default function GamesGrid() {
       if (exists) {
         return prev.filter((g) => g.sportName !== game.title);
       } else {
-        return [...prev, { sportName: game.title, sportId: parseInt(game.id) }];
+        return [...prev, { sportName: game.title, sportId: game.id }];
       }
     });
   };

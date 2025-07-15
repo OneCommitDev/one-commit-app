@@ -1546,14 +1546,15 @@ import { AcademicRequest, Api_Url, httpRequest2 } from '~/services/serviceReques
 import { AcademicMajor, AcademicResponse } from '~/services/DataModals';
 import Loader from '~/components/Loader';
 import { setMajorFromAPI, validateGPA, validateScore } from '~/utils/AppFunctions';
+import TitleText from '~/components/TitleText';
 
 type Props = {
   onNext?: () => void;
 };
 
 const Academic: React.FC<Props> = ({ onNext }) => {
-  const [testType, setTestType] = useState<'SAT' | 'ACT'>('SAT');
-  const [schoolType, setSchoolType] = useState<'Public' | 'Private' | 'Boarding'>('Public');
+  const [testType, setTestType] = useState<'sat' | 'act'>('sat');
+  const [schoolType, setSchoolType] = useState<'public' | 'private' | 'boarding'>('public');
   const [NCAAType, setNCAAType] = useState<'Yes' | 'No' | 'Unsure'>('Yes');
   const [loading, setLoading] = useState(false);
   const [apiMajors, setApiMajors] = useState<AcademicMajor[]>([]);
@@ -1577,7 +1578,7 @@ const Academic: React.FC<Props> = ({ onNext }) => {
   const handleChange = (key: string, val: string) => {
     setForm((prev) => ({ ...prev, [key]: val }));
     if (key === 'unweighted_gpa') validateGPA(val, setErrors);
-    if (key === 'test_score') validateScore(val, form.test_score_type as 'SAT' | 'ACT', setErrors);
+    if (key === 'test_score') validateScore(val, form.test_score_type as 'sat' | 'act', setErrors);
   };
 
   const getFilteredMajors = (search: string) =>
@@ -1610,17 +1611,18 @@ const Academic: React.FC<Props> = ({ onNext }) => {
       setLoading(true);
       const token = await getItem(PREF_KEYS.accessToken);
       const res = await httpRequest2<AcademicResponse>(Api_Url.academic, 'get', {}, token ?? '');
-
+      // console.log('res_res ', res);
       if (res.status && res.data) {
-        const testType = res.data.test_score_type?.toUpperCase() === 'ACT' ? 'ACT' : 'SAT';
+        const testType = res.data.test_score_type?.toLowerCase() === 'act' ? 'act' : 'sat';
         setTestType(testType);
         handleChange('test_score_type', testType);
 
-        const type = res.data.school_type;
-        if (['Public', 'Private', 'Boarding'].includes(type)) {
-          // setSchoolType(type);
-          handleChange('school_type', type);
-        }
+        const type = res.data.school_type; 
+        if (['public', 'private', 'boarding'].includes(type)) {
+        setSchoolType(type as 'public' | 'private' | 'boarding');
+         handleChange('school_type', type); // optional if needed
+      }
+
 
         const ncaa = res.data.ncaa_eligibility_status;
         if (['Yes', 'No', 'Unsure'].includes(ncaa)) {
@@ -1641,13 +1643,12 @@ const Academic: React.FC<Props> = ({ onNext }) => {
         setMajorFromAPI(res.data?.intended_major_2, 1, list, setMajors, handleChange);
         setMajorFromAPI(res.data?.intended_major_3, 2, list, setMajors, handleChange);
 
+          handleChange('test_score', res.data?.test_score?.toString() ?? '');
+
         setForm((prev) => ({
           ...prev,
           weighted_gpa: res.data?.weighted_gpa ?? '',
-          unweighted_gpa: res.data?.unweighted_gpa
-            ? parseFloat(res.data.unweighted_gpa).toFixed(1)
-            : '',
-          test_score: res.data?.test_score ?? '',
+          unweighted_gpa: res.data?.unweighted_gpa ?? '',
           school_name: res.data?.school_name ?? '',
         }));
       } else {
@@ -1684,7 +1685,9 @@ const Academic: React.FC<Props> = ({ onNext }) => {
       const res = await httpRequest2<AcademicResponse>(Api_Url.academic, 'post', reqBody, token ?? '', true);
 
       if (res.status) {
-        onNext?.();
+          setTimeout(() => {
+          onNext?.();
+        }, 300);
       } else {
         Alert.alert('Error', res.message ?? 'Request failed');
       }
@@ -1701,7 +1704,7 @@ const Academic: React.FC<Props> = ({ onNext }) => {
 
       {/* GPA */}
       <View className="px-2">
-        <AppText text="Unweighted GPA" />
+        <TitleText text="Unweighted GPA" />
         <AppInput
           value={form.unweighted_gpa}
           keyboardType="decimal-pad"
@@ -1710,14 +1713,14 @@ const Academic: React.FC<Props> = ({ onNext }) => {
         />
         {errors.unweighted_gpa && <Text className="text-red-500">{errors.unweighted_gpa}</Text>}
 
-        <AppText className="mt-4">Test Scores</AppText>
+        <TitleText className="mt-3">Test Scores</TitleText>
         <TestTypeToggle
-          options={['SAT', 'ACT']}
+          options={['sat', 'act']}
           initialValue={testType}
           onSelect={(sel) => {
-            setTestType(sel as 'SAT' | 'ACT');
+            setTestType(sel as 'sat' | 'act');
             handleChange('test_score_type', sel);
-            validateScore(form.test_score, sel as 'SAT' | 'ACT', setErrors);
+            validateScore(form.test_score, sel as 'sat' | 'act', setErrors);
           }}
         />
 
@@ -1733,11 +1736,11 @@ const Academic: React.FC<Props> = ({ onNext }) => {
       </View>
 
       {/* Intended Majors Section */}
-        <AppText  className='mt-6 -mb-3'>
+        <TitleText  className='mt-3 -mb-3'>
           Intended Major 
-        </AppText>
+        </TitleText>
       <View className="px-4 py-4 mt-4  bg-gray-200 rounded-3xl">
-         <AppText size="text-14" className='text-gray-400'>
+         <AppText>
           {/* Intended Major (<Text style={{ fontStyle: 'italic' , fontSize : 14 }}>Select upto 3 in order of preference</Text>) */}
                 Select upto 3 in order of preference
         </AppText>
@@ -1813,7 +1816,7 @@ const Academic: React.FC<Props> = ({ onNext }) => {
 
       {/* School Name */}
       <View className="px-2 mt-6">
-        <AppText className="mb-1">High School Name</AppText>
+        <TitleText className="mb-1">High School Name</TitleText>
         <AppInput
           value={form.school_name}
           onChangeValue={(text) => handleChange('school_name', text)}
@@ -1823,12 +1826,12 @@ const Academic: React.FC<Props> = ({ onNext }) => {
 
       {/* School Type */}
       <View className="px-2 mt-4">
-        <AppText className="mb-1">High School Type</AppText>
+        <TitleText className="mb-1">High School Type</TitleText>
         <TestTypeToggle
-          options={['Public', 'Private', 'Boarding']}
+          options={['public', 'private', 'boarding']}
           initialValue={schoolType}
           onSelect={(sel) => {
-            setSchoolType(sel as 'Public' | 'Private' | 'Boarding');
+            setSchoolType(sel as 'public' | 'private' | 'boarding');
             handleChange('school_type', sel);
           }}
         />

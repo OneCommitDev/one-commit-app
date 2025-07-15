@@ -95,6 +95,9 @@ type CityState = { city: string; state: string } | null;
         const email = await getItem(PREF_KEYS.userEmailID);
         const userId = await getItem(PREF_KEYS.userId);
         const accessToken = await getItem(PREF_KEYS.accessToken);
+
+console.log('accessToken ' , accessToken);
+
         const profileUrl = Api_Url.userProfile(userId ?? '', email ?? '');
         const res = await httpRequest2<ProfileResponse>(
           profileUrl,
@@ -109,8 +112,8 @@ type CityState = { city: string; state: string } | null;
           setForm((form) => ({
             ...form,
             fullName: res.data?.full_name ?? '',
-            preferredName: res.data?.prefferred_name ?? '',
-            phone: autoformatUSPhoneNumber(res.data?.phone_number ?? ''), // 👈 Format here
+            preferredName: res.data?.preferred_name ?? '',
+            phone: autoformatUSPhoneNumber(res.data?.phone ?? ''), // 👈 Format here
             dob: res.data?.dob ? new Date(res.data.dob) : null,
             city: res.data?.city ?? '',
             states: res.data?.state ?? '',
@@ -148,8 +151,8 @@ type CityState = { city: string; state: string } | null;
 
     const requestBody: CreateProfileRequest = {
         full_name: form.fullName,
-        prefferred_name: form.preferredName,
-        phone_number: cleanPhoneNumber(form.phone),
+        preferred_name: form.preferredName,
+        phone: cleanPhoneNumber(form.phone),
          dob: form.dob ? format(form.dob, 'yyyy-MM-dd') : '', // ✅ ISO format
         city: form.city,
         state: form.states,
@@ -214,7 +217,8 @@ const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
     console.log('ZIP API Result:', place);
 
     const city = place['place name'] || place['city'] || '';
-    const state = place['state'] || place['abbreviation'] || '';
+    // const state = place['state'] || place['abbreviation'] || '';
+    const state =  place['state abbreviation'] || '';
 
     if (!city || !state) throw new Error('Missing city/state data');
 
@@ -594,7 +598,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
               setForm((prev) => ({
                 ...prev,
                 heightis: formatted,
-                height_unit: 'inch',
+                height_unit: 'feet_inches',
               }));
 
               // Close modal after a small delay to ensure state is applied

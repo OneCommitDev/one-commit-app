@@ -320,7 +320,7 @@ const getResponse = await postFormUrlEncoded<RegisterResponse>(Api_Url.register,
           {/* Footer */}
           <View className="flex-row justify-center mb-2">
             <Text className="text-gray-500">Already have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity onPress={() => navigation.replace('Login')}>
               <Text className="text-[#124D3A] font-semibold">Sign In</Text>
             </TouchableOpacity>
           </View>

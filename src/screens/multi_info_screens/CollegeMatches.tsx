@@ -13,6 +13,7 @@ import ArrowButton from '~/components/ArrowButton';
 import AppText from '~/components/AppText';
 import WhiteCustomButton from '~/components/WhiteCustomButton';
 import images from '~/components/images';
+import TitleText from '~/components/TitleText';
 
 type College = {
   id: string;
@@ -121,10 +122,10 @@ export default function CollegeMatches({ onNext }: Props) {
           /> */}
          </View>
           <View className="flex-1 ml-2">
-            <AppText size="text-18" fontFamily="font-nunitoextrabold" color='text-primary'>
+            <TitleText  color='text-primary'>
               {item.name}
-            </AppText>
-            <AppText color="text-light" size="text-14" className="-mt-3">
+            </TitleText>
+            <AppText  className="-mt-3">
               {item.division} - {item.location}
             </AppText>
             <View className="flex-row space-x-2 -mt-1">
@@ -139,9 +140,11 @@ export default function CollegeMatches({ onNext }: Props) {
               >
                 <Text className="text-xs text-gray-700">{item.tag}</Text>
               </View>
-              <Text className="text-xs text-green-700 font-medium">
+               <View className='-mt-2 ml-3'>
+                 <AppText size='text-12'>
                 {item.match} Match
-              </Text>
+              </AppText>
+               </View>
             </View>
           </View>
         </View>

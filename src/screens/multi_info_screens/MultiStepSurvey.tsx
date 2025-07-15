@@ -11,17 +11,19 @@ import SelectedGames from './SelectedGames';
 import Athletic from './Athletic';
 import CollegePreferences from './CollegePreferences';
 import CollegeMatches from './CollegeMatches';
+import TitleText from '~/components/TitleText';
+import AppText from '~/components/AppText';
 
 type Step = {
   title: string;
   subtitle: string;
   type: string;
-    sportId?: number; // optional, only needed for 'games' steps
+    sportId?: string;  
 
 };
  type SelectedGame = {
   sportName: string;
-  sportId: number;
+  sportId: string;
 };
 
 type MultiStepSurveyRouteProp = RouteProp<RootStackParamList, 'MultiStepSurvey'>;
@@ -32,7 +34,7 @@ type MultiStepSurveyRouteProp = RouteProp<RootStackParamList, 'MultiStepSurvey'>
     title: sport.sportName,
     subtitle: 'Select the options as per your specialty.',
     type: 'games',
-    sportId: sport.sportId, // Make sure `Step` type has `sportId?: number`
+    sportId: sport.sportId, 
   }));
 
   const staticSteps: Step[] = [
@@ -160,19 +162,19 @@ export default function MultiStepSurvey() {
         }}
       >
         <View className="items-center mb-4 mt-5">
-          <Text className="text-20 font-nunitosemibold text-black text-center mb-1">
+          <TitleText className="text-center mb-1">
             {current.title}
-          </Text>
-          <Text className="text-12 text-light text-center mb-5">
+          </TitleText>
+          <AppText className="text-center mb-5">
             {current.subtitle}
-          </Text>
+          </AppText>
         </View>
 
         <View className="flex-1 px-3">
           {renderExtraInfoForStep(
             current.type,
             current.title,
-            current.sportId ?? 0,  
+            current.sportId ?? "",  
             searchText,
             setSearchText,
             selectedItems,
@@ -190,8 +192,7 @@ export default function MultiStepSurvey() {
 function renderExtraInfoForStep(
   type: string,
   sportName: string,
-    sportId: number,
-
+    sportId: string,
   searchText: string,
   setSearchText: (text: string) => void,
   selectedItems: string[][],

@@ -14,6 +14,7 @@ import { PREF_KEYS } from '~/utils/Prefs';
 import { HeightPickerModal2 } from '~/components/HeightPickerModal2';
 import { NumberPickerModal } from '~/components/NumberPickerModal';
 import { Applog } from '~/utils/logger';
+import TitleText from '~/components/TitleText';
 
 type Props = {
   onNext?: () => void;
@@ -59,7 +60,11 @@ const Athletic: React.FC<Props> = ({ onNext }) => {
   const [heightInputKey, setHeightInputKey] = useState<string | null>(null);
   const [showMeterModal, setShowMeterModal] = useState(false);
   const [meterInputKey, setMeterInputKey] = useState<string | null>(null);
-const [rawSportData, setRawSportData] = useState<GetSportsAlldata['sportUserData']>([]);
+// const [rawSportData, setRawSportData] = useState<GetSportsAlldata['sportUserData']>([]);
+const [rawSportData, setRawSportData] = useState<
+  GetSportsAlldata['data']['sportUserFormattedData']
+>([]);
+
   const [events, setEvents] = useState<HoldSportsdata[]>([]);
 
   const handleChange = (key: string, value: string) => {
@@ -129,12 +134,12 @@ const [rawSportData, setRawSportData] = useState<GetSportsAlldata['sportUserData
         accessToken ?? ''
       );
 
-      if (mounted && res.status && res.sportUserData) {
+      if (mounted && res.status && res.data.sportUserFormattedData) {
         // 1. Save raw data
-        setRawSportData(res.sportUserData);
+        setRawSportData(res.data.sportUserFormattedData);
 
         // 2. Transform to FlatList-friendly format
-        const transformedSections: Section[] = res.sportUserData.map((sport) => ({
+        const transformedSections: Section[] = res.data.sportUserFormattedData.map((sport) => ({
           title: sport.display_name,
           img: `${base_url_images}${sport.img_path?.startsWith('/') ? sport.img_path.slice(1) : sport.img_path}`,
           inputs: (sport.events || []).map((event) => ({
@@ -149,7 +154,7 @@ const [rawSportData, setRawSportData] = useState<GetSportsAlldata['sportUserData
 
         // 3. Initialize form state
         const initialForm: typeof form = {};
-        res.sportUserData.forEach((sport) => {
+        res.data.sportUserFormattedData.forEach((sport) => {
           sport.events?.forEach((event) => {
             const key = event.event_name;
             const type = event.measurement_type;
@@ -167,9 +172,14 @@ const [rawSportData, setRawSportData] = useState<GetSportsAlldata['sportUserData
 
         
 
+        // // Additional keys (videoLink and additional info)
+        // initialForm['videoLink'] = { input: '' };
+        // initialForm['additional'] = { input: '' };
+
         // Additional keys (videoLink and additional info)
-        initialForm['videoLink'] = { input: '' };
-        initialForm['additional'] = { input: '' };
+          initialForm['videoLink'] = { input: res.data.media_links || '' };
+          initialForm['additional'] = { input: res.data.additional_links || '' };
+
 
         setForm(initialForm);
       }
@@ -384,7 +394,7 @@ const handleSubmit = () => {
         ListFooterComponent={
   <View className="px-4">
     <View className="mb-5 -mt-3">
-      <AppText>Meet Highlight Link (optional)</AppText>
+      <TitleText>Meet Highlight Link (optional)</TitleText>
       <AppInput
         value={form['videoLink']?.input || ''}
         keyboardType="default"
@@ -398,7 +408,7 @@ const handleSubmit = () => {
     </View>
 
     <View className="mb-5 -mt-3">
-      <AppText>Any additional information</AppText>
+      <TitleText>Any additional information</TitleText>
       <AppInput
         value={form['additional']?.input || ''}
         keyboardType="default"
@@ -433,11 +443,8 @@ const handleSubmit = () => {
                 className="h-12 w-12 mr-2 rounded-1 xl"
                 resizeMode="cover"
               />
-              <AppText
+              <TitleText
                 text={section.title}
-                size="text-20"
-                color="text-primary"
-                fontFamily="font-nunitoextrabold"
               />
             </View>
             <View className="border-t border-gray-300 mx-2 mb-4" />
@@ -469,7 +476,7 @@ const handleSubmit = () => {
                             borderColor: '#ccc',
                           }}
                         >
-                          <Text className="text-center text-sm font-semibold">Feet</Text>
+                          <AppText>Feet</AppText>
                         </TouchableOpacity>
 
                       <TouchableOpacity
@@ -489,7 +496,7 @@ const handleSubmit = () => {
                           backgroundColor: form[key]?.selectedUnit === 'meters' ? '#D1FAE5' : '#fff',
                         }}
                       >
-                        <Text className="text-center text-sm font-semibold">Meters</Text>
+                        <AppText className="text-center">Meters</AppText>
                       </TouchableOpacity>
 
                       </View>
@@ -511,39 +518,54 @@ const handleSubmit = () => {
                         }}
                         className="px-4 py-2 border border-gray-300 rounded-full mt-2"
                       >
-                        <Text className="text-sm font-semibold">
+                        <AppText>
                           {form[key]?.selected || 'Points'}
-                        </Text>
+                        </AppText>
                       </TouchableOpacity>
                     )}
                   </View>
 
                   <View className="-mt-3">
-                    <AppInput
-                      value={form[key]?.input || value}
-                      onPressIn={() => {
-                        if (type === 'time') {
-                          setActivePickerKey(key);
-                          setShowTimePicker(true);
-                        } else if (type === 'height' || type === 'distance') {
-                          const selectedUnit = form[key]?.selectedUnit;
+                  {(type === 'time' || type === 'height' || type === 'distance') ? (
+  <TouchableOpacity
+    activeOpacity={0.8}
+    onPress={() => {
+      if (type === 'time') {
+        setActivePickerKey(key);
+        setShowTimePicker(true);
+      } else if (type === 'height' || type === 'distance') {
+        const selectedUnit = form[key]?.selectedUnit;
 
-                          if (selectedUnit === 'feet_inches') {
-                            setHeightInputKey(key);
-                            setShowHeightModal(true);
-                          } else if (selectedUnit === 'meters') {
-                            setMeterInputKey(key);
-                            setShowMeterModal(true);
-                          } else {
-                            Alert.alert('Select Unit', 'Please select Feet or Meters before entering value.');
-                          }
-                        }
-                      }}
-                      
-                     editable={type === 'points'}
-                      placeholder={placeholder}
-                      onChangeValue={(text) => handleChange(key, text)}
-                    />
+        if (selectedUnit === 'feet_inches') {
+          setHeightInputKey(key);
+          setShowHeightModal(true);
+        } else if (selectedUnit === 'meters') {
+          setMeterInputKey(key);
+          setShowMeterModal(true);
+        } else {
+          Alert.alert('Select Unit', 'Please select Feet or Meters before entering value.');
+        }
+      }
+    }}
+  >
+    <AppInput
+                          value={form[key]?.input || value}
+                          placeholder={placeholder}
+                          editable={false} 
+                          pointerEvents="none" 
+                          onChangeValue={function (val: string): void {
+                             
+                          } }    />
+  </TouchableOpacity>
+) : (
+  <AppInput
+    value={form[key]?.input || value}
+    placeholder={placeholder}
+    editable={type === 'points'}
+    onChangeValue={(text) => handleChange(key, text)}
+  />
+)}
+
                   </View>
                 </View>
 

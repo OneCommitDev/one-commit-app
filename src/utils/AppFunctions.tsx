@@ -119,17 +119,17 @@ export function isAtLeast13YearsOld(date: Date): boolean {
 
 export const validateScore = (
   value: string,
-  type: 'SAT' | 'ACT',
+  type: 'sat' | 'act',
   setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
 ) => {
   const score = parseInt(value, 10);
-  const isValid = type === 'SAT' ? score <= 1600 : score <= 36;
+  const isValid = type === 'sat' ? score <= 1600 : score <= 36;
 
   if (value === '' || !/^\d{1,4}$/.test(value) || !isValid) {
     setErrors((e) => ({
       ...e,
       test_score:
-        type === 'SAT'
+        type === 'act'
           ? 'SAT score must be a number ≤ 1600'
           : 'ACT score must be a number ≤ 36',
     }));

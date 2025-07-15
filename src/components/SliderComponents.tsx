@@ -1,21 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
+import AppText from './AppText';
 
-// Define the props interface
 interface SliderComponentsProps {
   onValueChange?: (value: number) => void;
+  initialValue?: number;
 }
 
-const SliderComponents: React.FC<SliderComponentsProps> = ({ onValueChange }) => {
-  const [value, setValue] = useState(2000);
-  
+const SliderComponents: React.FC<SliderComponentsProps> = ({ onValueChange, initialValue }) => {
+  const [value, setValue] = useState(initialValue ?? 2000);
+
+  useEffect(() => {
+    if (typeof initialValue === 'number') {
+      setValue(initialValue);
+    }
+  }, [initialValue]);
+
   const handleValueChange = (newValue: number) => {
     const roundedValue = Math.round(newValue);
     setValue(roundedValue);
-    if (onValueChange) {
-      onValueChange(roundedValue);
-    }
+    onValueChange?.(roundedValue);
   };
 
   return (
@@ -23,8 +28,8 @@ const SliderComponents: React.FC<SliderComponentsProps> = ({ onValueChange }) =>
       <Slider
         style={styles.slider}
         minimumValue={0}
-        maximumValue={60000}
-        step={1000}
+        maximumValue={100}
+        step={10}
         value={value}
         onValueChange={handleValueChange}
         minimumTrackTintColor="#235D48"
@@ -32,9 +37,12 @@ const SliderComponents: React.FC<SliderComponentsProps> = ({ onValueChange }) =>
         thumbTintColor="#647067"
       />
       <View style={styles.labelContainer}>
-        <Text style={styles.label}>0</Text>
-        <Text style={styles.value}>{Math.round(value)}</Text>
-        <Text style={styles.label}>60000</Text>
+        {/* <Text style={styles.label}>0k</Text>
+        <Text style={styles.value}>{value}k</Text>
+        <Text style={styles.label}>100k</Text> */}
+        <AppText>0k</AppText>
+        <AppText>{value}k</AppText>
+        <AppText>100k</AppText>
       </View>
     </View>
   );

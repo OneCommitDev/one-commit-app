@@ -2,7 +2,7 @@
 import React from 'react';
 import { Text, TextProps, View } from 'react-native';
 
-type AppTextProps = TextProps & {
+type TitleTextProps = TextProps & {
   text?: string;
   color?: string;
   size?: string;
@@ -10,14 +10,14 @@ type AppTextProps = TextProps & {
   className?: string;
 };
 
-export default function AppText({
+export default function TitleText({
   text,
-  color = 'text-black',
-  size = 'text-14',
-  fontFamily = 'font-nunitoregular',
+  color = 'text-primary',
+  size = 'text-16',
+  fontFamily = 'font-nunitoextrabold',
   className = '',
   ...props
-}: AppTextProps) {
+}: TitleTextProps) {
   return (
   <View className='mt-2 mb-1'>
       <Text

@@ -98,7 +98,7 @@ import { removeItem } from '~/utils/storage';
 // export default function SplashScreen({ navigation }: SplashScreenProps) {
     // const navigations = useNavigation<NavigationProp<RootStackParamList>>();
     // const route = useRoute<RouteProp<RootStackParamList, 'OtpVerification'>>();
-    export default function SplashScreen() {
+    export default function Splashscreen() {
 
       const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -114,6 +114,7 @@ import { removeItem } from '~/utils/storage';
        if (login_status === 'success') {
         // navigation.replace('Login');
           navigation.replace('UserProfile');
+            //  navigation.replace('EmailConnectionUI');
                   //  navigation.replace('CollegePreferences');
 
       } else {

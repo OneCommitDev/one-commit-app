@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ArrowButton from '~/components/ArrowButton';
+import AppText from '~/components/AppText';
+import TitleText from '~/components/TitleText';
 
 type Props = {
   onNext?: () => void;
@@ -30,11 +32,11 @@ export default function EmailConnectionUI({ onNext }: Props) {
             source={{ uri: 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico' }}
             className="w-10 h-10 rounded-full"
           />
-          <Text className="text-18 font-nunitosemibold text-title ml-4">
+          <TitleText className='ml-6'>
             Connect Gmail
-          </Text>
+          </TitleText>
         </View>
-        <Ionicons name="arrow-forward" size={20} color="#1A322E" />
+        {/* <Ionicons name="arrow-forward" size={20} color="#1A322E" /> */}
       </TouchableOpacity>
 
       {/* Outlook */}
@@ -46,19 +48,20 @@ export default function EmailConnectionUI({ onNext }: Props) {
       >
         <View className="flex-row items-center space-x-4">
           <Image
-            source={require('assets/images/outlook.png')}
+            source={require('../../../assets/images/outlook.png')
+}
             className="w-10 h-10"
           />
-          <Text className="text-18 font-nunitosemibold text-title ml-4">
+          <TitleText className='ml-6'>
             Connect Outlook
-          </Text>
+          </TitleText>
         </View>
-        <Ionicons name="arrow-forward" size={20} color="#1A322E" />
+        {/* <Ionicons name="arrow-forward" size={20} color="#1A322E" /> */}
       </TouchableOpacity>
 
       {/* Info Box */}
       <View className="bg-background border border-border_color rounded-xl p-2 mt-4 mb-6 text-title">
-        <Text className="text-base text-gray-700 leading-relaxed font-nunitosemibold ml-2">
+        <AppText className="leading-relaxed ml-2">
           Email connection is required to use OneCommit’s outreach features. To learn more, click{' '}
           <Text
             className="underline text-black"
@@ -67,7 +70,7 @@ export default function EmailConnectionUI({ onNext }: Props) {
             here
           </Text>
           .
-        </Text>
+        </AppText>
       </View>
 
       {/* Continue Button */}
@@ -76,8 +79,12 @@ export default function EmailConnectionUI({ onNext }: Props) {
           text="Continue"
           onPress={() => onNext?.()}
           fullWidth
-          disabled={!selected} // ✅ Disable if not selected
+          disabled={!selected}  
         />
+
+        <TouchableOpacity onPress={() => onNext?.()}>
+          <AppText className='text-center mt-5'>Skip for now</AppText>
+        </TouchableOpacity>
       </View>
     </View>
   );
