@@ -11,6 +11,8 @@ import { logAllPrefs, PREF_KEYS } from '~/utils/Prefs';
 import { removeItem } from '~/utils/storage';
 import { getItem, setItem } from 'expo-secure-store';
 import Loader from '~/components/Loader';
+import TitleText from '~/components/TitleText';
+import AppText from '~/components/AppText';
 
 type RootStackParamList = {
   OtpVerification: { method: 'email' | 'mobile'; value: string; typeis: string };
@@ -208,16 +210,16 @@ const ResenedOTPcall = async (resendurl: string, requestBody: any) => {
       )}
 
       {/* Header */}
-      <View className="items-center mb-4">
-        <Text className="text-black text-20 font-nunitoextrabold text-center mb-1">
+      <View className="items-center">
+        <TitleText className="text-center" size='text-20'>
           Enter Verification Code
-        </Text>
-        <Text className="text-light text-16 font-nunitoregular text-center px-2">
+        </TitleText>
+        <AppText className=" text-center px-2">
           We've sent a 6-digit code to your{' '}
-          <Text className="font-nunitoextrabold">
+          <AppText>
             {method === 'email' ? 'email address' : 'mobile number'}
-          </Text>
-        </Text>
+          </AppText>
+        </AppText>
       </View>
 
       {/* OTP Boxes */}
@@ -229,10 +231,10 @@ const ResenedOTPcall = async (resendurl: string, requestBody: any) => {
       <View className="items-center mb-10">
         {canResend ? (
           <TouchableOpacity onPress={handleResend}>
-            <Text className="text-green-700 font-nunitosemibold">Resend Code</Text>
+            <TitleText>Resend Code</TitleText>
           </TouchableOpacity>
         ) : (
-          <Text className="text-gray-500 font-nunitoregular">Resend in {formatTimer()}</Text>
+          <AppText>Resend in {formatTimer()}</AppText>
         )}
       </View>
 

@@ -18,4 +18,5 @@ export type RootStackParamList = {
   FillProfileInfoScreen: undefined;
   CollegePreferences : undefined;
   EmailConnectionUI : undefined;
+  Dashboard : undefined;
 };

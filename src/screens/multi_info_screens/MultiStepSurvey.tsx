@@ -162,10 +162,10 @@ export default function MultiStepSurvey() {
         }}
       >
         <View className="items-center mb-4 mt-5">
-          <TitleText className="text-center mb-1">
+          <TitleText className="text-center">
             {current.title}
           </TitleText>
-          <AppText className="text-center mb-5">
+          <AppText className="text-center mb-5 -mt-2 ml-2 mr-2">
             {current.subtitle}
           </AppText>
         </View>

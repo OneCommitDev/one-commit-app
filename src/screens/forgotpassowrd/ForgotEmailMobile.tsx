@@ -8,6 +8,8 @@ import { LoginResponse, SimpleResponse } from '~/services/DataModals';
 import { setItem } from 'expo-secure-store';
 import { PREF_KEYS, Temp_KEYS } from '~/utils/Prefs';
 import Loader from '~/components/Loader';
+import TitleText from '~/components/TitleText';
+import AppText from '~/components/AppText';
 
 type RootStackParamList = {
   // MobileEmailVerification: { method: 'email' | 'mobile' , value : string , maskedValue : string };
@@ -100,31 +102,31 @@ useFocusEffect(
 
       {/* Centered Title and Subtitle */}
       <View className="items-center mb-8">
-      <View className="items-center mb-4">
-  <Text className="text-black text-20 font-nunitoextrabold text-center">
+      <View className="items-center">
+  <TitleText className="text-center" size='text-20'>
     {selectedMethod === 'email'
       ? 'Recover Password via Email'
       : selectedMethod === 'mobile'
       ? 'Recover Password via Mobile Number'
       : 'Forgot Password'}
-  </Text>
+  </TitleText>
 </View>
 
-            <Text className="text-light text-16 font-nunitoregular text-center">
+            <AppText className="text-center">
             {selectedMethod === 'email'
             ? 'Provide your registered email ID to receive a password reset link.'
             : selectedMethod === 'mobile'
             ? 'Enter your mobile number to receive a password reset code.'
             : 'Select which method you’d like to use to reset your password.'}
-            </Text>
+            </AppText>
 
       </View>
     {/* Email Input */}
          {selectedMethod && (
   <>
-    <Text className="text-14 font-nunitoextrabold text-title mb-3">
+    <TitleText className="mb-3">
       {selectedMethod === 'email' ? 'Email Address' : 'Mobile Number'}
-    </Text>
+    </TitleText>
 
     <View className="flex-row items-center border border-gray-300 rounded-xl px-3 h-14 mb-4 bg-white">
       <View className="pl-2 pr-3">

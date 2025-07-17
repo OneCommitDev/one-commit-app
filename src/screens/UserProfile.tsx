@@ -26,6 +26,7 @@ import { autoformatUSPhoneNumber, cleanPhoneNumber, formatInchesToFeetAndInches,
 import CustomDualPicker, { weightValues_kg, weightValues_lb } from '~/components/CustomDualPicker';
 import { CustomDualPickerModal } from '~/components/CustomDualPickerModal';
 import { HeightPickerModal2 } from '~/components/HeightPickerModal2';
+import TitleText from '~/components/TitleText';
 
  
 
@@ -309,7 +310,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
         <Loader show={loading} />
  
         <View className="bg-background ml-5 mr-5">
-          <AppText text="Full Name" size="text-base" />
+          <TitleText text="Full Name"  />
           <AppInput
             value={form.fullName}
             leftIcon={<Ionicons name="person-outline" size={20} color="#6B7280" />}
@@ -317,7 +318,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
             placeholder="Enter full name"
           />
 
-          <AppText text="Preferred Name" size="text-base" />
+          <TitleText text="Preferred Name"  />
           <AppInput
             value={form.preferredName}
             leftIcon={<Ionicons name="person-outline" size={20} color="#6B7280" />}
@@ -325,7 +326,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
             placeholder="Enter preferred name"
           />
 
-          <AppText text="Email" size="text-base" />
+          <TitleText text="Email"  />
           <AppInput
             value={form.email}
             editable={false}
@@ -336,7 +337,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
             keyboardType="email-address"
           />
 
-          <AppText text="Phone Number" size="text-base" />
+          <TitleText text="Phone Number"  />
           <AppInput
             value={form.phone}
             leftIcon={<Ionicons name="phone-portrait-sharp" size={20} color="#6B7280" />}
@@ -349,7 +350,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
             }}
           />
 
-          <AppText text="Date of Birth" size="text-base" />
+          <TitleText text="Date of Birth"  />
           <View className="bg-white px-1 py-1 rounded-full mt-2 mb-2">
             <TouchableOpacity
              onPress={() => {
@@ -372,7 +373,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
           <View>
             <View className="flex-row space-x-4">
               <View className="flex-1">
-                <AppText text="ZipCode" size="text-base" />
+                <TitleText text="ZipCode"  />
                 <AppInput
                   value={form.zip}
                   keyboardType="number-pad"
@@ -412,7 +413,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
               </View>
 
               <View className="flex-1 ml-5">
-                <AppText text="State" size="text-base" />
+                <TitleText text="State"  />
                 <AppInput
                   value={form.states}
                     editable={false}
@@ -422,7 +423,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
               </View>
             </View>
 
-            <AppText text="City" size="text-base" />
+            <TitleText text="City"  />
                    <AppInput
                   value={form.city}
                     editable={false}
@@ -431,7 +432,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
                 />
           </View>
 
-          <AppText text="Gender" size="text-base" />
+          <TitleText text="Gender"  />
           <View className="mb-2">
             <TestTypeToggle
               options={['Male', 'Female']}
@@ -446,7 +447,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
           <View className="flex-row space-x-4">
             <View className="flex-1">
 
-              <AppText text="Weight" size="text-base" />
+              <TitleText text="Weight"  />
             <TouchableOpacity onPress={() => setShowWeightModal(true)} activeOpacity={1}>
             <AppInput
               value={form.weightis}
@@ -463,7 +464,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
 
 
             <View className="flex-1 ml-5">
-              <AppText text="Height" size="text-base" />
+              <TitleText text="Height"  />
               
               {/* <AppInput
               onPress={() => setShowHeightModal(true)}

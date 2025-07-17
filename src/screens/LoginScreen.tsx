@@ -28,6 +28,7 @@ import { Applog, Applogerror } from '~/utils/logger';
 import {  GoogleSignin,  GoogleSigninButton,  isErrorWithCode,  isSuccessResponse,
   SignInResponse,  statusCodes,} from '@react-native-google-signin/google-signin';
  import { State, City } from 'country-state-city';
+import { APP_CONFIG_MICROSOFT } from '~/utils/constants';
 
  
  
@@ -350,9 +351,10 @@ useFocusEffect(
 }, []);
 
 const [request, response, promptAsync] = Google.useAuthRequest({
-  clientId: '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com',
-  iosClientId: '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com',
-  androidClientId: '156935841607-ru30t91ba7r20pkdgclu1jn6rclqi9fl.apps.googleusercontent.com',
+  // clientId: '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com',
+  // iosClientId: '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com',
+  // androidClientId: '156935841607-ru30t91ba7r20pkdgclu1jn6rclqi9fl.apps.googleusercontent.com',
+       clientId: APP_CONFIG_MICROSOFT.CLIENT_ID,
 });
 
 useEffect(() => {

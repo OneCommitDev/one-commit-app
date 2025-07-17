@@ -45,7 +45,15 @@ export const useMicrosoftLogin = () => {
       clientId: APP_CONFIG_MICROSOFT.CLIENT_ID,
       redirectUri: APP_CONFIG_MICROSOFT.REDIRECT_URI,
       responseType: AuthSession.ResponseType.Code,
-      scopes: ['openid', 'profile', 'email', 'offline_access'],
+      // scopes: ['openid', 'profile', 'email', 'offline_access'],
+       scopes: [
+        'openid',
+        'profile',
+        'email',
+        'offline_access',
+        // 'https://graph.microsoft.com/Mail.Read',
+        // 'https://graph.microsoft.com/Mail.Send',
+      ],
       usePKCE: false,
     },
     {
@@ -53,7 +61,7 @@ export const useMicrosoftLogin = () => {
     }
   );
 
-  //console.log('request' , request);
+  // console.log('request' , request);
 
 console.log(AuthSession.makeRedirectUri({
   scheme: 'com.onecommit.app',
@@ -65,6 +73,7 @@ console.log(AuthSession.makeRedirectUri({
   const handleResponse = async () => {
     if (response?.type === 'success') {
       const { code } = response.params;
+  console.log('codecodecodecodecode' , response);
 
      // exchangeMicrosoftCode(code);
       return { code };
@@ -91,3 +100,48 @@ const exchangeMicrosoftCode = async (code: string) => {
   const data = await response.json();
   console.log('Microsoft Token Response:', data);
 };
+
+
+
+
+
+ 
+const DEFAULT_SCOPES = [
+  'openid',
+  'profile',
+  'email',
+  'offline_access',
+];
+
+export const useMicrosoftEmailConnect = (extraScopes: string[] = []) => {
+  const combinedScopes = [...new Set([...DEFAULT_SCOPES, ...extraScopes])];
+
+  const [request, response, promptAsync] = AuthSession.useAuthRequest(
+    {
+      clientId: APP_CONFIG_MICROSOFT.CLIENT_ID,
+      redirectUri: APP_CONFIG_MICROSOFT.REDIRECT_URI,
+      responseType: AuthSession.ResponseType.Code,
+      scopes: combinedScopes,
+      usePKCE: false,
+    },
+    {
+      authorizationEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+    }
+  );
+
+  console.log('Redirect URI:', AuthSession.makeRedirectUri({
+    scheme: 'com.onecommit.app',
+    path: 'oauthredirect',
+  }));
+
+  const handleResponse = async () => {
+    if (response?.type === 'success') {
+      const { code } = response.params;
+      return { code };
+    }
+    return null;
+  };
+
+  return { request, response, promptAsync, handleResponse };
+};
+

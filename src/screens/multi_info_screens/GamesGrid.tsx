@@ -13,6 +13,7 @@ import { PREF_KEYS } from '~/utils/Prefs';
 import { Api_Url, base_url_images, httpRequest2 } from '~/services/serviceRequest';
 import { GamesResponse } from '~/services/DataModals';
 import Loader from '~/components/Loader';
+import TitleText from '~/components/TitleText';
 
 // ✅ Define the type for selected game
 export type SelectedGame = {
@@ -125,9 +126,9 @@ export default function GamesGrid() {
     >
       <View className="items-center justify-center m-2">
         <Image source={item.image} className="w-[70px] h-[70px] mb-2 mt-4 rounded-md" />
-        <AppText size="text-18" className="-mt-2">
+        <TitleText  className="-mt-2">
           {item.title}
-        </AppText>
+        </TitleText>
       </View>
     </TouchableOpacity>
   );

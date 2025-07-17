@@ -14,6 +14,11 @@ import AppText from '~/components/AppText';
 import WhiteCustomButton from '~/components/WhiteCustomButton';
 import images from '~/components/images';
 import TitleText from '~/components/TitleText';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '~/navigation/types';
+import OutreachSheet from './OutreachSheet';
+import SuccessModal from '~/components/SuccessModal';
 
 type College = {
   id: string;
@@ -28,6 +33,8 @@ type College = {
 type Props = {
   onNext?: () => void;
 };
+type DashboardNavProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+
 
 const colleges: College[] = [
   {
@@ -60,6 +67,13 @@ const colleges: College[] = [
 ];
 
 export default function CollegeMatches({ onNext }: Props) {
+  const navigation = useNavigation<DashboardNavProp>();
+  const [sheetVisible, setSheetVisible] = useState(false);
+const [sheetData, setSheetData] = useState({ subject: '', message: '' });
+
+const [showOutreach, setShowOutreach] = useState(false);
+const [showSuccess, setShowSuccess] = useState(false);
+
   const [selected, setSelected] = useState<string[]>([]);
   const [searchText, setSearchText] = useState('');
 
@@ -77,6 +91,27 @@ export default function CollegeMatches({ onNext }: Props) {
 
   return (
     <View className="flex-1 bg-background px-2 pt-2">
+
+ <OutreachSheet
+  isVisible={sheetVisible}
+  onClose={() => setSheetVisible(false)}
+  initialSubject={sheetData.subject}
+  onEmailSent={() => {
+    setShowSuccess(true);
+  }}
+/>
+
+<SuccessModal
+  isVisible={showSuccess}
+  onClose={() => setShowSuccess(false)}
+/>
+
+
+      <SuccessModal
+      isVisible={showSuccess}
+      onClose={() => setShowSuccess(false)}
+    />
+
       {/* 🔍 Search Box */}
       <View className="flex-row items-center bg-white h-14 rounded-full px-4 mb-2">
         <TextInput
@@ -93,9 +128,9 @@ export default function CollegeMatches({ onNext }: Props) {
         <AppText>
           {filteredColleges.length} College Matches
         </AppText>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Ionicons name="filter" size={20} color="gray" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* 📋 Scrollable College List */}
@@ -150,11 +185,18 @@ export default function CollegeMatches({ onNext }: Props) {
         </View>
 
         <View className="mt-3">
-          <WhiteCustomButton
+        <WhiteCustomButton
             text="Start Outreach"
-            onPress={() => onNext?.()}
+            onPress={() => {
+              setSheetData({
+                subject: 'Testing subject',
+                message: 'I’m excited to connect with your program.',
+              });
+              setSheetVisible(true);
+            }}
             fullWidth
           />
+        
         </View>
       </TouchableOpacity>
     );
@@ -181,7 +223,7 @@ export default function CollegeMatches({ onNext }: Props) {
 
       <ArrowButton
         text="Finish & Go to Dashboard"
-        onPress={() => onNext?.()}
+         onPress={() => navigation.replace('Login')}
         fullWidth
       />
     </View>

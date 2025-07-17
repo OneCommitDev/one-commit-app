@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import ArrowButton from '~/components/ArrowButton';
+import TitleText from '~/components/TitleText';
+import AppText from '~/components/AppText';
 
 // ✅ Define the route types
 type RootStackParamList = {
@@ -48,10 +50,10 @@ const handleSubmit = () => {
 
       {/* Centered Title and Subtitle */}
       <View className="items-center mb-8">
-        <Text className="text-black text-20 font-nunitoextrabold mb-2">Forgot Password</Text>
-        <Text className="text-light text-16 font-nunitoregular text-center">
+        <TitleText  size='text-20'>Forgot Password</TitleText>
+        <AppText className="text-center">
           Select which method you’d like to reset.
-        </Text>
+        </AppText>
       </View>
 
       {/* Method Options */}
@@ -76,8 +78,8 @@ const handleSubmit = () => {
               <MaterialIcons name={method.icon as any} size={24} color="#124D3A" />
             </View>
             <View>
-              <Text className="text-title text-20 font-nunitoextrabold mb-1">{method.title}</Text>
-              <Text className="text-light text-base font-nunitoregular">{method.subtitle}</Text>
+              <TitleText className="mb-1">{method.title}</TitleText>
+              <AppText>{method.subtitle}</AppText>
             </View>
           </TouchableOpacity>
         );

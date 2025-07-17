@@ -18,6 +18,7 @@ import FillProfileInfoScreen from '~/screens/intoroScreeens/FillProfileInfoScree
 import CollegePreferences from '~/screens/multi_info_screens/CollegePreferences';
 import Splashscreen from '~/screens/Splashscreen';
 import EmailConnectionUI from '~/screens/multi_info_screens/EmailConnectionUI';
+import Dashboard from '~/screens/dashboard/Dashboard';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -86,6 +87,10 @@ options={{ headerShown: false,  animation: 'slide_from_right' }} />
 
 <Stack.Screen name="EmailConnectionUI" component={EmailConnectionUI}
 options={{ headerShown: false,  animation: 'slide_from_right' }} />
+
+
+<Stack.Screen name="Dashboard" component={Dashboard}
+options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
 
       </Stack.Navigator>
     </NavigationContainer>

@@ -11,6 +11,8 @@ import { getItem, setItem } from 'expo-secure-store';
 import { PREF_KEYS, Temp_KEYS } from '~/utils/Prefs';
 import Loader from '~/components/Loader';
 import { removeItem } from '~/utils/storage';
+import AppText from '~/components/AppText';
+import TitleText from '~/components/TitleText';
 
 type RootStackParamList = {
   ResetPasswordScreen: { userid: any };
@@ -122,16 +124,16 @@ const OTP = await getItem(PREF_KEYS.forgot_otp);
       >
         {/* Title */}
         <View className="items-center mb-8">
-          <Text className="text-black text-20 font-nunitoextrabold mb-2">
+          <TitleText size='text-20'>
             Change Your Password
-          </Text>
-          <Text className="text-light text-16 font-nunitoregular text-center">
+          </TitleText>
+          <AppText className="text-center">
             Please enter and confirm your new password.
-          </Text>
+          </AppText>
         </View>
 
         {/* New Password Field */}
-        <Text className="text-14 font-nunitoextrabold text-title mb-2">New Password</Text>
+        <TitleText className="mb-2">New Password</TitleText>
       <View
         className={`flex-row items-center rounded-xl px-3 h-14 mb-4 bg-white ${
           newPassword && !isPasswordValid(newPassword)
@@ -155,19 +157,19 @@ const OTP = await getItem(PREF_KEYS.forgot_otp);
         {/* Password Requirements Label */}
          {/* Hint + Tooltip */}
           <View className="flex-row items-center  ml-2 mb-4 mt-1">
-            <Text className="text-12 text-gray-600">
+            <AppText>
               Password must be at least 8 characters
-            </Text>
+            </AppText>
             <Tooltip
               isVisible={showTooltip}
               content={
                 <View style={{ backgroundColor: '#fff', padding: 12 }}>
-                  <Text style={{ fontSize: 14, color: '#333', lineHeight: 20 }}>
+                  <AppText style={{ fontSize: 14, color: '#333', lineHeight: 20 }}>
                     • At least 8 characters{'\n'}
                     • 1 uppercase & lowercase letter{'\n'}
                     • 1 number & 1 special character{'\n'}
                     • Example: Demo@123#
-                  </Text>
+                  </AppText>
                 </View>
               }
               placement={keyboardVisible ? 'bottom' : 'top'}
@@ -182,7 +184,7 @@ const OTP = await getItem(PREF_KEYS.forgot_otp);
           </View>
 
         {/* Confirm Password Field */}
-        <Text className="text-14 font-nunitoextrabold text-title mb-2">Confirm Password</Text>
+        <TitleText className="mb-2">Confirm Password</TitleText>
 <View
   className={`flex-row items-center rounded-xl px-3 h-14 mb-4 bg-white ${
     confirmPassword && (!isPasswordValid(confirmPassword) || confirmPassword !== newPassword)

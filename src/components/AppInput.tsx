@@ -18,7 +18,7 @@ export default function AppInput({
   placeholder = '',
   color = 'text-black',
   size = 'text-base',
-  fontFamily = 'font-sans',
+  fontFamily = 'font-nunitoregular',
   className = '',
   leftIcon, // ✅ Optional prop
   ...props

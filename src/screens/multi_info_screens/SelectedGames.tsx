@@ -226,7 +226,7 @@ export default function SelectedGames({
 
       {events.filter((e) => e.selected).length > 0 && (
         <View className="mt-1 px-1 py-1">
-          <Text className="text-green-800 mb-2">Selected:</Text>
+          <AppText className=" mb-2">Selected:</AppText>
           <View className="flex-row flex-wrap gap-1">
             {events
               .filter((e) => e.selected)
@@ -236,7 +236,7 @@ export default function SelectedGames({
                   onPress={() => toggleSelection(item.display_name)}
                   className="flex-row items-center px-4 py-2 bg-gray-200 rounded-full"
                 >
-                  <Text className="text-pretty mr-1">{item.display_name}</Text>
+                  <AppText className="text-pretty mr-1">{item.display_name}</AppText>
                   <Ionicons name="close" size={14} color="#065F46" />
                 </TouchableOpacity>
               ))}

@@ -8,6 +8,8 @@ import ArrowButton from '~/components/ArrowButton';
 import { Ionicons } from '@expo/vector-icons';
 import { setItem } from 'expo-secure-store';
 import { PREF_KEYS } from '~/utils/Prefs';
+import TitleText from '~/components/TitleText';
+import AppText from '~/components/AppText';
 
 export default function FillProfileInfoScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -33,10 +35,10 @@ export default function FillProfileInfoScreen() {
         />
 
 
-      <Text className="text-24 text-center mb-4 text-primary font-nunitoextrabold">Complete Your Profile</Text>
-      <Text className="text-14 text-center text-gray mb-8">
+      <TitleText className="text-20 text-center mb-0 ">Complete Your Profile</TitleText>
+      <AppText className=" text-center mb-8">
         To continue, please fill in your profile details. This helps us personalize your experience.
-      </Text>
+      </AppText>
 
       <ArrowButton
         text="Get Started"

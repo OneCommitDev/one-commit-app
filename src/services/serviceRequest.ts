@@ -7,6 +7,8 @@ import { PREF_KEYS } from '~/utils/Prefs';
 // ✅ Create a reusable Axios instance
 export const  base_url_images = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:80/';
 export const  base_url = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:80/v1';
+// export const  base_url = 'http://192.168.18.105:80/index.php';
+
 const api = axios.create({
   baseURL: base_url, 
   timeout: 60000,
@@ -371,6 +373,7 @@ export const Api_Url = {
   save_sports : '/user/profile/sports',
   academic : '/user/academic/', // Use for bothe request types
   collegePreferences : '/user/college-preferences', // Use for bothe request types
+  microsoft_email_connect : '/user/connect/microsoft',
 
  
 };

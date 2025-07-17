@@ -1699,7 +1699,9 @@ const Academic: React.FC<Props> = ({ onNext }) => {
   };
 
   return (
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 100 }}>
+    <ScrollView keyboardShouldPersistTaps="handled" 
+    showsVerticalScrollIndicator={false}
+    contentContainerStyle={{ paddingBottom: 100 }}>
       <Loader show={loading} />
 
       {/* GPA */}

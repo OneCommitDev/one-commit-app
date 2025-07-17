@@ -381,7 +381,7 @@
 
  import React, { useEffect, useState } from 'react';
 import {  View,  TouchableOpacity,  ScrollView,  Alert,  Modal,  FlatList,} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import ArrowButton from '~/components/ArrowButton';
 import Loader from '~/components/Loader';
 import AppText from '~/components/AppText';
@@ -393,6 +393,8 @@ import { MessagesText, PREF_KEYS } from '~/utils/Prefs';
 import {  GetCollegePreferencesResponse,  MatterItem,  SimpleResponse,} from '~/services/DataModals';
 import {  CollegePreferencesRequest,  Api_Url,  httpRequest2,} from '~/services/serviceRequest';
 import TitleText from '~/components/TitleText';
+import Tooltip from 'react-native-walkthrough-tooltip';
+import CustomAlert from '~/components/CustomAlert';
 
 type Props = {
   onNext?: () => void;
@@ -414,6 +416,18 @@ export default function CollegePreferences({ onNext }: Props) {
   const [selectedReligious, setSelectedReligious] = useState('Doesn’t matter');
   const [regions, setRegions] = useState<string[]>([]);
   const [showRegionModal, setShowRegionModal] = useState(false);
+const [showAdvice, setShowAdvice] = useState(false);
+const [adviceModal, setAdviceModal] = useState<{
+  visible: boolean;
+  title: string;
+  message: string;
+  buttonText: string;
+}>({
+  visible: false,
+  title: '',
+  message: '',
+  buttonText: '',
+});
 
   const [form, setForm] = useState({
     what_matter_most: '',
@@ -470,11 +484,18 @@ const showDivisionAdvice = (
   message?: string,
   buttonText?: string
 ) => {
-  Alert.alert(
-    title || 'Advice',
-    message || 'We don’t recommend limiting yourself to just one division.',
-    [{ text: buttonText || 'OK' }]
-  );
+  // Alert.alert(
+  //   title || 'Advice',
+  //   message || 'We don’t recommend limiting yourself to just one division.',
+  //   [{ text: buttonText || 'OK' }]
+  // );
+    setAdviceModal({
+    visible: true,
+    title: title || 'Advice',
+    message: message || 'We don’t recommend limiting yourself to just one division.',
+    buttonText: buttonText || 'OK',
+  });
+
 };
 
 
@@ -593,6 +614,8 @@ const showDivisionAdvice = (
     console.log('Selected Value:', value);
   };
 
+ 
+
   return (
     <>
       <ScrollView
@@ -603,6 +626,21 @@ const showDivisionAdvice = (
         style={{ marginHorizontal: 12 }}
       >
         <Loader show={loading} />
+
+      <CustomAlert
+      visible={adviceModal.visible}
+      title={adviceModal.title}
+      message={adviceModal.message}
+      buttonText={adviceModal.buttonText}
+      onClose={() => setAdviceModal((prev) => ({ ...prev, visible: false }))}
+    />
+
+
+
+ 
+
+
+
 
         <View className="px-2">
           <TitleText className='mb-5'>When it comes to recruiting, what matters most to you?</TitleText>
@@ -684,7 +722,7 @@ const showDivisionAdvice = (
           <View className="flex-1 mt-3">
     <View className="flex-row items-center justify-between">
               <TitleText>School Size</TitleText>
-<TouchableOpacity onPress={() => showDivisionAdvice()}>
+<TouchableOpacity onPress={() => showDivisionAdvice("School size ranges" , MessagesText.School_Size_MSG)}>
                 <Ionicons name="information-circle-outline" size={22} color="#6b7280" />
               </TouchableOpacity>
             </View>
@@ -710,9 +748,9 @@ const showDivisionAdvice = (
           <View className="flex-1 mt-3">
                 <View className="flex-row items-center justify-between">
               <TitleText>Academic Rigor</TitleText>
-              <TouchableOpacity onPress={() => showDivisionAdvice("Alert" , MessagesText.Academic_Rigor_MSG)}>
+              {/* <TouchableOpacity onPress={() => showDivisionAdvice("Alert" , MessagesText.Academic_Rigor_MSG)}>
                 <Ionicons name="information-circle-outline" size={22} color="#6b7280" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
             <TestTypeToggle
               options={['low', 'medium', 'high']}

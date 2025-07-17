@@ -6,6 +6,8 @@ import ArrowButton from '~/components/ArrowButton';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '~/navigation/types';
+import TitleText from '~/components/TitleText';
+import AppText from '~/components/AppText';
 
 type SuccessScreenNavProp = NativeStackNavigationProp<RootStackParamList, 'Success'>;
 type SuccessScreenRouteProp = RouteProp<RootStackParamList, 'Success'>;
@@ -33,13 +35,13 @@ export default function SuccessScreen() {
       >
         <Ionicons name="checkmark-circle-outline" size={80} color="#4CAF50" />
 
-        <Text className="text-3xl font-bold text-[#124D3A] mt-6">
+        <TitleText size='text-24'>
           {title}
-        </Text>
+        </TitleText>
 
-        <Text className="text-base text-center text-gray-600 mt-4 mb-6">
+        <AppText className="text-center mb-6 -mt-2">
           {message}
-        </Text>
+        </AppText>
 
         <ArrowButton onPress={handleContinue} text="Back To Home" fullWidth />
       </Animated.View>

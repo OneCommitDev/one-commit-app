@@ -36,7 +36,7 @@ export const clearAllPrefs = async () => {
 
 
 export const MessagesText ={
-  School_Size_MSG : '',
+  School_Size_MSG :     '• Small: 100 – 20,000 students\n• Medium: 20,001 – 40,000 students\n• Large: 40,001 – 60,000+ students',
   Academic_Rigor_MSG : '',
 
 }
