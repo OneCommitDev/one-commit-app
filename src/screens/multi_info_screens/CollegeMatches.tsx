@@ -220,7 +220,7 @@ const [showSuccess, setShowSuccess] = useState(false);
             height={50}
           />
      </View>
-
+// 123
       <ArrowButton
         text="Finish & Go to Dashboard"
          onPress={() => navigation.replace('Login')}
