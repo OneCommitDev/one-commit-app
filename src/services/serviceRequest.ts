@@ -5,9 +5,12 @@ import { getValidAccessToken } from '~/utils/decodeAccessToken';
 import { PREF_KEYS } from '~/utils/Prefs';
 
 // ✅ Create a reusable Axios instance
-export const  base_url_images = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:80/';
-export const  base_url = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:80/v1';
+// export const  base_url_images = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:80/';
+// export const  base_url = 'http://ec2-18-218-15-226.us-east-2.compute.amazonaws.com:80/v1';
 // export const  base_url = 'http://192.168.18.105:80/index.php';
+
+export const  base_url_images = 'http://ec2-18-218-239-171.us-east-2.compute.amazonaws.com:80/';
+export const  base_url = 'http://ec2-18-218-239-171.us-east-2.compute.amazonaws.com:80/v1';
 
 const api = axios.create({
   baseURL: base_url, 
@@ -309,6 +312,59 @@ export async function httpRequest_social_token<T>(
   }
 }
 
+export async function httpSilentRequest<T>(
+  url: string,
+  method: 'get' | 'post' | 'put' | 'delete',
+  data?: any,
+  token?: string,
+  isFormUrlEncoded = false
+): Promise<T | null> {
+  try {
+    const loginStatus = await getItem(PREF_KEYS.login_status);
+    let finalToken = token;
+
+    if (loginStatus === 'success') {
+      finalToken = await getValidAccessToken() ?? '';
+      if (!finalToken) return null;
+    }
+
+    const headers: Record<string, string> = {
+      'Content-Type': isFormUrlEncoded
+        ? 'application/x-www-form-urlencoded'
+        : 'application/json',
+    };
+
+    if (finalToken) {
+      headers.Authorization = `Bearer ${finalToken}`;
+    }
+
+    const fullUrl =
+      method === 'get' && data
+        ? `${url}?${qs.stringify(data)}`
+        : url;
+
+    const response = await api.request<T>({
+      url: fullUrl,
+      method,
+      ...(method === 'get'
+        ? { params: data }
+        : { data: isFormUrlEncoded ? qs.stringify(data) : data }),
+      headers,
+      timeout: 4000, // optional: short timeout for silent calls
+    });
+
+    return response.data;
+  } catch (error: any) {
+    console.log('🕳️ Silent request failed:', {
+      url,
+      message: error?.message,
+      code: error?.code,
+      status: error?.response?.status,
+    });
+    return null;
+  }
+}
+
 
 
 export async function httpGetWithToken<T>(
@@ -372,10 +428,28 @@ export const Api_Url = {
   `/list/${sportsid}/events`,
   save_sports : '/user/profile/sports',
   academic : '/user/academic/', // Use for bothe request types
-  collegePreferences : '/user/college-preferences', // Use for bothe request types
+  collegePreferences : '/user/college-preferences', // Use for both request types
   microsoft_email_connect : '/user/connect/microsoft',
+  google_email_connect : '/user/connect/google',
+    get_email_connection : '/email/connection',
 
+ profileComplete : '/profile-complete', // school match saving api
+
+
+   // ✅ SCHOOL MATCHING API FUNC WITH PAGINATION
+ schoolsMatches : (start: number, limit: number) =>
+    `/match/schools/${start}/${limit}`,
+
+  // ✅ SCHOOL REMOVIING FUNC SAVE AND DELETE
+ schoolsMatchesDelete : (schoolid: string, type : string) =>
+    `/match/school/${type}/${schoolid}`,
  
+   getOutreachemail : '/email/load',
+   re_write_email : '/email/rewrite-with-ai',
+   send_email_outReach : '/user/send/email',
+    profileSummary : '/user/profile-summary',
+    searchSchool : '/list/schools',
+
 };
 
 

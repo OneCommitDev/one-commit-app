@@ -7,6 +7,8 @@ import {
   Platform,
   ScrollView,
   TextInput,
+  Alert,
+  InteractionManager,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ModalComponent from 'react-native-modal';
@@ -15,6 +17,11 @@ import TitleText from '~/components/TitleText';
 import AppText from '~/components/AppText';
 import AppInput from '~/components/AppInput';
 import SuccessModal from '~/components/SuccessModal';
+import Loader from '~/components/Loader';
+import { Api_Url, httpRequest2 } from '~/services/serviceRequest';
+import { getItem } from 'expo-secure-store';
+import { EmailOutreach, EmailOutreachCoachDetails, GamesResponse, SimpleResponse } from '~/services/DataModals';
+import { PREF_KEYS } from '~/utils/Prefs';
 
 type OutreachSheetProps = {
   isVisible: boolean;
@@ -38,21 +45,154 @@ export default function OutreachSheet({
 const [showOutreach, setShowOutreach] = useState(false);
 const [showSuccess, setShowSuccess] = useState(false);
 const [shouldNotifySuccess, setShouldNotifySuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+const [coachCount, setCoachCount] = useState<number>(0);
+const [coachDetails, setCoachDetails] = useState<EmailOutreachCoachDetails[]>([]);
 
-  // Sync form data when modal opens
-  useEffect(() => {
-    if (isVisible) {
-      setForm({
-        subject: initialSubject,
-        message_txt: '',
-      });
-    }
-  }, [isVisible, initialSubject]);
+  // useEffect(() => {
+  //   if (isVisible) {
+  //     setForm({
+  //       subject: initialSubject,
+  //       message_txt: '',
+  //     });
+  //   }
+  // }, [isVisible, initialSubject]);
 
   const handleChange = (key: string, val: string) => {
     setForm((prev) => ({ ...prev, [key]: val }));
   };
 
+  useEffect(() => {
+  console.log('OutreachSheet isVisible =', isVisible);
+}, [isVisible]);
+
+useEffect(() => {
+  if (isVisible) {
+    EmilgetApiRequest();
+  } else {
+    setForm({ subject: '', message_txt: '' });
+    setCoachCount(0);
+  }
+}, [isVisible]);
+
+
+  const EmilgetApiRequest = async () => {
+  try {
+    setLoading(true);
+    const accessToken = await getItem(PREF_KEYS.accessToken); // await required
+    const res = await httpRequest2<EmailOutreach>(
+      Api_Url.getOutreachemail,
+      'get',
+      {},
+      accessToken ?? '',
+    );
+      setLoading(false);
+
+    if (res.status && res.data) {
+      setForm({
+        subject: res.data.email_subject,
+        message_txt: res.data.email_content.replace(/<br\s*\/?>/gi, '\n'), // Convert HTML to text
+      });
+      setCoachCount(res.data.coach_count);
+        setCoachDetails(res.data.coach_details); // 👈 Save coach_details
+
+      // console.log('sfsdf', res);
+    } else {
+      Alert.alert('Error', res.message ?? 'Something went wrong');
+    }
+  } catch (err) {
+    Alert.alert('Error', 'Unexpected error occurred.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+      const re_write_email = () => {
+          RewriteApiRequest();
+      }
+ 
+          const RewriteApiRequest = async () => {
+          try {
+            setLoading(true);
+            
+            const accessToken = await getItem(PREF_KEYS.accessToken); // await required
+            const res = await httpRequest2<EmailOutreach>(
+              Api_Url.re_write_email,
+              'post',
+              {'email_content' : form.message_txt},
+              accessToken ?? '',
+              true
+            );
+              setLoading(false);
+
+            if (res.status && res.data) {
+                setForm(prev => ({
+                  ...prev,
+                  message_txt: '',
+                }));
+              
+
+                     setTimeout(() => {
+                        setForm(prev => ({
+                        ...prev,
+                        message_txt: res.data.email_content.replace(/<br\s*\/?>/gi, '\n'),
+                      }));
+                }, 300); 
+
+              setCoachCount(res.data.coach_count);
+              // console.log('sfsdf', res);
+            } else {
+              Alert.alert('Error', res.message ?? 'Something went wrong');
+            }
+          } catch (err) {
+            Alert.alert('Error', 'Unexpected error occurred.');
+          } finally {
+            setLoading(false);
+          }
+      };
+
+
+           const SendEmailApiRequest = async () => {
+          try {
+            setLoading(true);
+               const payload = {
+               coach_details: JSON.stringify(coachDetails),
+                email_subject : form.subject,
+                  email_content : form.message_txt
+            };
+
+            console.log('payload', payload);
+            
+            const accessToken = await getItem(PREF_KEYS.accessToken);  
+            const res = await httpRequest2<SimpleResponse>(
+              Api_Url.send_email_outReach,
+              'post',
+              payload ,
+              accessToken ?? '',
+              true
+            );
+              setLoading(false);
+              setShowOutreach(false);
+              console.log('resresres' , res);
+            if (res.status ) {
+
+                InteractionManager.runAfterInteractions(() => {
+                  setTimeout(() => {
+                  setShouldNotifySuccess(true);  
+                  onClose();  
+                  }, 300); 
+                });
+
+            } else {
+              Alert.alert('Error', res.message ?? 'Something went wrong');
+            }
+          } catch (err) {
+            Alert.alert('Error', 'Unexpected error occurred.');
+          } finally {
+            setLoading(false);
+          }
+      };
  
 
   return (
@@ -64,18 +204,21 @@ const [shouldNotifySuccess, setShouldNotifySuccess] = useState(false);
     //   backdropOpacity={0.4}
     // >
     <ModalComponent
-  isVisible={isVisible}
-  onBackdropPress={onClose}
-  onModalHide={() => {
-    // ✅ Trigger only after modal closes
-    if (shouldNotifySuccess) {
+      isVisible={isVisible}
+      onBackdropPress={onClose}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      animationInTiming={400}
+      animationOutTiming={300}
+      onModalHide={() => {
+      if (shouldNotifySuccess) {
       onEmailSent?.();
       setShouldNotifySuccess(false); // reset internal flag
-    }
-  }}
-  style={{ justifyContent: 'flex-end', margin: 0 }}
-  backdropOpacity={0.4}
->
+      }
+      }}
+      style={{ justifyContent: 'flex-end', margin: 0 }}
+      backdropOpacity={0.4}
+      >
 
           
       <KeyboardAvoidingView
@@ -90,6 +233,8 @@ const [shouldNotifySuccess, setShouldNotifySuccess] = useState(false);
           paddingBottom: 12,
         }}
       >
+              <Loader show={loading} />
+        
           {/* 👇 Handle View */}
   <View className="items-center mt-3 mb-3">
     <View style={{
@@ -101,7 +246,7 @@ const [shouldNotifySuccess, setShouldNotifySuccess] = useState(false);
   </View>
         {/* Header */}
         <View className="flex-row justify-between items-center mb-4 mt-4">
-          <TitleText size='text-20'>Start Outreach</TitleText>
+          <TitleText size='text-18'>Start Outreach</TitleText>
           <TouchableOpacity onPress={onClose}>
             <Ionicons name="close" size={24} color="black" />
           </TouchableOpacity>
@@ -126,7 +271,7 @@ const [shouldNotifySuccess, setShouldNotifySuccess] = useState(false);
 
           {/* Message */}
           <AppText className="mb-1">Message</AppText>
-        <View className='border border-gray-300 py-4 px-4 rounded-3xl h-[400]'>
+        <View className='border border-gray-300 py-4 px-4 rounded-3xl h-[350]'>
             <TextInput
               value={form.message_txt}
               className="mb-10  h-[90%]"
@@ -140,14 +285,14 @@ const [shouldNotifySuccess, setShouldNotifySuccess] = useState(false);
             <View className="absolute bottom-3 right-3 flex-row items-center space-x-1">
               <Ionicons name="document-text-outline" size={14} color="gray" />
               <AppText className="text-xs text-gray-500">
-                {form.message_txt.length}/500
+                {form.message_txt.length}/2000
               </AppText>
             </View>
           </View>
 
-          {/* Action Buttons */}
+    
           <View className="flex-row justify-between items-center mb-10 mt-6">
-            <TouchableOpacity className="flex-row items-center space-x-1 bg-gray-200 px-4 py-2 rounded-full">
+            <TouchableOpacity className="flex-row items-center space-x-1 bg-gray-200 px-4 py-2 rounded-full" onPress={() => re_write_email()}>
               <Ionicons name="sparkles" size={16} color="#10B981" />
               <AppText>Rewrite with AI</AppText>
             </TouchableOpacity>
@@ -157,18 +302,18 @@ const [shouldNotifySuccess, setShouldNotifySuccess] = useState(false);
             </TouchableOpacity>
 
             <TouchableOpacity className="bg-gray-200 px-3 py-1.5 rounded-full">
-              <AppText>5 Coaches</AppText>
+              <AppText>{coachCount} Coach{coachCount === 1 ? '' : 'es'}</AppText>
             </TouchableOpacity>
           </View>
               <View className="mb-24">
          <ArrowButton
-  text="Send Email"
-  fullWidth
-  onPress={() => {
-    setShouldNotifySuccess(true);  
-    onClose();  
-  }}
-/>
+          text="Send Email"
+          fullWidth
+          onPress={() => {
+            SendEmailApiRequest();
+           
+          }}
+        />
 
         </View>
         </ScrollView>
@@ -179,3 +324,7 @@ const [shouldNotifySuccess, setShouldNotifySuccess] = useState(false);
     </ModalComponent>
   );
 }
+function setSheetVisible(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+

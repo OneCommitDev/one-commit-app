@@ -19,6 +19,10 @@ import CollegePreferences from '~/screens/multi_info_screens/CollegePreferences'
 import Splashscreen from '~/screens/Splashscreen';
 import EmailConnectionUI from '~/screens/multi_info_screens/EmailConnectionUI';
 import Dashboard from '~/screens/dashboard/Dashboard';
+import CollegeMatchDetails from '~/screens/multi_info_screens/CollageMatchDeatils';
+import AppWebview from '~/components/AppWebview';
+import DeleteAccount from '~/screens/dashboard/DeleteAccount';
+import ProfilePreview from '~/screens/multi_info_screens/ProfilePreview';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -82,14 +86,36 @@ export default function AppNavigator() {
 <Stack.Screen name="FillProfileInfoScreen" component={FillProfileInfoScreen}
 options={{ headerShown: false,  animation: 'slide_from_right' }} />
 
-<Stack.Screen name="CollegePreferences" component={CollegePreferences}
+{/* <Stack.Screen name="CollegePreferences" component={CollegePreferences}
 options={{ headerShown: false,  animation: 'slide_from_right' }} />
 
 <Stack.Screen name="EmailConnectionUI" component={EmailConnectionUI}
-options={{ headerShown: false,  animation: 'slide_from_right' }} />
+options={{ headerShown: false,  animation: 'slide_from_right' }} /> */}
 
 
 <Stack.Screen name="Dashboard" component={Dashboard}
+options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
+
+<Stack.Screen
+options={{ headerShown: false,  animation: 'slide_from_bottom' , animationDuration : 600  }}
+  name="CollegeMatchDetails"  
+  component={CollegeMatchDetails}  
+  
+/>
+
+<Stack.Screen
+  options={{ headerShown: false,  animation: 'slide_from_right' , animationDuration : 600  }}
+  name="AppWebview"  
+  component={AppWebview}  
+/>
+
+<Stack.Screen
+  options={{ headerShown: false,  animation: 'slide_from_right' , animationDuration : 600  }}
+  name="DeleteAccount"  
+  component={DeleteAccount}  
+/>
+
+<Stack.Screen name="ProfilePreview" component={ProfilePreview}
 options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
 
       </Stack.Navigator>

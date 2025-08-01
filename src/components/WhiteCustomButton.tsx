@@ -87,8 +87,8 @@ export default function WhiteCustomButton({
       }
     >
       <Text
-        className={`text-16 mr-2 font-nunitosemibold ${
-          disabled ? 'text-gray-500' : 'text-primary'
+        className={`text-14 mr-2 font-nunitosemibold ${
+          disabled ? 'text-gray-500' : 'text-black'
         }`}
       >
         {text}

@@ -7,20 +7,26 @@ import TitleText from '~/components/TitleText';
 import { useMicrosoftEmailConnect, useMicrosoftLogin } from '~/utils/socialAuth';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import Loader from '~/components/Loader';
-import { Api_Url, httpRequest_social_token } from '~/services/serviceRequest';
-import { SocialTokenResponse } from '~/services/DataModals';
+import { Api_Url, httpRequest2, httpRequest_social_token } from '~/services/serviceRequest';
+import { EmailConnectionResponse, EmailOutreach, SimpleResponse, SocialTokenResponse } from '~/services/DataModals';
  import * as Microsoft from 'expo-auth-session/providers/google';
-import { APP_CONFIG_MICROSOFT } from '~/utils/constants';
+import {  APP_CONFIG_GOOGLE, APP_CONFIG_MICROSOFT } from '~/utils/constants';
+import { getItem } from 'expo-secure-store';
+import { PREF_KEYS } from '~/utils/Prefs';
 
 type Props = {
   onNext?: () => void;
+  goToLastStep?: () => void;
+  stepToEdit: number | null;
 };
 
-export default function EmailConnectionUI({ onNext }: Props) {
+export default function EmailConnectionUI({ onNext , goToLastStep , stepToEdit}: Props) {
   const [selected, setSelected] = useState<'gmail' | 'outlook' | null>(null);
+    const [selectedTemp, setSelectedTemp] = useState<'gmail' | 'outlook' | null>(null);
+
   const [loading, setLoading] = useState(false);
   const {    promptAsync: microsoftPrompt,    response: microsoftResponse,    handleResponse: handleMicrosoftResponse,  request: microsoftRequest,} = useMicrosoftEmailConnect([
-  'https://graph.microsoft.com/Mail.Read',
+  'https://graph.microsoft.com/Mail.ReadWrite',
   'https://graph.microsoft.com/Mail.Send'
 ]);
   
@@ -31,20 +37,15 @@ export default function EmailConnectionUI({ onNext }: Props) {
  useEffect(() => {
   (async () => {
     const microsoftData = await handleMicrosoftResponse();
-
     if (microsoftData?.code) {
-      console.log("🔑 Microsoft Auth Code:", microsoftData.code);
-      console.log("🧾 codeVerifiercodeVerifier :", request?.codeVerifier);
-   
-
+      // console.log("🔑 Microsoft Auth Code:", microsoftData.code);
+      // console.log("🧾 codeVerifiercodeVerifier :", request?.codeVerifier);
         setTimeout(() => {
              SocialLoginRequestVerifyTokens(
             microsoftData.code,
             Api_Url.microsoft_email_connect
             );
         }, 300);
-
-
     }
   })();
 }, [microsoftResponse]);
@@ -54,18 +55,11 @@ export default function EmailConnectionUI({ onNext }: Props) {
 
 
   GoogleSignin.configure({
-    scopes: [
-    'profile',
-    'email',
-    'https://www.googleapis.com/auth/gmail.readonly',  
-    'https://www.googleapis.com/auth/gmail.send',       
-    'https://www.googleapis.com/auth/gmail.modify',
-    // ''
-  ],
+    scopes: APP_CONFIG_GOOGLE.emailScopes,
     offlineAccess: true, 
     forceCodeForRefreshToken: true,
-    webClientId: '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com', 
-    iosClientId: '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com', 
+    webClientId: APP_CONFIG_GOOGLE.webClient, 
+    iosClientId: APP_CONFIG_GOOGLE.iosClient, 
     profileImageSize: 120, 
 });
 
@@ -77,6 +71,33 @@ export default function EmailConnectionUI({ onNext }: Props) {
         //console.log('FULL userInfo:', JSON.stringify(userInfo, null, 2));
         const serverAuthCode = userInfo.data.serverAuthCode ?? userInfo.data.user?.serverAuthCode;
         console.log(serverAuthCode);  
+        if (!tokens.accessToken || !serverAuthCode) {
+            console.log('Missing tokens or serverAuthCode');
+            return;
+          }
+
+            // Step 2: Check Gmail scope access using access token
+          const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile', {
+            headers: {
+              Authorization: `Bearer ${tokens.accessToken}`,
+            },
+          });
+            if (res.status === 200) {  
+              
+            setTimeout(() => {
+            //  checkGmailScopeAccess(serverAuthCode);
+             SocialLoginRequestVerifyTokens(
+                serverAuthCode,
+                Api_Url.google_email_connect
+            );
+              }, 100);
+            }
+            else if (res.status === 403) {
+            Alert.alert('Gmail scope not granted, please allow the eramil read and write permissions');
+          }
+
+        
+      
    
     } catch (error: unknown) {
       if (typeof error === 'object' && error !== null && 'code' in error) {
@@ -100,43 +121,130 @@ export default function EmailConnectionUI({ onNext }: Props) {
       }
     }
   };
+ 
+const checkGmailScopeAccess = async (serverAuthCode : string) => {
+  try {
+    // Step 1: Sign in and get access token
+    const userInfo = await GoogleSignin.signIn();
+    const tokens = await GoogleSignin.getTokens(); // { idToken, accessToken }
+    const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile', {
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+      },
+    });
+
+    if (res.status === 200) {
+          setTimeout(() => {
+             SocialLoginRequestVerifyTokens(
+                serverAuthCode,
+                Api_Url.google_email_connect
+            );
+        }, 300);
+      console.log('✅ Gmail read scope granted');
+    } else if (res.status === 403) {
+      console.log('❌ Gmail scope not granted or token expired');
+    } else {
+      console.log(`❗ Unexpected response status: ${res.status}`);
+    }
+  } catch (err) {
+    console.error('Error checking Gmail scope:', err);
+  }
+};
+
   
 
    const handleSubmit = () => {  
-      if(selected === 'outlook'){
-          microsoftPrompt({ useProxy: false } as any); 
-      }else{
-               GooglesignInApp();
-      }
+    if(stepToEdit != null){
+        if(selectedTemp == selected){
+            goToLastStep?.();
+        }else{
+        if(selected === 'outlook'){
+            microsoftPrompt({ useProxy: false } as any); 
+        }else{
+              GooglesignInApp();
+        }
+        }
+    }else{
+      if(selectedTemp == selected){
+            onNext?.();
+        }else{
+            if(selected === 'outlook'){
+              microsoftPrompt({ useProxy: false } as any); 
+            }else{
+                GooglesignInApp();
+            }
+        }
+     
+    }
+     
    }
 
 
-   const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string) => {
+     const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string) => {
+      try {
+        setLoading(true);
+        const requestBody = {
+          "authCodeToken" :authCode,
+        };
+    
+        // console.log(requestBody);
+          const token = getItem(PREF_KEYS.accessToken);
+          const res = await httpRequest2<SimpleResponse>(api_url, 'post', requestBody, token ?? '' , true);
+        
+        console.log(res);
+        if (res.status) {
+          if(stepToEdit != null){
+            goToLastStep?.();
+          }else{
+            onNext?.();
+          }
+        
+        } else {
+          Alert.alert('Error',  res.message);
+        }
+      } catch (err) {
+        Alert.alert('Error', 'Unexpected error occurred.');
+        console.log('Social Login Errors:', err);
+      } finally {
+        setLoading(false);
+      }
+   };
+
+
+  
+     useEffect(() => {
+       EmilgetApiRequest();
+     }, []);
+   
+     const EmilgetApiRequest = async () => {
      try {
        setLoading(true);
-       const requestBody = {
-        "authCodeToken" :authCode,
-       };
-   
-      // console.log(requestBody);
-   
-       const res = await httpRequest_social_token<SocialTokenResponse>(
-         api_url,
-         'post',
-         requestBody,
-         undefined,
-         true
+       const accessToken = await getItem(PREF_KEYS.accessToken); // await required
+       const res = await httpRequest2<EmailConnectionResponse>(
+         Api_Url.get_email_connection,
+         'get',
+         {},
+         accessToken ?? '',
        );
+         setLoading(false);
    
-       console.log(res);
-       if (res.data?.accessToken) {
- 
+       if (res.status ) {
+          if(res.data.provider === 'Gmail'){
+             setSelected('gmail');
+             setSelectedTemp('gmail');
+          }
+         else if(res.data.provider === 'Microsoft'){
+             setSelected('outlook');
+              setSelectedTemp('outlook');
+          }else{
+              
+          }
+          
        } else {
-         Alert.alert('Error',  'Somthing went wrong failed');
+         
        }
      } catch (err) {
        Alert.alert('Error', 'Unexpected error occurred.');
-       console.log('Social Login Errors:', err);
      } finally {
        setLoading(false);
      }
@@ -159,11 +267,22 @@ export default function EmailConnectionUI({ onNext }: Props) {
             source={{ uri: 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico' }}
             className="w-10 h-10 rounded-full"
           />
-          <TitleText className='ml-6'>
-            Connect Gmail
-          </TitleText>
+   <View className='ml-5'>
+  <TitleText>
+    {selectedTemp === 'gmail' ? 'Gmail Account Connected' : 'Connect Gmail Account'}
+  </TitleText>
+
+  {/* {selectedTemp === 'gmail' && (
+    <Text>
+      abc@abc.com
+    </Text>
+  )} */}
+</View>
+
         </View>
-        {/* <Ionicons name="arrow-forward" size={20} color="#1A322E" /> */}
+        {/* {selected === 'gmail'}{
+            <Ionicons name="checkmark-circle" size={20} color="#1A322E" />
+        } */}
       </TouchableOpacity>
 
       {/* Outlook */}
@@ -179,12 +298,16 @@ export default function EmailConnectionUI({ onNext }: Props) {
 }
             className="w-10 h-10"
           />
-          <TitleText className='ml-6'>
-            Connect Outlook
+       <View>
+           <TitleText className='ml-6'>
+              {selectedTemp == 'outlook' ? 'Connected with Outlook' : 'Connect Outlook Account'}
           </TitleText>
+       </View>
         </View>
-        {/* <Ionicons name="arrow-forward" size={20} color="#1A322E" /> */}
-      </TouchableOpacity>
+        {/* {selected === 'outlook' && (
+          <Ionicons name="checkmark-circle" size={20} color="#1A322E" />
+        )}  */}
+         </TouchableOpacity>
 
       {/* Info Box */}
       <View className="bg-background border border-border_color rounded-xl p-2 mt-4 mb-6 text-title">
@@ -209,10 +332,13 @@ export default function EmailConnectionUI({ onNext }: Props) {
           fullWidth
           disabled={!selected}  
         />
+        {stepToEdit == null && (
+          <TouchableOpacity onPress={() => onNext?.()}>
+            <AppText className="text-center mt-5">Skip Connection For Now</AppText>
+          </TouchableOpacity>
+        )}
 
-        <TouchableOpacity onPress={() => onNext?.()}>
-          <AppText className='text-center mt-5'>Skip for now</AppText>
-        </TouchableOpacity>
+       
       </View>
     </View>
   );

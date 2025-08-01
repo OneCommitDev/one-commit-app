@@ -1,15 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
 import AppText from './AppText';
 
 interface SliderComponentsProps {
   onValueChange?: (value: number) => void;
   initialValue?: number;
+  minimumValue?: number;
+  maximumValue?: number;
+  step?: number;
+  minLabel?: string;
+  maxLabel?: string;
+  middleLabel?: (value: number) => string;
+  valueSuffix?: string;
+  disabled?: boolean; // ✅ NEW
 }
 
-const SliderComponents: React.FC<SliderComponentsProps> = ({ onValueChange, initialValue }) => {
-  const [value, setValue] = useState(initialValue ?? 2000);
+const SliderComponents: React.FC<SliderComponentsProps> = ({
+  onValueChange,
+  initialValue,
+  minimumValue = 0,
+  maximumValue = 100,
+  step = 10,
+  minLabel = '0k',
+  maxLabel = '100k',
+  middleLabel,
+  valueSuffix = 'k',
+  disabled = false, // ✅ default to false
+}) => {
+  const [value, setValue] = useState(initialValue ?? maximumValue / 2);
 
   useEffect(() => {
     if (typeof initialValue === 'number') {
@@ -23,29 +42,30 @@ const SliderComponents: React.FC<SliderComponentsProps> = ({ onValueChange, init
     onValueChange?.(roundedValue);
   };
 
-  return (
-    <View style={styles.container}>
-      <Slider
-        style={styles.slider}
-        minimumValue={0}
-        maximumValue={100}
-        step={10}
-        value={value}
-        onValueChange={handleValueChange}
-        minimumTrackTintColor="#235D48"
-        maximumTrackTintColor="#E3E4E3"
-        thumbTintColor="#647067"
-      />
-      <View style={styles.labelContainer}>
-        {/* <Text style={styles.label}>0k</Text>
-        <Text style={styles.value}>{value}k</Text>
-        <Text style={styles.label}>100k</Text> */}
-        <AppText>0k</AppText>
-        <AppText>{value}k</AppText>
-        <AppText>100k</AppText>
-      </View>
+ return (
+  <View style={styles.container}>
+    <Slider
+      style={styles.slider}
+      minimumValue={minimumValue}
+      maximumValue={maximumValue}
+      step={step}
+      value={value}
+      onValueChange={handleValueChange}
+      disabled={disabled}
+      minimumTrackTintColor="#235D48"
+      maximumTrackTintColor="#E3E4E3"
+      thumbTintColor="#647067"
+    />
+    <View style={styles.labelContainer}>
+      <AppText>{minLabel}</AppText>
+      <AppText className="px-6 py-1 bg-gray-200 rounded-full">
+        {middleLabel ? middleLabel(value) : `${value}${valueSuffix ?? ''}`}
+      </AppText>
+      <AppText>{maxLabel}</AppText>
     </View>
-  );
+  </View>
+);
+
 };
 
 const styles = StyleSheet.create({
@@ -59,16 +79,7 @@ const styles = StyleSheet.create({
   labelContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  label: {
-    fontSize: 16,
-    color: '#235D48',
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#235D48',
+    marginTop: 1,
   },
 });
 

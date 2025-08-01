@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AppInput from '~/components/AppInput';
 import AppText from '~/components/AppText';
 import ArrowButton from '~/components/ArrowButton';
-import { useNavigation } from '@react-navigation/native';
+import { NavigationProp, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '~/navigation/types';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -27,11 +27,18 @@ import CustomDualPicker, { weightValues_kg, weightValues_lb } from '~/components
 import { CustomDualPickerModal } from '~/components/CustomDualPickerModal';
 import { HeightPickerModal2 } from '~/components/HeightPickerModal2';
 import TitleText from '~/components/TitleText';
+import { setItem } from '~/utils/storage';
 
  
+type ProfileScreenRouteProp = RouteProp<RootStackParamList, 'UserProfile'>;
 
 export default function ProfileScreen() {
-const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+ const navigation_0 = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+const route = useRoute<ProfileScreenRouteProp>();
+  const { src } = route.params;
+
 const [showAndroidPicker, setShowAndroidPicker] = useState(false);
 const [genderType, setGenderType] = useState<'Male' | 'Female'>('Male');
 const [loading, setLoading] = useState(false);
@@ -40,8 +47,12 @@ const [showHeightModal, setShowHeightModal] = useState(false);
 type CityState = { city: string; state: string } | null;
 
   const handleBack = () => {
-    navigation.replace('Login');
-    clearAllPrefs();
+    if(src === ''){
+      navigation_0.replace('Login');
+      clearAllPrefs();
+    }else{
+      navigation.goBack();
+    }
   };
 
   const [form, setForm] = useState({
@@ -97,7 +108,6 @@ type CityState = { city: string; state: string } | null;
         const userId = await getItem(PREF_KEYS.userId);
         const accessToken = await getItem(PREF_KEYS.accessToken);
 
-console.log('accessToken ' , accessToken);
 
         const profileUrl = Api_Url.userProfile(userId ?? '', email ?? '');
         const res = await httpRequest2<ProfileResponse>(
@@ -165,6 +175,8 @@ console.log('accessToken ' , accessToken);
         height_unit: form.height_unit ?? '',
       };
 
+     await setItem(PREF_KEYS.displayName , form.preferredName);
+
 
       console.log('requestBody ', requestBody);
 
@@ -178,11 +190,17 @@ console.log('accessToken ' , accessToken);
 
       console.log('resresresresres', res);
       if (res.status) {
-         navigation.navigate('GamesGrid');
+            if(src == ''){
+                navigation.navigate('GamesGrid');
+            }
+            else if (src === 'review_src'){
+               navigation.goBack();
+            }
+            else{
+                navigation.goBack();
+            }
       } else {
         Alert.alert('Error', res.message ?? 'Request failed');
-                //  navigation.navigate('GamesGrid');
-
       }
     } catch (err) {
       Alert.alert('Error', 'Unexpected error occurred.');
@@ -295,7 +313,8 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
 
         <View className="flex-1 justify-center ml-3">
           <Text className="text-16 font-nunitoextrabold text-title">
-            Create Profile
+            {src?.trim() === '' ? 'Create Profile' : 'Edit Profile Info'}
+
           </Text>
         </View>
       </View>
