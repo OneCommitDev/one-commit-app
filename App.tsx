@@ -48,6 +48,8 @@ import React from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -63,7 +65,11 @@ export default function App() {
       {/* ✅ Global StatusBar */}
       <StatusBar backgroundColor="#235D48" barStyle="light-content" />
       
-      <AppNavigator />
+     <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AppNavigator />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
     </>
   );
 }

@@ -28,7 +28,7 @@ import { Applog, Applogerror } from '~/utils/logger';
 import {  GoogleSignin,  GoogleSigninButton,  isErrorWithCode,  isSuccessResponse,
   SignInResponse,  statusCodes,} from '@react-native-google-signin/google-signin';
  import { State, City } from 'country-state-city';
-import { APP_CONFIG_MICROSOFT } from '~/utils/constants';
+import { APP_CONFIG_GOOGLE, APP_CONFIG_MICROSOFT } from '~/utils/constants';
 
  
  
@@ -36,12 +36,18 @@ import { APP_CONFIG_MICROSOFT } from '~/utils/constants';
   WebBrowser.maybeCompleteAuthSession();
 
 GoogleSignin.configure({
-  scopes: ['profile', 'email' ],
-  offlineAccess: true, 
-  forceCodeForRefreshToken: true,
-  webClientId: '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com', // client ID of type WEB for your server. Required to get the `idToken` on the user object, and for offline access.
-  iosClientId: '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com', // [iOS] if you want to specify the client ID of type iOS (otherwise, it is taken from GoogleService-Info.plist)
-  profileImageSize: 120, // [iOS] The desired height (and width) of the profile image. Defaults to 120px
+  // scopes: ['profile', 'email' ],
+  // offlineAccess: true, 
+  // forceCodeForRefreshToken: true,
+  // webClientId: '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com', // client ID of type WEB for your server. Required to get the `idToken` on the user object, and for offline access.
+  // iosClientId: '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com', // [iOS] if you want to specify the client ID of type iOS (otherwise, it is taken from GoogleService-Info.plist)
+  // profileImageSize: 120,  
+   scopes: APP_CONFIG_GOOGLE.emailLoginScopes,
+      offlineAccess: true, 
+      forceCodeForRefreshToken: true,
+      webClientId: APP_CONFIG_GOOGLE.webClient, 
+      iosClientId: APP_CONFIG_GOOGLE.iosClient, 
+      profileImageSize: 120, 
 });
 
 
@@ -70,60 +76,18 @@ const GooglesignOutApp = async () => {
   }
 };
 
-//  const GooglesignInApp = async () => {
-//   try {
-//     await GoogleSignin.hasPlayServices();
-//     const user = await GoogleSignin.signIn();
-//     console.log('Google SignIn success:', user);
-//     const accessToken = await GoogleSignin.getTokens();
-//     console.log('Access Token:', accessToken);
-//       await setItem(PREF_KEYS.login_status, 'success');
-//       await setItem(PREF_KEYS.accessToken, accessToken);
-//       await setItem(PREF_KEYS.refreshToken, accessToken);
-//        await setItem(PREF_KEYS.userEmailID, email);
-      
-
-//     // Do something with user
-//   } catch (error: unknown) {
-//     if (typeof error === 'object' && error !== null && 'code' in error) {
-//       const err = error as { code: string; message?: string };
-//       switch (err.code) {
-//         case statusCodes.SIGN_IN_CANCELLED:
-//           console.log('User cancelled the login flow');
-//           break;
-//         case statusCodes.IN_PROGRESS:
-//           console.log('Sign in already in progress');
-//           break;
-//         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-//           console.log('Play services not available or outdated');
-//           break;
-//         default:
-//           console.log('Unhandled error code:', err.code);
-//             console.log('Sign-in error full:', JSON.stringify(error, null, 2));
-
-//       }
-//     } else {
-//       console.log('Unknown error:', error);
-//     }
-//   }
-// };
-
 const GooglesignInApp = async () => {
- // await GoogleSignin.signOut(); // Force clean login
-
-  try {
-    await GoogleSignin.hasPlayServices();
-const userInfo = await GoogleSignin.signIn() as any;
-    const tokens = await GoogleSignin.getTokens(); // Get access & id token
-
-//console.log('FULL userInfo:', JSON.stringify(userInfo, null, 2));
-
-const serverAuthCode = userInfo.data.serverAuthCode ?? userInfo.data.user?.serverAuthCode;
-    console.log(serverAuthCode);
-
-    // console.log('Google SignIn success:', userInfo);
-    // console.log('Access Token:', tokens.accessToken);
-  //  console.log('ID Token:', tokens.idToken);
+      // await GoogleSignin.signOut(); // Force clean login
+      try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn() as any;
+      const tokens = await GoogleSignin.getTokens(); // Get access & id token
+      //console.log('FULL userInfo:', JSON.stringify(userInfo, null, 2));
+      const serverAuthCode = userInfo.data.serverAuthCode ?? userInfo.data.user?.serverAuthCode;
+      console.log(serverAuthCode);
+      // console.log('Google SignIn success:', userInfo);
+      // console.log('Access Token:', tokens.accessToken);
+      //  console.log('ID Token:', tokens.idToken);
 
     // Save details
     await setItem(PREF_KEYS.login_status, 'success');
@@ -131,10 +95,6 @@ const serverAuthCode = userInfo.data.serverAuthCode ?? userInfo.data.user?.serve
     await setItem(PREF_KEYS.refreshToken, tokens.idToken);
     await setItem(PREF_KEYS.userEmailID, userInfo.data?.user.email ?? '');
     await  SocialLoginRequestVerifyTokens(serverAuthCode , Api_Url.google_token );
-
-    // await setItem(PREF_KEYS.userName, userInfo.data?.user.givenName ?? '');
-    // await setItem(PREF_KEYS.userPhoto, userInfo.data?.user.photo ?? '');
-    // navigation.navigate('UserProfile');
   } catch (error: unknown) {
     if (typeof error === 'object' && error !== null && 'code' in error) {
       const err = error as { code: string; message?: string };
@@ -162,12 +122,11 @@ const serverAuthCode = userInfo.data.serverAuthCode ?? userInfo.data.user?.serve
 useEffect(() => {
   (async () => {
     const microsoftData = await handleMicrosoftResponse();
-
     if (microsoftData?.code) {
       const codeVerifier = microsoftData;
-       console.log("microsoftData.codee", microsoftData.code);
-      console.log("codeVerifier", request?.codeVerifier);
-      console.log('🪟 Microsoft Code:', microsoftData.code);
+      //  console.log("microsoftData.codee", microsoftData.code);
+      // console.log("codeVerifier", request?.codeVerifier);
+      // console.log('🪟 Microsoft Code:', microsoftData.code);
       setItem('microsoftCode', microsoftData.code);
     await  SocialLoginRequestVerifyTokens(microsoftData.code , Api_Url.microsoft_token );
     }
@@ -219,20 +178,11 @@ useEffect(() => {
         // if (appleData) console.log('Apple:', appleData);
       }
   };
-
- 
-
   const handleSubmit = () => {
      LoginRequestViaAPI();  
-
-      // navigation.navigate('Success', {
-      // message: 'OTP verified successfully this is testing msg!',
-      // });
-
   };
- 
 
-const LoginRequestViaAPI = async () => {
+ const LoginRequestViaAPI = async () => {
   try {
     setLoading(true);
     const requestBody : LoginRequest = {  email : email,   password : password   };
@@ -242,6 +192,7 @@ const LoginRequestViaAPI = async () => {
     );
 
 if (res.status && res.data) {
+    setLoading(false);
       await setItem(PREF_KEYS.login_status, 'success');
       await setItem(PREF_KEYS.accessToken, res.data.accessToken);
       await setItem(PREF_KEYS.refreshToken, res.data.refreshToken);
@@ -260,7 +211,6 @@ if (res.status && res.data) {
           // navigation.navigate('UserProfile');
            navigation.replace('FillProfileInfoScreen');
         }
-
     } else {
       Alert.alert('Error', res.message ?? 'Login failed');
     }
@@ -274,13 +224,9 @@ if (res.status && res.data) {
 const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string) => {
   try {
     setLoading(true);
-
     const requestBody = {
      "authCodeToken" :authCode,
     };
-
-   // console.log(requestBody);
-
     const res = await httpRequest_social_token<SocialTokenResponse>(
       api_url,
       'post',
@@ -289,22 +235,15 @@ const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string
       true
     );
 
-    console.log(res);
+     setLoading(false);
     if (res.data?.accessToken) {
       await setItem(PREF_KEYS.login_status, 'success');
       await setItem(PREF_KEYS.accessToken, res.data?.accessToken);
       if (res.data.refreshToken) {
         await setItem(PREF_KEYS.refreshToken, res.data?.refreshToken);
       }
-
-            await Savedetailsafterlogin();
-      
-     // console.log('access_token:', res.access_token);
-      //console.log('refresh_token:', res.refresh_token);
-
-      // Optional: navigate or fetch user profile
-       navigation.navigate('UserProfile');
-
+        await Savedetailsafterlogin();
+       navigation.navigate('UserProfile' , {src : ''});
     } else {
       Alert.alert('Error',  'Login failed');
     }

@@ -398,11 +398,13 @@ import CustomAlert from '~/components/CustomAlert';
 
 type Props = {
   onNext?: () => void;
+    goToLastStep?: () => void;
+  stepToEdit: number | null;
 };
 
 const divisionOptions = ['D1', 'D2', 'D3'];
 
-export default function CollegePreferences({ onNext }: Props) {
+export default function CollegePreferences({ onNext , goToLastStep , stepToEdit}: Props) {
   const [loading, setLoading] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [recruitingOptions, setRecruitingOptions] = useState<MatterItem[]>([]);
@@ -597,7 +599,11 @@ const showDivisionAdvice = (
 
       if (res.status) {
         setTimeout(() => {
+          if(stepToEdit != null){
+          goToLastStep?.();
+          }else{
           onNext?.();
+          }
         }, 300);
       } else {
         Alert.alert('Error', res.message ?? 'Request failed');

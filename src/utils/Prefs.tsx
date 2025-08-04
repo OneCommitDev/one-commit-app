@@ -1,5 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-import { removeItem } from './storage';
+import { getItem, removeItem, setItem } from './storage';
 import { Alert } from 'react-native';
 
 export const PREF_KEYS = {
@@ -14,6 +14,8 @@ export const PREF_KEYS = {
     forgot_otp : 'FORGOT_OTP',
     userEmailID : 'USER_EMIAL_ID',
     hasSeenProfileIntro : 'hasSeenProfileIntro',
+    displayName : 'displayName',
+    fcmToken : 'fcm_token',
 }as const;
 
 export const logAllPrefs = async () => {
@@ -27,11 +29,14 @@ export const logAllPrefs = async () => {
 // below func are for development purpose only
 
 export const clearAllPrefs = async () => {
+  const fcmToken = getItem(PREF_KEYS.fcmToken);
   const keys = Object.values(PREF_KEYS); 
   for (const key of keys) {
     await removeItem(key);
   }
-  Alert.alert("All PREF_KEYS cleared"); 
+
+  setItem(PREF_KEYS.fcmToken , fcmToken);
+  // Alert.alert("All PREF_KEYS cleared"); 
 };
 
 
@@ -41,14 +46,14 @@ export const MessagesText ={
 
 }
 
-export const Temp_KEYS = {  
-  pass: 'Dnd@123456',
-  email: 'Pardeep.Kumar@agilite.tech',
-  newpass : 'Dnd@123456',
-}as const;
-
 // export const Temp_KEYS = {  
-//   pass: '',
-//   email: '',
-//   newpass : '',
+//   pass: 'Dnd@123456',
+//   email: 'Pardeep.Kumar@agilite.tech',
+//   newpass : 'Dnd@123456',
 // }as const;
+
+export const Temp_KEYS = {  
+  pass: '',
+  email: '',
+  newpass : '',
+}as const;

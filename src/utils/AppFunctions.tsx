@@ -117,19 +117,23 @@ export function isAtLeast13YearsOld(date: Date): boolean {
 
 // ~/utils/formValidators.ts
 
-export const validateScore = (
+ export const validateScore = (
   value: string,
   type: 'sat' | 'act',
   setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
 ) => {
+  console.log('value_value', value);
+  console.log('type_type', type);
+
   const score = parseInt(value, 10);
-  const isValid = type === 'sat' ? score <= 1600 : score <= 36;
+  const isValid =
+    type === 'sat' ? score > 0 && score <= 1600 : score > 0 && score <= 36;
 
   if (value === '' || !/^\d{1,4}$/.test(value) || !isValid) {
     setErrors((e) => ({
       ...e,
       test_score:
-        type === 'act'
+        type === 'sat'
           ? 'SAT score must be a number ≤ 1600'
           : 'ACT score must be a number ≤ 36',
     }));
@@ -137,6 +141,7 @@ export const validateScore = (
     setErrors((e) => ({ ...e, test_score: '' }));
   }
 };
+
 
 
   // const validateGPA = (value: string) => {

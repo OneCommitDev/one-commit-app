@@ -112,11 +112,8 @@ import { removeItem } from '~/utils/storage';
 
      setTimeout(() => {
        if (login_status === 'success') {
-        // navigation.replace('Login');
-          navigation.replace('UserProfile');
-            //  navigation.replace('EmailConnectionUI');
-                  //  navigation.replace('CollegePreferences');
-
+         navigation.replace('UserProfile' , {src : ''});
+         // navigation.replace('Dashboard');
       } else {
         navigation.replace('Intro');
         //  navigation.replace('CollegePreferences');
