@@ -1,6 +1,6 @@
 // --- Your imports and types remain unchanged ---
 import React, { useEffect, useState } from 'react';
-import {  View,  Image,  FlatList,  Text,  Alert,  KeyboardAvoidingView,  Platform,  TouchableOpacity,} from 'react-native';
+import {  View,  Image,  FlatList,  Text,  Alert,  KeyboardAvoidingView,  Platform,  TouchableOpacity, InteractionManager,} from 'react-native';
 import AppText from '~/components/AppText';
 import AppInput from '~/components/AppInput';
 import ArrowButton from '~/components/ArrowButton';
@@ -15,9 +15,12 @@ import { HeightPickerModal2 } from '~/components/HeightPickerModal2';
 import { NumberPickerModal } from '~/components/NumberPickerModal';
 import { Applog } from '~/utils/logger';
 import TitleText from '~/components/TitleText';
+import { useFocusEffect } from '@react-navigation/native';
 
 type Props = {
   onNext?: () => void;
+  stepToEdit?: any;
+    goToLastStep?: () => void;
 };
 
 type InputItem = {
@@ -36,7 +39,7 @@ type Section = {
 
 const MAX_CHARS = 500;
 
-const Athletic: React.FC<Props> = ({ onNext }) => {
+const Athletic: React.FC<Props> = ({ onNext , stepToEdit , goToLastStep}) => {
   const [form, setForm] = useState<
     Record<
       string,
@@ -119,7 +122,7 @@ const [rawSportData, setRawSportData] = useState<
     },
     {} as Record<string, { key: string; label: string; value: string }[]>
   );
-
+/*
  useEffect(() => {
   let mounted = true;
 
@@ -191,14 +194,94 @@ const [rawSportData, setRawSportData] = useState<
     }
   };
 
-  fetchAthletic();
+   //fetchAthletic();
+
 
   return () => {
     mounted = false;
   };
 }, []);
+*/
+  
+
+useFocusEffect(
+  React.useCallback(() => {
+    const task = InteractionManager.runAfterInteractions(() => {
+      fetchAthletic();
+    });
+
+    return () => task.cancel();
+  }, [])
+);
 
 
+  const fetchAthletic = async () => {
+    try {
+      setLoading(true);
+      const accessToken = await getItem(PREF_KEYS.accessToken);
+      const res = await httpRequest2<GetSportsAlldata>(
+        Api_Url.save_sports,
+        'get',
+        {},
+        accessToken ?? ''
+      );
+
+      if (res.status && res.data.sportUserFormattedData) {
+        // 1. Save raw data
+        setRawSportData(res.data.sportUserFormattedData);
+
+        // 2. Transform to FlatList-friendly format
+        const transformedSections: Section[] = res.data.sportUserFormattedData.map((sport) => ({
+          title: sport.display_name,
+          img: `${base_url_images}${sport.img_path?.startsWith('/') ? sport.img_path.slice(1) : sport.img_path}`,
+          inputs: (sport.events || []).map((event) => ({
+            key: event.event_name,
+            label: event.display_name,
+            placeholder: `Enter value in ${event.measurement_unit || ''}`,
+            type: event.measurement_type || '',
+            value : event.eventValue || '',
+          })),
+        }));
+        setSections(transformedSections);
+
+        // 3. Initialize form state
+        const initialForm: typeof form = {};
+        res.data.sportUserFormattedData.forEach((sport) => {
+          sport.events?.forEach((event) => {
+            const key = event.event_name;
+            const type = event.measurement_type;
+            const eventValue = event.eventValue;
+
+            initialForm[key] = {
+              input: eventValue,  
+              selected: '',
+              selectedUnit: (type === 'height' || type === 'distance') ? undefined : undefined,
+              feet: '',
+              meters: '',
+            };
+          });
+        });
+
+        
+
+        // // Additional keys (videoLink and additional info)
+        // initialForm['videoLink'] = { input: '' };
+        // initialForm['additional'] = { input: '' };
+
+        // Additional keys (videoLink and additional info)
+          initialForm['videoLink'] = { input: res.data.media_links || '' };
+          initialForm['additional'] = { input: res.data.additional_links || '' };
+
+
+        setForm(initialForm);
+      }
+    } catch (err) {
+      console.log('Error fetching athletic data', err);
+      Alert.alert('Error', 'Unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 const handleSubmit = () => {
@@ -242,10 +325,10 @@ const handleSubmit = () => {
     sports_profile: JSON.stringify(sportsDataToSave),
     additional_info: form['additional']?.input || '',
     media_links: form['videoLink']?.input || '',
+      ...(stepToEdit != null && { ui_flow: 'profile_edit' })  
   };
 
-    console.log('Payload:', payload); // for debug
-
+ 
 
   SaveApiRequest(payload);  
 };
@@ -258,11 +341,7 @@ const handleSubmit = () => {
         return;
       }
 
-      // const payload = {
-      //   sports_profile: JSON.stringify(allData),
-      //   additional_info: '',
-      //   media_links: '',
-      // };
+      
 
       const payload = JSON.stringify(allData);
 
@@ -280,7 +359,11 @@ const handleSubmit = () => {
 
       if (res.status) {
          setTimeout(() => {
-          onNext?.();
+          if(stepToEdit != null){
+            goToLastStep?.();
+          }else{
+            onNext?.();
+          }
         }, 300);
       } else {
         Alert.alert('Error', res.message ?? 'Failed to submit.');
@@ -390,6 +473,10 @@ const handleSubmit = () => {
 
       <FlatList
         data={sections}
+          scrollIndicatorInsets={{ right: 1 }}  
+           /* ---- SCROLLBAR FIX / OPTIONS ---- */
+        //  showsVerticalScrollIndicator={false}   
+        automaticallyAdjustsScrollIndicatorInsets={false}
         keyExtractor={(section) => section.title}
         ListFooterComponent={
   <View className="px-4">
@@ -453,7 +540,10 @@ const handleSubmit = () => {
               <View key={key}>
                 <View className="mb-4 px-2">
                   <View className="flex-row items-center justify-between mb-2">
-                    <AppText className="mr-5">{label}</AppText>
+                    <View className='flex-1'>
+                       <AppText className="mr-5">{label} </AppText>
+
+                      </View>
 
                     {type === 'distance' || type === 'height' ? (
                       <View className="flex-row mt-2 w-[50%] border border-gray-300 rounded-full overflow-hidden">
@@ -584,3 +674,5 @@ const handleSubmit = () => {
 };
 
 export default Athletic;
+ 
+

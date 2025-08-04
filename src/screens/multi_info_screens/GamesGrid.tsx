@@ -103,7 +103,11 @@ export default function GamesGrid() {
   };
 
   const handleNext = () => {
-    navigation.navigate('MultiStepSurvey', { selectedGames: selected });
+   navigation.navigate('MultiStepSurvey', {
+  selectedGames: selected,
+  stepToEdit: null, // ✅ use colon, not semicolon
+});
+
   };
 
   const renderItem = ({ item }: { item: GameItem }) => (

@@ -1,20 +1,22 @@
 // ✅ MultiStepSurvey.tsx
-import React, { useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, Animated, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ArrowButton from '~/components/ArrowButton';
 import EmailConnectionUI from './EmailConnectionUI';
 import Academic from './Academic';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { RootStackParamList } from '~/navigation/types';
+// import { RootStackParamList } from '~/navigation/types';
 import SelectedGames from './SelectedGames';
 import Athletic from './Athletic';
 import CollegePreferences from './CollegePreferences';
 import CollegeMatches from './CollegeMatches';
 import TitleText from '~/components/TitleText';
 import AppText from '~/components/AppText';
+import ProfilePreview from './ProfilePreview';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-type Step = {
+export type Step = {
   title: string;
   subtitle: string;
   type: string;
@@ -26,7 +28,21 @@ type Step = {
   sportId: string;
 };
 
-type MultiStepSurveyRouteProp = RouteProp<RootStackParamList, 'MultiStepSurvey'>;
+
+
+// type MultiStepSurveyRouteProp = RouteProp<RootStackParamList, 'MultiStepSurvey'>;
+type MultiStepSurveyRouteProp = RouteProp<
+  RootStackParamList,
+  'MultiStepSurvey'
+>;
+
+export type RootStackParamList = {
+  MultiStepSurvey: {
+    selectedGames: SelectedGame[];
+    stepToEdit?: number | null;
+  };
+};
+
 
 
  function generateStepsData(selectedGames: SelectedGame[]): Step[] {
@@ -59,10 +75,16 @@ type MultiStepSurveyRouteProp = RouteProp<RootStackParamList, 'MultiStepSurvey'>
       type: 'Accounts',
     },
     {
-      title: 'Your Top College Matches',
-      subtitle: 'Choose best one & start outreach',
-      type: 'CollegeMatches',
+      title: 'Profile Summary',
+      subtitle: "Please review your details. To make any changes, go back and update them. Once you're ready, tap the button below to finalize your profile.",
+      type: 'ProfilePreview',
     },
+    // {
+    //   title: 'Your Initial College Matches',
+    //   subtitle: 'You may remove any schools, but we recommend keeping your list large at first.',
+    //   type: 'CollegeMatches',
+    // },
+    
   ];
 
   return [...dynamicSteps, ...staticSteps];
@@ -71,19 +93,21 @@ type MultiStepSurveyRouteProp = RouteProp<RootStackParamList, 'MultiStepSurvey'>
 
 export default function MultiStepSurvey() {
   const route = useRoute<MultiStepSurveyRouteProp>();
-  const { selectedGames } = route.params;
-
+  const { selectedGames , stepToEdit  } = route.params ?? {};
   const stepsData = generateStepsData(selectedGames);
   const TOTAL_STEPS = stepsData.length;
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'MultiStepSurvey'>>();
 
-  const navigation = useNavigation();
-  const [step, setStep] = useState(0);
+  console.log(stepToEdit);
+  // const navigation = useNavigation();
+  // const [step, setStep] = useState(0);
+const [step, setStep] = useState<number>(stepToEdit ?? 0);
+
   const [searchText, setSearchText] = useState('');
   const [selectedItems, setSelectedItems] = useState<string[][]>(
     Array(TOTAL_STEPS).fill([]),
   );
   const animation = useRef(new Animated.Value(1)).current;
-
   const current = stepsData[step];
 
   const handleNext = () => {
@@ -107,6 +131,11 @@ export default function MultiStepSurvey() {
   };
 
   const handleBack = () => {
+    if( stepToEdit != null || stepToEdit != undefined ){     // if user editinging tehrecords then allow them go back to teh profile summary screen
+      //  navigation.setParams({ stepToEdit: null }); 
+    goToLastStep();
+
+    }else{
     if (step > 0) {
       Animated.timing(animation, {
         toValue: 0,
@@ -124,18 +153,62 @@ export default function MultiStepSurvey() {
     } else {
       navigation.goBack();
     }
+  }
   };
+
+    const goToLastStep = () => {
+            navigation.setParams({ stepToEdit: null }); 
+
+         Animated.timing(animation, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start(() => {
+             setStep(TOTAL_STEPS - 1);
+
+        setSearchText('');
+        Animated.timing(animation, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      });
+
+      };
+
+    const gotToPersonalRecordForcefully = () => {
+        setTimeout(() => {
+                 setStep(selectedGames.length);
+        }, 300);
+    };
 
   return (
     <View className="flex-1 px-3 pt-12">
       {/* Header */}
       <View className="flex-row items-center justify-between mb-1 mt-6">
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={handleBack}
           className="w-12 h-12 rounded-full bg-[#E3E9E5] items-center justify-center"
         >
           <Ionicons name="chevron-back" size={24} color="#1A322E" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+              {stepToEdit !== null || stepToEdit != undefined ? (
+                <TouchableOpacity
+                  onPress={handleBack}
+                  className="px-1 py-2  rounded-full"
+                >
+                  <AppText className='text-blue-700 text-16'>Cancel</AppText>
+                  {/* <Ionicons name="close-sharp" size={30} color="red" /> */}
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={handleBack}
+                  className="w-12 h-12 rounded-full bg-[#E3E9E5] items-center justify-center"
+                >
+                  <Ionicons name="chevron-back" size={24} color="#1A322E" />
+                </TouchableOpacity>
+              )}
+
         <View className="flex-1 mx-10 my-5">
           <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden">
             <View
@@ -181,7 +254,10 @@ export default function MultiStepSurvey() {
             setSelectedItems,
             step,
             handleNext,
-            selectedGames  
+            selectedGames  ,
+            goToLastStep,
+            stepToEdit,
+            gotToPersonalRecordForcefully
           )}
         </View>
       </Animated.View>
@@ -190,41 +266,37 @@ export default function MultiStepSurvey() {
 }
 
 function renderExtraInfoForStep(
-  type: string,
-  sportName: string,
+    type: string,
+    sportName: string,
     sportId: string,
-  searchText: string,
-  setSearchText: (text: string) => void,
-  selectedItems: string[][],
-  setSelectedItems: React.Dispatch<React.SetStateAction<string[][]>>,
-  step: number,
-  onNext?: () => void,
-    selectedGames?: SelectedGame[]  
+    searchText: string,
+    setSearchText: (text: string) => void,
+    selectedItems: string[][],
+    setSelectedItems: React.Dispatch<React.SetStateAction<string[][]>>,
+    step: number,
+    onNext?: () => void,
+    selectedGames?: SelectedGame[]  ,
+    goToLastStep?: () => void,
+    stepToEdit?: any,
+    gotToPersonalRecordForcefully?: () => void,
 
 ) {
   switch (type) {
     case 'PersonalRecords':
-      return <Athletic onNext={onNext} />;
+      return <Athletic onNext={onNext} stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
     case 'Academic':
-      return <Academic onNext={onNext} />;
+      return <Academic onNext={onNext} stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
     case 'College':
-      return <CollegePreferences onNext={onNext} />;
+      return <CollegePreferences onNext={onNext} stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
     case 'Accounts':
-      return <EmailConnectionUI onNext={onNext} />;
+      return <EmailConnectionUI onNext={onNext}  stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
     case 'CollegeMatches':
       return <CollegeMatches onNext={onNext} />;
+     case 'ProfilePreview':
+      return <ProfilePreview onNext={onNext} />;
     case 'games':
       return (
-        // <SelectedGames
-        //   sportName={sportName}
-        //   sportId={sportId}
-        //   searchText={searchText}
-        //   setSearchText={setSearchText}
-        //   selectedItems={selectedItems}
-        //   setSelectedItems={setSelectedItems}
-        //   step={step}
-        //   onNext={onNext}
-        // />
+      
        <SelectedGames
         sportName={sportName}
         sportId={sportId}
@@ -232,8 +304,11 @@ function renderExtraInfoForStep(
         setSearchText={setSearchText}
         step={step}
         onNext={onNext}
-        selectedGames={selectedGames ?? []} // ✅ fallback to empty array if undefined
-      />
+        goToLastStep={goToLastStep}
+        selectedGames={selectedGames ?? []} 
+        stepToEdit={stepToEdit}
+         gotToPersonalRecordForcefully={gotToPersonalRecordForcefully}
+       />
       );
     default:
       return null;

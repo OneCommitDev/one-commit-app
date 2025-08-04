@@ -16,7 +16,7 @@ export default function FillProfileInfoScreen() {
 
   const handleGetStarted = () => {
     setItem(PREF_KEYS.hasSeenProfileIntro , "1");
-     navigation.navigate('UserProfile');
+     navigation.navigate('UserProfile' , {src : ''});
 };
 
 

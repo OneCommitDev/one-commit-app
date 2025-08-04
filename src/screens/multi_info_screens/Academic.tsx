@@ -1550,9 +1550,11 @@ import TitleText from '~/components/TitleText';
 
 type Props = {
   onNext?: () => void;
+    goToLastStep?: () => void;
+  stepToEdit: number | null;
 };
 
-const Academic: React.FC<Props> = ({ onNext }) => {
+const Academic: React.FC<Props> = ({ onNext , goToLastStep , stepToEdit }) => {
   const [testType, setTestType] = useState<'sat' | 'act'>('sat');
   const [schoolType, setSchoolType] = useState<'public' | 'private' | 'boarding'>('public');
   const [NCAAType, setNCAAType] = useState<'Yes' | 'No' | 'Unsure'>('Yes');
@@ -1578,7 +1580,8 @@ const Academic: React.FC<Props> = ({ onNext }) => {
   const handleChange = (key: string, val: string) => {
     setForm((prev) => ({ ...prev, [key]: val }));
     if (key === 'unweighted_gpa') validateGPA(val, setErrors);
-    if (key === 'test_score') validateScore(val, form.test_score_type as 'sat' | 'act', setErrors);
+
+     if (key === 'test_score') validateScore(val, form.test_score_type as 'sat' | 'act', setErrors);
   };
 
   const getFilteredMajors = (search: string) =>
@@ -1617,6 +1620,9 @@ const Academic: React.FC<Props> = ({ onNext }) => {
         setTestType(testType);
         handleChange('test_score_type', testType);
 
+         handleChange('test_score', res.data?.test_score?.toString() ?? '');
+      validateScore(res.data?.test_score, res.data.test_score_type as 'sat' | 'act', setErrors);
+
         const type = res.data.school_type; 
         if (['public', 'private', 'boarding'].includes(type)) {
         setSchoolType(type as 'public' | 'private' | 'boarding');
@@ -1643,8 +1649,7 @@ const Academic: React.FC<Props> = ({ onNext }) => {
         setMajorFromAPI(res.data?.intended_major_2, 1, list, setMajors, handleChange);
         setMajorFromAPI(res.data?.intended_major_3, 2, list, setMajors, handleChange);
 
-          handleChange('test_score', res.data?.test_score?.toString() ?? '');
-
+         
         setForm((prev) => ({
           ...prev,
           weighted_gpa: res.data?.weighted_gpa ?? '',
@@ -1686,7 +1691,11 @@ const Academic: React.FC<Props> = ({ onNext }) => {
 
       if (res.status) {
           setTimeout(() => {
-          onNext?.();
+            if(stepToEdit != null){
+                 goToLastStep?.();
+            }else{
+               onNext?.();
+            }
         }, 300);
       } else {
         Alert.alert('Error', res.message ?? 'Request failed');

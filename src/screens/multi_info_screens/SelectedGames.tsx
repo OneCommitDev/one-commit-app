@@ -41,6 +41,9 @@ type Props = {
   step: number;
   onNext?: () => void;
   selectedGames: { sportName: string; sportId: string }[];
+  goToLastStep?: () => void;
+  stepToEdit?: any;
+  gotToPersonalRecordForcefully?: () => void;
 };
 
 export default function SelectedGames({
@@ -51,6 +54,9 @@ export default function SelectedGames({
   step,
   onNext,
   selectedGames,
+  goToLastStep,
+  stepToEdit,
+  gotToPersonalRecordForcefully,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState<HoldSportsdata[]>([]);
@@ -122,8 +128,9 @@ export default function SelectedGames({
         sports_profile: JSON.stringify(allData),
         additional_info: '',
         media_links: '',
+          ...(stepToEdit != null && { ui_flow: 'profile_edit' , ui_flow_data : sportId })  
       };
-
+      console.log('sportId ' , sportId);
 
       const res = await httpRequest2<SavedSportResponse>(
         Api_Url.save_sports,
@@ -135,7 +142,12 @@ export default function SelectedGames({
 
       if (res.status) {
          setTimeout(() => {
-          onNext?.();
+          if( stepToEdit != null){
+           // Alert.alert(stepToEdit+'');
+           gotToPersonalRecordForcefully?.();
+          }else{
+                onNext?.();
+          }
         }, 300);
       } else {
         Alert.alert('Error', res.message ?? 'Failed to submit.');
@@ -164,14 +176,25 @@ export default function SelectedGames({
     // Save current step's selected sport data
     cachedSportsData.current[sportId] = mappedData;
 
-    if (step === selectedGames.length - 1) {
-      // Combine all cached sport data
-      const allCached = Object.values(cachedSportsData.current).flat();
-     await handleSubmit(allCached);
-   // console.log('allCached' , allCached);
-    } else {
-      onNext?.();
-    }
+    // if (step === selectedGames.length - 1) {
+    //   const allCached = Object.values(cachedSportsData.current).flat();
+    //  await handleSubmit(allCached);
+    // } else {
+    //   onNext?.();
+    // }
+
+ 
+        if( stepToEdit != null){
+            const allCached = Object.values(cachedSportsData.current).flat();
+            await handleSubmit(allCached);
+        }else{
+          if (step === selectedGames.length - 1) {
+           const allCached = Object.values(cachedSportsData.current).flat();
+           await handleSubmit(allCached);
+          } else {
+           onNext?.();
+          }
+        }
   };
 
   const filtered = events.filter((opt) =>

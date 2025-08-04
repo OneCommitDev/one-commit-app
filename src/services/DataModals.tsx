@@ -233,3 +233,189 @@ export type MatterItem = {
   key: string;
   value: string;
 };
+ 
+
+export type SchoolsMatches = {
+  status: boolean;
+  pagination: {
+    offset: number;
+    limit: number;
+    total: number;
+  };
+  data: SchoolMatchItem[];
+};
+
+export type SchoolMatchItem = {
+  school_id: string;
+  name: string;
+  ncaa_division: string;
+  city: string;
+  state: string;
+  region: string;
+  img_path: string;
+  school_size: string;
+  overall_match_percent: string;
+  match_criteria: MatchCriteria;
+  match_created_at: string;
+  coach_name: string;
+  coach_email: string;
+  coach_role: string;
+};
+
+export type MatchCriteria = {
+  match_score: MatchScore;
+  academic_fit: AcademicFit;
+  athlietic_fit: AthleticFit[];
+  preference_fit: PreferenceFit;
+};
+
+export type MatchScore = {
+  match_score_tier: string;
+  match_score_percent: string;
+};
+
+export type AcademicFit = {
+  test_type: string;
+  test_score: string | number | null;
+  test_score_avg: string | number | null;
+  test_score_min: string | number | null;
+  unweighted_gpa: string | number | null;
+  test_score_above_average: boolean;
+  match_score_tier: string;
+  unweighted_gpa_school_avg: string | number | null;
+  unweighted_gpa_school_min: string | number | null;
+  unweighted_gpa_above_average: boolean;
+};
+
+export type AthleticFit = {
+  event_name: string;
+  within_range: boolean;
+  event_performance: any;
+  event_school_benchmark: string;
+  event_school_bm_max: any;
+  event_school_bm_min: any;
+};
+
+export type PreferenceFit = {
+  school_size: string;
+  preferred_region: string;
+  school_size_match: boolean;
+  preferred_region_match: boolean;
+};
+
+export interface EmailConnectionResponse {
+  data: EmailConnectionResponseData;
+ status: boolean;
+   message : string;
+ }
+export interface EmailConnectionResponseData {
+  provider: string;
+ email: string;
+}
+
+
+ export type EmailOutreach = {
+  status: boolean;
+  message : string;
+  data: EmailOutreachData;
+};
+
+export type EmailOutreachData = {
+  coach_count: number;
+  email_subject: string;
+  email_content: string;
+  coach_details: EmailOutreachCoachDetails[];
+};
+
+export type EmailOutreachCoachDetails = { 
+  coach_id: string;
+  coach_name: string;
+  coach_role: string;
+  coach_email: string;
+  coach_phone: string;
+  school_id: string;
+  school_name: string;
+};
+
+
+ export type ProfileComplition = {
+  status: boolean;
+  profile: {
+    complete: boolean;
+    stage: string;
+  };
+  data: ProfileComplitionData;
+};
+
+export type ProfileComplitionData = {
+  email_connect_status: boolean;
+  email_connect_provider: string;
+  email_connect_address: string;
+  full_name: string;
+  preferred_name: string;
+  phone: string;
+  dob: string;
+  city: string;
+  state: string;
+  zipcode: string;
+  weight: string;
+  weight_unit: string;
+  height: number;
+  height_unit: string;
+  weighted_gpa: string;
+  unweighted_gpa: string;
+  test_score_type: string;
+  test_score: number;
+  intended_major: string;
+  intended_major_2: string;
+  intended_major_3: string;
+  school_name: string;
+  school_type: string;
+  what_matter_most: string;
+  preferred_region: string;
+  school_size: string;
+  academic_rigor: string;
+  campus_type: string;
+  need_financial_aid: string;
+  required_financial_aid: number;
+  early_decision_willingness: string;
+  religious_affiliation: string;
+  additional_info: string;
+  media_links: string;
+  user_id: string;
+  is_profile_complete: boolean;
+  completion_stage: string;
+  ncaa_division: string[];
+  sportUserFormattedData: SportUserFormattedData[];
+};
+
+export type SportUserFormattedData = {
+  sport_id: string;
+  sport_name: string;
+  display_name: string;
+  img_path: string;
+  events: SportEvent[];
+};
+
+export type SportEvent = {
+  event_id: string;
+  eventValue: string;
+  eventUnit: string;
+  event_name: string;
+  display_name: string;
+  measurement_type: string;
+  measurement_unit: string;
+};
+
+
+
+export type SearchSchoolModal = {
+  status: boolean;
+  data: SearchSchoolData[];
+};
+
+export type SearchSchoolData = {
+  school_id: string;
+  short_name: string;
+  name: string;
+};
