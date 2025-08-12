@@ -21,46 +21,40 @@ import { RootStackParamList } from '~/navigation/types';
 import {  NativeSyntheticEvent,  NativeScrollEvent,  ScrollView,} from 'react-native';
 import SuccessModal from '~/components/SuccessModal';
 import ExplorCards from '~/components/ExplorCards';
+import NoDataAvailable from '~/components/NoDataAvailable';
 
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const ITEM_HEIGHT = SCREEN_HEIGHT * 0.73;
-  
  type DashboardNavProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 export default function ExplorSchools() {
- 
-  const [matches, setMatches] = useState<SchoolMatchItem[]>([]);
-  const [offset, setOffset] = useState(0);
-  const [limit] = useState(5);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const [selectedSchoolMatchVisible, setSelectedSchoolMatchVisible] = useState(false);
-  const [confirmVisible, setConfirmVisible] = useState(false);
-  const [schoolIdToDelete, setSchoolIdToDelete] = useState<string | null>(null);
-  const [confirmMessage, setConfirmMessage] = useState<string>('');
-  const [selectedSchool, setSelectedSchool] = useState<SchoolMatchItem | null>(null);
-  const [flippingCardId, setFlippingCardId] = useState<string | null>(null);
-  const flipAnim = useRef(new Animated.Value(0)).current;
-
-  const flatListRef = useRef<FlatList>(null);
+ const [matches, setMatches] = useState<SchoolMatchItem[]>([]);
+const [offset, setOffset] = useState(0);
+const [limit] = useState(1);
+const [total, setTotal] = useState(0);
+const [loading, setLoading] = useState(false);
+const [loadingMore, setLoadingMore] = useState(false);
+const [showDetails, setShowDetails] = useState(false);
+const [selectedSchoolMatchVisible, setSelectedSchoolMatchVisible] = useState(false);
+const [confirmVisible, setConfirmVisible] = useState(false);
+const [schoolIdToDelete, setSchoolIdToDelete] = useState<string | null>(null);
+const [confirmMessage, setConfirmMessage] = useState<string>('');
+const [selectedSchool, setSelectedSchool] = useState<SchoolMatchItem | null>(null);
+const [flippingCardId, setFlippingCardId] = useState<string | null>(null);
+const flipAnim = useRef(new Animated.Value(0)).current;
+const flatListRef = useRef<FlatList>(null);
 const [currentIndex, setCurrentIndex] = useState(0);
-
 const [noMoreData, setNoMoreData] = useState(false);
-
-
-
-   const [sheetVisible, setSheetVisible] = useState(false);
-  const [sheetData, setSheetData] = useState({ subject: '', message: '' });
-
- const [showOutreach, setShowOutreach] = useState(false);
- const [showSuccess, setShowSuccess] = useState(false);
+const [sheetVisible, setSheetVisible] = useState(false);
+const [sheetData, setSheetData] = useState({ subject: '', message: '' });
+const [showOutreach, setShowOutreach] = useState(false);
+const [showSuccess, setShowSuccess] = useState(false);
 const slideAnim = useRef(new Animated.Value(0)).current;
-  const [searchText, setSearchText] = useState('');
+const [searchText, setSearchText] = useState('');
 const [filteredData, setFilteredData] = useState<SearchSchoolData[]>([]);
 const [allSchools, setAllSchools] = useState<SearchSchoolData[]>([]);
+const [isArchiveData, setIsArchiveData] = useState(false);
 
 
   const triggerFlipAndShowDetails = (school: SchoolMatchItem) => {
@@ -99,10 +93,9 @@ const [allSchools, setAllSchools] = useState<SearchSchoolData[]>([]);
         accessToken ?? '',
         true
       );
-      console.log('search_data', res);
-    if (res?.status && Array.isArray(res.data)) {
-      setAllSchools(res.data);        // ✅ store all from API
-      setFilteredData(res.data);      // also update filtered view
+     if (res?.status && Array.isArray(res.data)) {
+      setAllSchools(res.data);        
+      setFilteredData(res.data);       
     } else {
       setAllSchools([]);
       setFilteredData([]);
@@ -115,93 +108,175 @@ const [allSchools, setAllSchools] = useState<SearchSchoolData[]>([]);
   };
 
 
-  const fetchColleges = async (offsetToLoad = 0, append = false) => {
-    setLoading(true)
-    try {
+    const fetchColleges = async (offsetToLoad = 0, append = false) => {
+      setSearchText('');
+      setIsArchiveData(false); // Not from archive
+
       if (append) setLoadingMore(true);
-    else {
-      setMatches([]);             
-      setCurrentIndex(0);         
-      setNoMoreData(false);       
-      setLoading(true);
-    }
+      else {
+        setMatches([]);             
+        setCurrentIndex(0);  
+        setNoMoreData(false);       
+        setLoading(true);
+      }
 
-      const accessToken = await getItem(PREF_KEYS.accessToken);
-      const url = Api_Url.schoolsMatches(offsetToLoad, limit);
-      const res = await httpRequest2<SchoolsMatches>(
-        url,
-        'post',
-        {},
-        accessToken ?? '',
-        true
-      );
+      try {
+        const accessToken = await getItem(PREF_KEYS.accessToken);
+        const url = Api_Url.schoolsMatches(offsetToLoad, limit);
+        const res = await httpRequest2<SchoolsMatches>(
+          url,
+          'post',
+          {},
+          accessToken ?? '',
+          true
+        );
 
+        const newData = Array.isArray(res.data) ? res.data : [];
 
-if (!Array.isArray(res.data) || res.data.length === 0) {
-        setNoMoreData(true);
-        console.log('no data available', res.data);
-                setMatches(prev => append ? [...prev, ...res.data] : res.data);
-         setLoading(false)
+        if (newData.length === 0) {
+          setNoMoreData(true);
+          setMatches(prev => append ? [...prev, ...newData] : newData);
+        //  Alert.alert('sdfsfs');
+        fetchArchiveColleges(0);
+          return;
+        }
 
-        return;  
-      } else {
-         setNoMoreData(false);
-            setLoading(false)
-            setMatches([]);             
+        setMatches(prev => append ? [...prev, ...newData] : newData);
+        // setOffset(offsetToLoad + limit);
+        setTotal(res.pagination.total ?? 0);
+
+            setCurrentIndex(prev => {
+              const updatedList = append ? [...matches, ...newData] : newData;
+              return updatedList.length > 0 ? Math.min(prev, updatedList.length - 1) : 0;
+            });
+
+      } catch (err) {
+        Alert.alert('Error', 'Unexpected error occurred.');
+      } finally {
+        if (append) setLoadingMore(false);
+        else setLoading(false);
+      }
+    };
+
+    const fetchArchiveColleges = async (offsetToLoad = 0, append = false) => {
+      setIsArchiveData(true); // This is from archive
+
+              setSearchText('');
+            if (append) setLoadingMore(true);
+            else {
+              setMatches([]);             
+              setCurrentIndex(0);  
+              setNoMoreData(false);       
+              setLoading(true);
+            }
+            if (!append) {
+            setMatches([]);
             setCurrentIndex(0);
-            setMatches(prev => append ? [...prev, ...res.data] : res.data);
-            setOffset(offsetToLoad + limit);
-            setTotal(res.pagination.total);
+            setNoMoreData(false);
+            setLoading(true);
+          }
 
-            setTimeout(() => {
-              setCurrentIndex(prev => {
-                const hasMore = matches.length > prev + 1;
-                return hasMore ? prev + 1 : prev;
-              });
-          }, 300);
-      }
-    } catch (err) {
-      Alert.alert('Error', 'Unexpected error occurred.');
-    } finally {
-      if (append) setLoadingMore(false);
-      else setLoading(false);
-    }
-  };
+      try {
+        const accessToken = await getItem(PREF_KEYS.accessToken);
+        const url = Api_Url.archiveschoolsMatches(offsetToLoad, limit);
+        const res = await httpRequest2<SchoolsMatches>(
+          url,
+          'get',
+          {},
+          accessToken ?? '',
+          true
+        );
 
+        const newData = Array.isArray(res.data) ? res.data : [];
+
+        if (newData.length === 0) {
+          setNoMoreData(true);
+          setMatches(prev => append ? [...prev, ...newData] : newData);
+          return;
+        }
+
+          setMatches(prev => append ? [...prev, ...newData] : newData);
+          // setOffset(offsetToLoad + limit);
+          setOffset(offsetToLoad);
+
+            setCurrentIndex(prev => {
+              const updatedList = append ? [...matches, ...newData] : newData;
+              return updatedList.length > 0 ? Math.min(prev, updatedList.length - 1) : 0;
+            });
+
+        } catch (err) {
+          Alert.alert('Error', 'Unexpected error occurred.');
+        } finally {
+          if (append) setLoadingMore(false);
+          else setLoading(false);
+        }
+      };
  
-  const handleDelete = (schoolId: string, name: string) => {
-    setSchoolIdToDelete(schoolId);
-    setConfirmMessage(`Are you sure you want to delete “${name}”?`);
-    setConfirmVisible(true);
-  };
+ 
+ 
+      const deleteColleges = async (deleteId: string , type : string) => {
+        try {
+          setLoading(true);  
+          const accessToken = await getItem(PREF_KEYS.accessToken);
+          const url = Api_Url.schoolsMatchesDelete(deleteId , type);
+          const res = await httpRequest2<SimpleResponse>(url, 'post', {}, accessToken ?? '', true);
 
-  const deleteColleges = async (deleteId: string , type : string) => {
-    try {
-      setLoading(true);  
+          console.log('save_res' , res);
+          if (res.status) {
+            setMatches(prev => prev.filter(item => item.school_id !== deleteId));
+            setTotal(prev => Math.max(prev - 1, 0));
+            await fetchColleges(offset, true); // safer
+          }else{
+          //  setMatches(prev => prev.filter(item => item.school_id !== deleteId));
+          //  setTotal(prev => Math.max(prev - 1, 0));
+            // await fetchColleges(offset, true); // safer
+          }
+        } catch (err) {
+          console.log('Error deleting school', err);
+          Alert.alert('Error', 'Unexpected error occurred.');
+        } finally {
+          setLoading(false); // Hide global loader
+        }
+      };
+ 
 
-      const accessToken = await getItem(PREF_KEYS.accessToken);
-      const url = Api_Url.schoolsMatchesDelete(deleteId , type);
-      const res = await httpRequest2<SimpleResponse>(url, 'post', {}, accessToken ?? '', true);
+      const deleteCollegesTemp = async (deleteId: string , type : string) => {
+            console.log('deleteColleges');
 
-      console.log('save_res' , res);
-      if (res.status) {
-        // setMatches(prev => prev.filter(item => item.school_id !== deleteId));
-        // setMatches(prev => prev.filter(item => item.school_id !== deleteId));
-        // setTotal(prev => Math.max(prev - 1, 0));
-        setMatches(prev => prev.filter(item => item.school_id !== deleteId));
-        setTotal(prev => Math.max(prev - 1, 0));
-        await fetchColleges(offset, true); // safer
-      }
-    } catch (err) {
-      console.log('Error deleting school', err);
-      Alert.alert('Error', 'Unexpected error occurred.');
-    } finally {
-      setLoading(false); // Hide global loader
-    }
-  };
+        try {
+          setLoading(true);  
+
+          const accessToken = await getItem(PREF_KEYS.accessToken);
+          const url = Api_Url.schoolsMatchesDelete('123', type);
+          const res = await httpRequest2<SimpleResponse>(url, 'post', {}, accessToken ?? '', true);
+
+          if (res.status) {
+            setMatches(prev => {
+              const updated = prev.filter(item => item.school_id !== deleteId);
+              // Adjust currentIndex if needed
+              if (currentIndex >= updated.length && updated.length > 0) {
+                setCurrentIndex(updated.length - 1);
+              }
+              return updated;
+            });
+            setTotal(prev => Math.max(prev - 1, 0));
+          } else {
+            setMatches(prev => prev.filter(item => item.school_id !== deleteId));
+            setTotal(prev => Math.max(prev - 1, 0));
+          }
+
+          // Optional: fetch fresh data if needed
+          await fetchColleges(offset, true);
+        } catch (err) {
+          console.log('Error deleting school', err);
+          Alert.alert('Error', 'Unexpected error occurred.');
+        } finally {
+          setLoading(false);
+        }
+      };
 
   
-
+/*
  const handleSlideCard = () => {
   Animated.timing(slideAnim, {
     toValue: -500,
@@ -217,7 +292,8 @@ if (!Array.isArray(res.data) || res.data.length === 0) {
     } else {
       setCurrentIndex(prev => prev + 1);
     }
-
+ 
+  await fetchColleges(offset, true);
     slideAnim.setValue(500);
     Animated.timing(slideAnim, {
       toValue: 0,
@@ -227,6 +303,35 @@ if (!Array.isArray(res.data) || res.data.length === 0) {
   });
 };
 
+*/
+
+const handleSlideCard = () => {
+  Animated.timing(slideAnim, {
+    toValue: -500,
+    duration: 300,
+    useNativeDriver: true,
+  }).start(async () => {
+    const isLastCard = currentIndex === matches.length - 1;
+
+    if (isLastCard) {
+      if (!noMoreData) {
+         setOffset(offset + limit);
+        await fetchColleges(offset, true);
+        // Increment index to show the newly loaded card
+        setCurrentIndex(prev => prev + 1);
+      }
+    } else {
+      setCurrentIndex(prev => prev + 1);
+    }
+
+    slideAnim.setValue(500);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  });
+};
 
 
  
@@ -250,6 +355,44 @@ const handleSelect = (item: SearchSchoolData) => {
   setSearchText(item.name);
   setFilteredData([]); // Hide dropdown
   console.log('Selected:', item.school_id);
+    if (item.school_id) {
+    searchschoolByID(item.school_id); // 🔥 Call API with selected ID
+  }
+};
+
+ const searchschoolByID = async (schoolId: string) => {
+  setLoading(true);
+  setNoMoreData(false);
+  setMatches([]);             
+  setCurrentIndex(0);
+
+  try {
+    const accessToken = await getItem(PREF_KEYS.accessToken);
+    const url = Api_Url.searchSchoolByID;
+    const res = await httpRequest2<SchoolsMatches>(
+      url,      'post',      {school_id : schoolId},      accessToken ?? '',      true    );
+
+    const resultData = Array.isArray(res.data) ? res.data : [];
+      console.log('resultData' , resultData);
+    if (resultData.length === 0) {
+      setNoMoreData(true);
+      setMatches([]);
+      return;
+    }else{
+      setMatches(resultData);
+      setTotal(res.pagination?.total ?? resultData.length);
+      setCurrentIndex(0);  
+      
+    }
+
+
+
+  } catch (err) {
+    Alert.alert('Error', 'Failed to fetch school by ID.');
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
 };
 
  
@@ -291,13 +434,23 @@ const handleSelect = (item: SearchSchoolData) => {
 
       
 
-      {matches.length > 0 && matches[currentIndex] && noMoreData == false  && (
+      {!loading && matches.length > 0 && matches[currentIndex] && noMoreData == false  && (
         <Animated.View
           style={{
             transform: [{ translateX: slideAnim }],
           }}
         >
+
+  {/* Show label only if data is from archive */}
+    {isArchiveData && (
+      <View className="mb-2">
+        <TitleText>Archived Cards</TitleText>
+      </View>
+    )}
+
+
           <ExplorCards
+            key={`${matches[currentIndex]?.school_id}_${currentIndex}`}  
             item={matches[currentIndex]}
             index={currentIndex}
             flippingCardId={flippingCardId}
@@ -310,14 +463,16 @@ const handleSelect = (item: SearchSchoolData) => {
       )}
 
       {noMoreData === true && (
-  <View className='flex-1 justify-center text-center items-center'> 
-    <AppText>No more data available</AppText>
-  </View>
-)}
-
- 
-  
-
+        <View className='flex-1 justify-center text-center items-center'> 
+          <NoDataAvailable
+          title="No data available"
+          subtitle=""
+          onRetry={() => fetchColleges(0)}
+          showRefresh={false}
+          useLottie={true}
+        />
+        </View>
+      )}
   </View>
 </View>
 

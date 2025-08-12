@@ -1,6 +1,10 @@
 // cAppFunctions.ts
 
 import { AcademicMajor } from "~/services/DataModals";
+import messaging, { deleteToken, getMessaging, getToken } from '@react-native-firebase/messaging';
+import { setItem } from "./storage";
+import { PREF_KEYS } from "./Prefs";
+import { getApp } from "@react-native-firebase/app";
 
 /**
  * Converts height in inches to a string like `5'7`.
@@ -197,3 +201,43 @@ type HandleChangeFn = (key: string, value: string) => void;
     handleChange(`intended_major_${index + 1}`, found.id);
   }
 };
+
+
+
+
+ 
+export async function resetFCMToken() {
+  try {
+    // 1. Delete current token
+        const app = getApp();
+        const messaging = getMessaging(app);
+
+        // Delete token
+        await deleteToken(messaging);
+    console.log('🗑️ FCM token deleted');
+
+    // 2. Re-generate new token
+const newToken = await getToken(messaging);
+    console.log('🔁 New FCM token:', newToken);
+    setItem(PREF_KEYS.fcmToken , newToken);
+
+    // (Optional) Save newToken to your server or local storage
+    return newToken;
+  } catch (error) {
+    console.error('❌ Error resetting FCM token:', error);
+  }
+}
+
+
+export async function getFCMToken() {
+  try {
+    const token = await messaging().getToken();
+    console.log('FCM Token:', token);
+
+    await setItem(PREF_KEYS.fcmToken, token); // ensure async storage is awaited
+    return token; // ✅ Return token on success
+  } catch (error) {
+    console.error('Error getting FCM token:', error);
+    return null; // ✅ Return null on failure
+  }
+}

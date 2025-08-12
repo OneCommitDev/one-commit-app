@@ -9,6 +9,8 @@ export const PREF_KEYS = {
     userId: 'USER_ID',
     register_redirect : 'register_redirect',
     login_status : 'login_status',     // success
+    profileCompleted : 'profileCompleted',     // success
+
     userVerification : 'user_Verification',
     forgot_email : 'FORGOT_EMAIL',
     forgot_otp : 'FORGOT_OTP',
@@ -16,6 +18,8 @@ export const PREF_KEYS = {
     hasSeenProfileIntro : 'hasSeenProfileIntro',
     displayName : 'displayName',
     fcmToken : 'fcm_token',
+    connected_id : 'connected_email_id',
+    connected_id_provider : 'connected_email_id_provider',
 }as const;
 
 export const logAllPrefs = async () => {

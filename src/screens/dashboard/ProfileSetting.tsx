@@ -1,12 +1,5 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Switch,
-  ScrollView,
-  Image,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {  View,  Text,  TouchableOpacity,  Switch,  ScrollView,  Image,  Alert,} from 'react-native';
 import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
 import TitleText from '~/components/TitleText';
 import AppText from '~/components/AppText';
@@ -14,24 +7,128 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '~/navigation/types';
 import { clearAllPrefs, PREF_KEYS } from '~/utils/Prefs';
-import { getItem } from '~/utils/storage';
+import { getItem, removeItem } from '~/utils/storage';
 import Loader from '~/components/Loader';
+import { getFCMToken, resetFCMToken } from '~/utils/AppFunctions';
+import { Api_Url, httpRequest2 } from '~/services/serviceRequest';
+import { SimpleResponse } from '~/services/DataModals';
+import EmailAccountPopupsModal from './EmailAccountPopupsModal';
+import { setItem } from 'expo-secure-store';
 
 export default function ProfileSetting() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
+  const [showModal, setShowModal] = useState(false);
   const [autoFollowUp, setAutoFollowUp] = useState(false);
+  const [emailAccount, setEmailAccount] = useState(false);
+  const [connectedProvider, setConnectedProvider] = useState('');
+  const [connectedEmail, setConnectedEmail] = useState('');
   const [smartRecommendations, setSmartRecommendations] = useState(true);
   const [loading, setLoading] = useState(false);
+const [fcmToken, setFcmToken] = useState('');
+
+    useEffect(() => {
+      (async () => {
+        const token = await getFCMToken();
+        if (token) {
+          console.log("Got FCM token:", token);
+          setFcmToken(token);
+        } else {
+          console.log("Failed to get FCM token");
+        }
+      })();
+    }, []);
 
   const handleLogout = () => {
-    setLoading(true);
-    clearAllPrefs();
-    setTimeout(() => {
-      setLoading(false); // Optional, in case you show loader only before navigation
-      navigation.replace('Login');
-    }, 3000);
+     logoutWithFCMDeletion()
   };
+
+
+    const logoutWithFCMDeletion = async () => {
+        setLoading(true);
+      try {
+      const accessToken = await getItem(PREF_KEYS.accessToken);
+      const url = Api_Url.fcmTokenDeleteAPI;
+      const res = await httpRequest2<SimpleResponse>(
+        url,   'delete',    {fcmToken : fcmToken},    accessToken ?? '',     true     );
+        setLoading(false);
+ 
+      if (res?.status) {
+        clearAllPrefs();
+        resetFCMToken();
+        navigation.replace('Login');
+    }  
+    } catch (err) {
+        setLoading(false);
+      Alert.alert('Error', 'Unexpected error occurred.');
+    } finally {
+          setLoading(false);
+    }
+  };
+
+
+ const loadConnectedEmail = async () => {
+  const provider = await getItem(PREF_KEYS.connected_id_provider);
+  const email = await getItem(PREF_KEYS.connected_id);
+  setConnectedProvider(provider ?? '');
+  setConnectedEmail(email ?? '');
+  if (provider) {
+    setEmailAccount(true);
+  } else {
+    setEmailAccount(false);
+  }
+};
+
+useEffect(() => {
+  loadConnectedEmail();
+}, []);
+
+const handleEmailDelete = () => {
+  Alert.alert(
+    'Disconnect Email Account',
+    'Are you sure you want to disconnect this email account? After this, you will no longer be able to send or receive messages from coaches or schools.',
+    [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Disconnect',
+        style: 'destructive',
+        onPress: () => {
+         // setEmailAccount(false);
+          disconnectEmail();
+          console.log('Email account disconnected');
+        },
+      },
+    ]
+  );
+};
+
+
+    const disconnectEmail = async () => {
+         setLoading(true);
+       try {
+        const accessToken = await getItem(PREF_KEYS.accessToken);
+        const url = Api_Url.removeEmailApi;
+        console.log(url);
+          
+         const res = await httpRequest2<SimpleResponse>(
+          url,   'post',    {remove_email : connectedEmail},    accessToken ?? '',     true     );
+         setLoading(false);
+         
+       if (res?.status) {
+            removeItem(PREF_KEYS.connected_id);
+             removeItem(PREF_KEYS.connected_id_provider);
+                        setEmailAccount(false);
+
+       }  
+      } catch (err) {
+          setLoading(false);
+        Alert.alert('Error', 'Unexpected error occurred.');
+      } finally {
+           setLoading(false);
+      }
+    };
+  
+
+    
 
 
   return (
@@ -68,43 +165,83 @@ export default function ProfileSetting() {
 
       <View>
               {/* Connected Email Account */}
-              <TitleText className="mb-2">Connected Email Account</TitleText>
+               {emailAccount ? (
+            <TitleText className="mb-2">Connected Email Account</TitleText>
+          ) : 
+           null
+          }
 
               <View className="bg-white px-4 py-4 rounded-xl mb-6">
                 {/* Top Row: Icon + Gmail + Buttons */}
-                <View className="flex-row justify-between items-center">
-                  <View className="flex-row items-center">
-                      <View className="h-14 w-14 rounded-full bg-gray-200 justify-center items-center">
-                      <Ionicons name="mail-outline" size={24} color="#6B7280" />
-                      </View>
+ {emailAccount ? (
+  <View className="flex-row justify-between items-center">
+    <View className="flex-row items-center">
+      <View className="h-14 w-14 rounded-full bg-gray-200 justify-center items-center">
+        <Ionicons name="mail-outline" size={24} color="#6B7280" />
+      </View>
 
-                    <View className="ml-4">
-                      <TitleText>Gmail</TitleText>
-                      <AppText className="-mt-4">example@example.com</AppText>
-                    </View>
-                  </View>
+      <View className="ml-4">
+        <TitleText>{connectedProvider}</TitleText>
+        <AppText className="-mt-3 mb-2">{connectedEmail}</AppText>
+      </View>
+    </View>
 
-                  {/* Right: Delete & Reload Buttons */}
-                  <View className="flex-row space-x-4">
-                 <View className='mr-5'>
-                     <TouchableOpacity>
-                      <Ionicons name="trash-outline" size={20} color="#DC2626" />
-                    </TouchableOpacity>
-                 </View>
-                    <TouchableOpacity>
-                      <Ionicons name="refresh-outline" size={20} color="#6B7280" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
+    {/* Right: Delete Button */}
+    <TouchableOpacity onPress={handleEmailDelete} className="mr-3">
+      <Ionicons name="trash-outline" size={20} color="#DC2626" />
+    </TouchableOpacity>
+  </View>
+) : (
+ <View>
+  <TouchableOpacity
+  onPress={() => setShowModal(true)}
+  activeOpacity={0.8}
+  className="flex-row items-center bg-white rounded-xl"
+>
+  {/* Icon */}
+  <View className="h-14 w-14 rounded-full justify-center items-center -mt-1 bg-gray-100">
+    <Ionicons name="mail-outline" size={26} color="#4B5563" />
+  </View>
+
+  {/* Text */}
+ <View className="ml-4 flex-1 mr-6">
+  <TitleText>
+    Connect Your Email
+  </TitleText>
+  <AppText
+    className="-mt-3 text-gray-600" size='text-12'
+    style={{ flexWrap: 'wrap' }} 
+  >
+    Link Gmail or Outlook to start messaging
+  </AppText>
+</View>
+
+
+  {/* Arrow Icon */}
+  <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+</TouchableOpacity>
+
+
+    <EmailAccountPopupsModal
+  visible={showModal}
+  onClose={() => {
+    loadConnectedEmail();
+    setShowModal(false);
+  }}
+/>
+
+  </View>
+)}
+
+
               </View>
 
 
               {/* Email Preferences */}
-              <View className="mb-6">
+              {/* <View className="mb-6">
                 <TitleText className="mb-3">Email Preferences</TitleText>
 
-                {/* Auto-Send Follow-Ups */}
-                <View className="flex-row justify-between items-center mb-4">
+                 <View className="flex-row justify-between items-center mb-4">
                   <View className="flex-1 pr-4">
                     <TitleText>Auto-Send Follow-Ups</TitleText>
                     <AppText className='-mt-3'>
@@ -114,8 +251,7 @@ export default function ProfileSetting() {
                   <Switch value={autoFollowUp} onValueChange={setAutoFollowUp} />
                 </View>
 
-                {/* Smart Recommendations */}
-                <View className="flex-row justify-between items-center">
+                 <View className="flex-row justify-between items-center">
                   <View className="flex-1 pr-4">
                     <TitleText>Smart Recommendations</TitleText>
                     <AppText className='-mt-3'>
@@ -124,7 +260,7 @@ export default function ProfileSetting() {
                   </View>
                   <Switch value={smartRecommendations} onValueChange={setSmartRecommendations} />
                 </View>
-              </View>
+              </View> */}
 
               {/* Account Controls */}
               <View className="mb-6">

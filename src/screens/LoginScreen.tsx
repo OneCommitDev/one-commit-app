@@ -199,16 +199,18 @@ if (res.status && res.data) {
        await setItem(PREF_KEYS.userEmailID, email);
                    await Savedetailsafterlogin();
 
-      // console.log('accesss_token ', res.data.accessToken);
-      // console.log('refresh_Token ', res.data.refreshToken);
+     
         if(res.redirect == "verify"){
             navigation.navigate('OtpVerification', {
             method: 'email',
             value: '',
             typeis: 'login_verify',
         });
-        }else if(res.redirect == "profile"){
+        }else if(res.profile.complete == true){
+          setItem(PREF_KEYS.profileCompleted , 'success');
           // navigation.navigate('UserProfile');
+           navigation.replace('Dashboard');
+        }else{
            navigation.replace('FillProfileInfoScreen');
         }
     } else {
@@ -236,14 +238,29 @@ const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string
     );
 
      setLoading(false);
+      console.log(api_url);
+     console.log(res);
+     console.log(requestBody);
     if (res.data?.accessToken) {
+
       await setItem(PREF_KEYS.login_status, 'success');
       await setItem(PREF_KEYS.accessToken, res.data?.accessToken);
       if (res.data.refreshToken) {
         await setItem(PREF_KEYS.refreshToken, res.data?.refreshToken);
       }
         await Savedetailsafterlogin();
-       navigation.navigate('UserProfile' , {src : ''});
+        if(res.profile.complete == true){
+          setItem(PREF_KEYS.profileCompleted , 'success');
+          // navigation.navigate('UserProfile');
+          navigation.replace('Dashboard');
+        }else{
+           navigation.navigate('UserProfile' , {src : ''});
+        }
+
+
+
+
+
     } else {
       Alert.alert('Error',  'Login failed');
     }

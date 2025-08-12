@@ -26,14 +26,16 @@ import { PREF_KEYS } from '~/utils/Prefs';
 type OutreachSheetProps = {
   isVisible: boolean;
   onClose: () => void;
-  initialSubject?: string;
+  schoolid?: string;
+   typeIs?: string;
  onEmailSent?: () => void;  
 };
 
 export default function OutreachSheet({
   isVisible,
   onClose,
-  initialSubject = '',
+  schoolid = '',
+  typeIs = '',
    onEmailSent,  
 }: OutreachSheetProps) {
   const [form, setForm] = useState({
@@ -79,9 +81,11 @@ useEffect(() => {
   const EmilgetApiRequest = async () => {
   try {
     setLoading(true);
+    const urlis = Api_Url.getOutreachemail(schoolid);
+    console.log(urlis);
     const accessToken = await getItem(PREF_KEYS.accessToken); // await required
     const res = await httpRequest2<EmailOutreach>(
-      Api_Url.getOutreachemail,
+     urlis,
       'get',
       {},
       accessToken ?? '',
@@ -162,7 +166,7 @@ useEffect(() => {
                   email_content : form.message_txt
             };
 
-            console.log('payload', payload);
+            console.log('payload', Api_Url.send_email_outReach);
             
             const accessToken = await getItem(PREF_KEYS.accessToken);  
             const res = await httpRequest2<SimpleResponse>(
@@ -196,14 +200,7 @@ useEffect(() => {
  
 
   return (
-    
-    // <ModalComponent
-    //   isVisible={isVisible}
-    //   onBackdropPress={onClose}
-    //   style={{ justifyContent: 'flex-end', margin: 0 }}
-    //   backdropOpacity={0.4}
-    // >
-    <ModalComponent
+      <ModalComponent
       isVisible={isVisible}
       onBackdropPress={onClose}
       animationIn="slideInUp"
@@ -246,7 +243,9 @@ useEffect(() => {
   </View>
         {/* Header */}
         <View className="flex-row justify-between items-center mb-4 mt-4">
-          <TitleText size='text-18'>Start Outreach</TitleText>
+          <TitleText size='text-18'>
+             {typeIs ? typeIs : 'Start Outreach'}
+          </TitleText>
           <TouchableOpacity onPress={onClose}>
             <Ionicons name="close" size={24} color="black" />
           </TouchableOpacity>

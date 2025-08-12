@@ -139,9 +139,9 @@ export default function Dashboard() {
         </View> */}
 
         {/* Tab Content */}
-        {activeTab === 'Home' && <HomeScreen />}
-        {activeTab === 'Dashboard' && <DisplayDashboard />}
-        {activeTab === 'Explore' && <ExplorSchools />}
+        {activeTab === 'Home' && <HomeScreen onRedirect={setActiveTab} />}
+        {activeTab === 'Dashboard' && <DisplayDashboard  />}
+        {activeTab === 'Explore' && <ExplorSchools  />}
         {activeTab === 'Profile' && <ProfileSetting />}
       </View>
 

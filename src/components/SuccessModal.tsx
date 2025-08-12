@@ -54,7 +54,7 @@ export default function SuccessModal({ isVisible, onClose }: Props) {
           Your email to Coach Johnson at Stanford University has been sent.
         </AppText>
 
-        <View className="w-full mb-4 bg-gray-50 border border-border_color p-4 rounded-xl">
+        {/* <View className="w-full mb-4 bg-gray-50 border border-border_color p-4 rounded-xl">
           <AppText className="text-center  mb-3">
             Would you like to set a reminder to follow up if you don't get a reply in 7 days?
           </AppText>
@@ -70,7 +70,7 @@ export default function SuccessModal({ isVisible, onClose }: Props) {
             />
 
 
-        </View>
+        </View> */}
 
           <View className='w-full'>
                   <ArrowButton

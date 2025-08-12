@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "429115153068",
+    "project_id": "onecommit",
+    "storage_bucket": "onecommit.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:429115153068:android:7df5e61a6a2eadb144dd09",
+        "android_client_info": {
+          "package_name": "com.onecommit.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "429115153068-mi3i4q5h86q6l56aroiorc49jigsb7ko.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA366DbKCHgY8Di6oelCt8hZ_44WQvolw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "429115153068-mi3i4q5h86q6l56aroiorc49jigsb7ko.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "429115153068-8n42o6qr0dnknd5nce4k73doai84l762.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "OneCommit"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

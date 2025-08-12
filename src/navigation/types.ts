@@ -24,7 +24,11 @@ export type RootStackParamList = {
   Success: { message: string; title?: string };
   FillProfileInfoScreen: undefined;
   CollegePreferences : undefined;
-  EmailConnectionUI : undefined;
+  EmailConnectionUI: {
+    stepToEdit?: number;
+    onNext?: () => void;
+    goToLastStep?: () => void;
+  };
   Dashboard : undefined;
   CollegeMatchDetails: { school: SchoolMatchItem };
 
@@ -32,4 +36,9 @@ export type RootStackParamList = {
   DeleteAccount : undefined;
 
   ProfilePreview : { selectedGames: SelectedGame[] , stepToEdit : any };
+  EmailCommunication : {id : string , type : string};
+  ExplorSchools : undefined;
+  DeleteAccountSuccess : undefined;
+  SuccessProfileScreen : undefined;
+
 };

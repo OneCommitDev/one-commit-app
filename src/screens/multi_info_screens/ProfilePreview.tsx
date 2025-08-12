@@ -13,6 +13,7 @@ import { Api_Url, httpRequest2 } from '~/services/serviceRequest';
 import { PREF_KEYS } from '~/utils/Prefs';
 import { ProfileComplition, SimpleResponse } from '~/services/DataModals';
 import TitleText from '~/components/TitleText';
+import { setItem } from '~/utils/storage';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MultiStepSurvey'>;
 
@@ -296,7 +297,8 @@ InteractionManager.runAfterInteractions(() => {
       if (res.status) {
         setLoading(false);
         setTimeout(() => {
-           navigation.replace('Dashboard')
+        setItem(PREF_KEYS.profileCompleted , 'success');
+           navigation.replace('SuccessProfileScreen')
         }, 300);
       }
     } catch (err) {
