@@ -23,12 +23,15 @@ import CollegeMatchDetails from '~/screens/multi_info_screens/CollageMatchDeatil
 import AppWebview from '~/components/AppWebview';
 import DeleteAccount from '~/screens/dashboard/DeleteAccount';
 import ProfilePreview from '~/screens/multi_info_screens/ProfilePreview';
+import EmailCommunication from '~/screens/dashboard/EmailCommunication';
+import DeleteAccountSuccess from '~/screens/dashboard/DeleteAccountSuccess';
+import SuccessProfileScreen from '~/components/SuccessProfileScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   return (
-    <NavigationContainer>
+    // <NavigationContainer>
       <Stack.Navigator initialRouteName="Splash">
         <Stack.Screen
           name="Splash"
@@ -118,7 +121,42 @@ options={{ headerShown: false,  animation: 'slide_from_bottom' , animationDurati
 <Stack.Screen name="ProfilePreview" component={ProfilePreview}
 options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
 
+
+<Stack.Screen name="EmailCommunication" component={EmailCommunication}
+options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
+
+
+<Stack.Screen
+  options={{ headerShown: false,  animation: 'slide_from_right' , animationDuration : 600  }}
+  name="DeleteAccountSuccess"  
+  component={DeleteAccountSuccess}  
+/>
+
+<Stack.Screen
+  options={{
+    headerShown: true,
+    animation: 'slide_from_right',
+    animationDuration: 600
+  }}
+  name="EmailConnectionUI"
+>
+  {(props) => (
+    <EmailConnectionUI
+      {...props}
+      onNext={() => console.log("Next clicked")}
+      goToLastStep={() => console.log("Go to last step")}
+      stepToEdit={0}
+    />
+  )}
+</Stack.Screen>
+
+<Stack.Screen name="SuccessProfileScreen" component={SuccessProfileScreen}
+options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
+
+
+
+
       </Stack.Navigator>
-    </NavigationContainer>
+    // </NavigationContainer>
   );
 }

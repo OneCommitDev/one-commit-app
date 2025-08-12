@@ -585,6 +585,8 @@ const showDivisionAdvice = (
       const reqBody: CollegePreferencesRequest = {
         ...form,
         ncaa_division: selectedDivisions.join(','),
+        school_size : form.school_size.toLowerCase(),
+        campus_type : form.campus_type.toLowerCase(),
         need_financial_aid : 'yes',
         religious_affiliation: "0", // If it's static
       };

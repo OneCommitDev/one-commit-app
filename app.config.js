@@ -1,3 +1,5 @@
+
+
 export default ({ config }) => ({
   ...config,
   name: 'OneCommit',
@@ -21,6 +23,22 @@ export default ({ config }) => ({
   },
   assetBundlePatterns: ['**/*'],
  plugins: [
+   '@react-native-firebase/app',
+    '@react-native-firebase/messaging',
+     // 🧱 Set useFrameworks for Swift pods like Firebase
+    [
+      'expo-build-properties',
+      {
+        ios: {
+          useFrameworks: 'static', // Required for Firebase
+          deploymentTarget: '15.1', // Ensure compatibility
+        },
+         android: {
+          compileSdkVersion: 35,
+          targetSdkVersion: 35,  
+        },
+      },
+    ],
   'expo-web-browser',
   'expo-build-properties',
   [
@@ -35,8 +53,13 @@ export default ({ config }) => ({
     userInterfaceStyle: "light",
     supportsTablet: true,
     usesAppleSignIn: true,
+    googleServicesFile: './fcm/GoogleService-Info.plist',
     bundleIdentifier: 'com.onecommit.app',
+     entitlements: {
+      'aps-environment': 'development', // or 'production' for production builds
+    },
     infoPlist: {
+     NSUserTrackingUsageDescription: 'This identifier will be used to deliver personalized ads to you.',
       NSAppTransportSecurity: {
       NSAllowsArbitraryLoads: true,
       NSExceptionDomains: {
@@ -46,6 +69,8 @@ export default ({ config }) => ({
       },
     },
     },
+        NSPushNotificationUsageDescription: 'This app uses notifications to keep you updated.',
+        UIBackgroundModes: ['fetch', 'remote-notification'],
       CFBundleURLTypes: [
         {
           CFBundleURLSchemes: [
@@ -63,6 +88,10 @@ export default ({ config }) => ({
     },
   },
   android: {
+        googleServicesFile: './fcm/google-services.json',
+        permissions: [
+             'NOTIFICATIONS', 
+    ],
     package: 'com.onecommit.app',
      "userInterfaceStyle": "light",
     usesCleartextTraffic: true,

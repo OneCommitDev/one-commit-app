@@ -58,7 +58,10 @@ export default function GamesGrid() {
           id: item.sport_id?.toString() ?? '',
           title: item.display_name || item.sport_name,
           image: {
-            uri: `${base_url_images}${item.img_path?.startsWith('/') ? item.img_path.slice(1) : item.img_path}`,
+            uri: `${base_url_images}${
+    item.img_path
+      ?.replace(/^\/?v1\//, '') // remove leading "v1/" or "/v1/"
+  }`,
           },
           selectedids: item.user_selected,
         }));

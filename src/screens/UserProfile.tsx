@@ -14,7 +14,7 @@ import { RootStackParamList } from '~/navigation/types';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { clearAllPrefs, PREF_KEYS } from '~/utils/Prefs';
 import { Api_Url, CreateProfileRequest, httpRequest2 } from '~/services/serviceRequest';
-import { ProfileResponse, ProfileSaveResponse } from '~/services/DataModals';
+import { ProfileResponse, ProfileSaveResponse, SimpleResponse } from '~/services/DataModals';
 import Loader from '~/components/Loader';
 import { getItem } from 'expo-secure-store';
 import TestTypeToggle from './multi_info_screens/TestTypeToggle';
@@ -22,7 +22,7 @@ import WeightRuler from '~/components/WeightRuler';
 import WhiteCustomButton from '~/components/WhiteCustomButton';
 import HeightRuler from '~/components/HeightRuler';
  import WheelPickerExpo from 'react-native-wheel-picker-expo';
-import { autoformatUSPhoneNumber, cleanPhoneNumber, formatInchesToFeetAndInches, formatUSPhoneNumber, isAtLeast13YearsOld, parseHeightToInches } from '~/utils/AppFunctions';
+import { autoformatUSPhoneNumber, cleanPhoneNumber, formatInchesToFeetAndInches, formatUSPhoneNumber, getFCMToken, isAtLeast13YearsOld, parseHeightToInches } from '~/utils/AppFunctions';
 import CustomDualPicker, { weightValues_kg, weightValues_lb } from '~/components/CustomDualPicker';
 import { CustomDualPickerModal } from '~/components/CustomDualPickerModal';
 import { HeightPickerModal2 } from '~/components/HeightPickerModal2';
@@ -141,7 +141,7 @@ type CityState = { city: string; state: string } | null;
             weight_unit: res.data?.weight_unit ?? 'lbs',
           }));
           
-          console.log('heightheight ',res.data?.height);
+          setGenderType(genderFromAPI);
       } else {
         Alert.alert('Error', res.message ?? 'Something went wrong');
       }
@@ -168,7 +168,7 @@ type CityState = { city: string; state: string } | null;
         city: form.city,
         state: form.states,
         zipcode: form.zip,
-        gender: form.gender,
+        gender: form.gender.toLowerCase(),
         weight: form.weightis?.toString().replace(/[^0-9.]/g, '') ?? '',
         weight_unit: form.weight_unit ?? '',
         height: form.heightis ? parseHeightToInches(form.heightis).toString() : '',  // 👈
@@ -221,6 +221,7 @@ useEffect(() => {
   };
 
   fillFormDefaults();
+  fcmTokenSavingAPi();
 }, []);
 
 const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
@@ -300,6 +301,29 @@ const [tempWeightUnit, setTempWeightUnit] = useState<'kg' | 'lbs'>('lbs');
 
   const [pickerVisible, setPickerVisible] = useState(false);
 const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
+
+
+  const fcmTokenSavingAPi = async () => {
+    try {
+      const accessToken = await getItem(PREF_KEYS.accessToken);
+      const fcm = await getItem(PREF_KEYS.fcmToken);
+      const url = Api_Url.fcmTokenAPI;
+
+      await getFCMToken();
+
+      const res = await httpRequest2<SimpleResponse>(
+        url,
+        'post',
+        { fcmToken: fcm },
+        accessToken ?? '',
+        true
+      );
+
+      console.log('FCM token saved:', fcm);
+    } catch (err) {
+      Alert.alert('Error', 'Unexpected error occurred.');
+    }
+  };
 
   return (
     <View className="flex-1 px-2 pt-7">

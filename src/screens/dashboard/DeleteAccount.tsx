@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Alert,
@@ -11,9 +11,15 @@ import { RootStackParamList } from '~/navigation/types';
 import TitleText from '~/components/TitleText';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AppText from '~/components/AppText';
+import { getItem } from 'expo-secure-store';
+import { clearAllPrefs, PREF_KEYS } from '~/utils/Prefs';
+import { Api_Url, httpRequest2 } from '~/services/serviceRequest';
+import { SimpleResponse } from '~/services/DataModals';
+import Loader from '~/components/Loader';
 
 export default function DeleteAccount() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const [loading, setLoading] = useState(false);
 
   const handleDelete = () => {
     Alert.alert(
@@ -27,12 +33,34 @@ export default function DeleteAccount() {
           onPress: () => {
             // TODO: Call delete API here
             console.log('Account deleted');
-            navigation.navigate('Splash');
+            
+              deactivateAPIRequest();
           },
         },
       ]
     );
   };
+
+      const deactivateAPIRequest = async () => {
+        try {
+             setLoading(true);
+    
+          const accessToken = getItem(PREF_KEYS.accessToken);
+          const url = Api_Url.deactivateAPI;
+          const res = await httpRequest2<SimpleResponse>(
+            url,  'post',   {},   accessToken ?? ''  );
+
+            console.log('resres',res);
+          if (res.status) {
+                clearAllPrefs();
+                navigation.navigate('DeleteAccountSuccess');
+          }
+        } catch (err) {
+           Alert.alert('Error', 'Unexpected error occurred.');
+        } finally {
+             setLoading(false);
+        }
+      };
 
   const handleBack = () => {
     navigation.goBack();
@@ -90,6 +118,8 @@ export default function DeleteAccount() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+            <Loader show={loading} />
+      
     </View>
   );
 }

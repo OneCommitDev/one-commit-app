@@ -107,14 +107,20 @@ import { removeItem } from '~/utils/storage';
     const token = await getItem(PREF_KEYS.accessToken);
     const register_redirect = await getItem(PREF_KEYS.register_redirect);
     const login_status = await getItem(PREF_KEYS.login_status);
+    const profileCompleted = await getItem(PREF_KEYS.profileCompleted);
 
     
 
      setTimeout(() => {
-       if (login_status === 'success') {
-         navigation.replace('UserProfile' , {src : ''});
-         // navigation.replace('Dashboard');
-      } else {
+       if ( profileCompleted === 'success') {
+        //  navigation.replace('UserProfile' , {src : ''});
+         navigation.replace('Dashboard');
+      }
+     else  if (login_status === 'success' ) {
+        navigation.replace('UserProfile' , {src : ''});
+      } 
+          
+      else {
         navigation.replace('Intro');
         //  navigation.replace('CollegePreferences');
       }

@@ -203,7 +203,7 @@ const [rawSportData, setRawSportData] = useState<
 }, []);
 */
   
-
+/*
 useFocusEffect(
   React.useCallback(() => {
     const task = InteractionManager.runAfterInteractions(() => {
@@ -213,7 +213,29 @@ useFocusEffect(
     return () => task.cancel();
   }, [])
 );
+*/
+useFocusEffect(
+  React.useCallback(() => {
+    fetchAthletic();
+    return () => {};
+  }, [])
+);
+/*
+useFocusEffect(
+  React.useCallback(() => {
+ const task = InteractionManager.runAfterInteractions(() => {
+  try {
+    fetchAthletic();
+  } catch (e) {
+    console.log('InteractionManager error:', e);
+  }
+});
 
+
+    return () => task.cancel();
+  }, [])
+);
+*/
 
   const fetchAthletic = async () => {
     try {
@@ -233,7 +255,14 @@ useFocusEffect(
         // 2. Transform to FlatList-friendly format
         const transformedSections: Section[] = res.data.sportUserFormattedData.map((sport) => ({
           title: sport.display_name,
-          img: `${base_url_images}${sport.img_path?.startsWith('/') ? sport.img_path.slice(1) : sport.img_path}`,
+          // img: `${base_url_images}${sport.img_path?.startsWith('/') ? sport.img_path.slice(1) : sport.img_path}`,
+          img: `${base_url_images}${
+  (sport.img_path?.startsWith('/') 
+    ? sport.img_path.slice(1) 
+    : sport.img_path
+  )?.replace(/^v1\//, '') // remove v1/ at the start if present
+}`,
+
           inputs: (sport.events || []).map((event) => ({
             key: event.event_name,
             label: event.display_name,

@@ -5,18 +5,19 @@ import { getValidAccessToken } from '~/utils/decodeAccessToken';
 import { PREF_KEYS } from '~/utils/Prefs';
 
 // ✅ Create a reusable Axios instance
- export const  base_url_images = 'http://devapi.onecommit.us/';
+ export const  base_url_images = 'https://d2b1wekz0xjax3.cloudfront.net/';
  export const  base_url = 'http://devapi.onecommit.us/v1';
 // export const  base_url = 'http://192.168.18.105:80/index.php';
 
-// export const  base_url_images = 'http://ec2-18-218-239-171.us-east-2.compute.amazonaws.com:80/';
-// export const  base_url = 'http://ec2-18-218-239-171.us-east-2.compute.amazonaws.com:80/v1';
+// export const  base_url_images = 'http://ec2-18-218-239-171.us-east-2.compute.amazonaws.com:80/'; // demo url
+// export const  base_url = 'http://ec2-18-218-239-171.us-east-2.compute.amazonaws.com:80/v1'; // // demo url
 
 const api = axios.create({
   baseURL: base_url, 
   timeout: 60000,
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json',   
+    'x-api-key' : 'AXBpVmVyMS4wLWMzYjg3YmE3ZDY2NzdiMzI1M2I1MDc0N2U3MjFiODk3NjUwMDg1MDU2YjUzNmMyMTYwNjkxOGFjZTcxMTRhN2Qtb25lY29tbWl0'
   },
 });
 
@@ -444,11 +445,34 @@ export const Api_Url = {
  schoolsMatchesDelete : (schoolid: string, type : string) =>
     `/match/school/${type}/${schoolid}`,
  
-   getOutreachemail : '/email/load',
+      getOutreachemail : (schoolID: string) =>
+    `/email/load/${schoolID}`,
    re_write_email : '/email/rewrite-with-ai',
    send_email_outReach : '/user/send/email',
     profileSummary : '/user/profile-summary',
     searchSchool : '/list/schools',
+    searchSchoolByID : '/match/school',
+
+     dashboardschools : (start: number, limit: number) =>
+    `/dashboard/schools/${start}/${limit}`,
+
+      dashboardDetails : (schoolid: any) =>
+    `/dashboard/school/${schoolid}`,
+
+         getEmialContent : '/email/content',
+
+
+      archiveschoolsMatches : (start: number, limit: number) =>
+    `/dashboard/archived/schools/${start}/${limit}`,
+    homeToDo : '/dashboard/home/todo',
+
+        fcmTokenAPI : '/user/notification',
+        fcmTokenDeleteAPI : '/user/notification',
+        deactivateAPI : '/user/deactivate',
+        removeEmailApi : '/dashboard/remove-email',
+
+        
+
 
 };
 

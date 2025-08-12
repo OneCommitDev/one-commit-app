@@ -18,10 +18,16 @@ export interface LoginResponse {
  status: boolean;
   message?: string;
   redirect?: string;
+  profile : profileLogin;
   data?: {
     accessToken: string;
     refreshToken: string;
   };
+}
+
+export type profileLogin = {
+complete : boolean;
+stage : string;
 }
 
 export interface ResetPasswordResponse {
@@ -49,6 +55,8 @@ export interface SocialTokenResponse {
  status: boolean;
   message?: string;
   redirect?: string;
+    profile : profileLogin;
+
   data?: {
     accessToken: string;
     refreshToken: string;
@@ -237,6 +245,7 @@ export type MatterItem = {
 
 export type SchoolsMatches = {
   status: boolean;
+  email_conn_data : email_conn_data;
   pagination: {
     offset: number;
     limit: number;
@@ -244,6 +253,12 @@ export type SchoolsMatches = {
   };
   data: SchoolMatchItem[];
 };
+
+export type email_conn_data= {
+  status: boolean;
+  provider: boolean;
+  email: boolean;
+}
 
 export type SchoolMatchItem = {
   school_id: string;
@@ -260,6 +275,12 @@ export type SchoolMatchItem = {
   coach_name: string;
   coach_email: string;
   coach_role: string;
+
+  last_interaction_detail : string;
+  no_of_interactions : any;
+  last_interaction_date : string;
+  coach_interest_percent : any;
+  overall_progress_percent : any;
 };
 
 export type MatchCriteria = {
@@ -418,4 +439,84 @@ export type SearchSchoolData = {
   school_id: string;
   short_name: string;
   name: string;
+};
+
+
+export type HomeToDo = {
+  status : boolean;
+  data : HomeToDoModal;
+};
+
+export type HomeToDoModal = {
+  todo_items : todo_items[];
+  profile : todo_profile;
+   connected_email : todo_connected_email;
+};
+
+export type todo_items ={
+  id : string;
+  school_id : string;
+  notification : string;
+  redirect_type : string;
+}
+
+export type todo_profile ={
+name : string;
+email : string;
+}
+
+export type todo_connected_email ={
+provider : string;
+email : string;
+}
+
+ export type Emaildatamodal = {
+  status: boolean;
+  data: {
+    school_details: school_details[];
+    communication_history: CommunicationHistory[];
+  };
+};
+
+ 
+export type school_details = {
+  school_id: string | null;
+  name: string;
+  ncaa_division: string;
+  city: string;
+  state: string;
+  school_size: string;
+  overall_match_percent: string;
+  last_interaction_detail: string;
+  no_of_interactions: string;
+  last_interaction_date: string;
+  coach_interest_percent: string;
+  overall_progress_percent: string;
+  school_coaches : school_coaches[];
+};
+
+export type school_coaches = {
+  coach_id: string | null;
+  coach_name: string;
+  coach_role: string;
+  coach_email: string;
+  coach_phone: string;
+ 
+};
+
+ 
+export type CommunicationHistory = {
+  email_id: string | null;
+  email_subject: string;
+  email_to: string;
+  email_from: string;
+  email_sent_date: string;
+  email_status: string;
+};
+
+
+ export type Emaildetails = {
+  status: boolean;
+  data : string;
+  message : string;
 };
