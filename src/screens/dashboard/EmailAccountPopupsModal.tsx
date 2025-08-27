@@ -75,7 +75,6 @@ import { setItem } from '~/utils/storage';
 
 
        const userEmail = userInfo?.user?.email;
-    console.log("Google account email:", userEmail);
 
       if (res.status === 200) {
         setTimeout(() => {
@@ -86,7 +85,7 @@ import { setItem } from '~/utils/storage';
       }
     } catch (error: any) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) return;
-      console.log('Sign-in error:', error);
+     // console.log('Sign-in error:', error);
     }
   };
 

@@ -14,6 +14,7 @@ import { PREF_KEYS } from '~/utils/Prefs';
 import { ProfileComplition, SimpleResponse } from '~/services/DataModals';
 import TitleText from '~/components/TitleText';
 import { setItem } from '~/utils/storage';
+import AppText from '~/components/AppText';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MultiStepSurvey'>;
 
@@ -77,42 +78,62 @@ type ProfileSection = {
   data: ProfileField[];
 };
 
-export default function ProfilePreview({ onNext }: { onNext?: () => void }) {
+ export type RootStackParamList2 = {
+   CollegePreferences: {
+    selectedGames: [];
+    stepToEdit?: number | null;
+  };
+    EmailConnectionUI: {
+    selectedGames: [];
+    stepToEdit?: number | null;
+  };
+      ProfilePreview: {
+    selectedGames: [];
+    stepToEdit?: number | null;
+  };
+
+};
+type Nav = NativeStackNavigationProp<RootStackParamList2>;
+
+type Props = {
+  onNext?: () => void;
+  goToLastStep?: () => void;
+  stepToEdit: number | null;
+  selectedGames: SelectedGame[];
+  currentSteps : number;
+};
+
+// export default function ProfilePreview({ onNext }: { onNext?: () => void }) {
+export default function ProfilePreview({ onNext , goToLastStep , stepToEdit,  selectedGames , currentSteps}: Props) {
+
+  const navigation2 = useNavigation<Nav>(); 
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<MultiStepSurveyRouteProp>();
-const { selectedGames , stepToEdit  } = route.params ?? {};
+  // const { selectedGames , stepToEdit  } = route.params ?? {};
   const stepsData = generateStepsData(selectedGames);
   const [loading, setLoading] = useState(false);
   const [profileSections, setProfileSections] = useState<ProfileSection[]>([]);
 
-//  const handleEdit = (sectionTitle: string) => {
-//   const stepType = sectionStepMap[sectionTitle];
-
-//   if (stepType === 'profile') {
-//     console.log('Navigating to UserProfile for:', sectionTitle);
-//     navigation.navigate('UserProfile', { src: '' });
-//   } 
-//   else  if (stepType === 'games') {  
-//     const stepIndex = stepsData.findIndex(step => step.title === stepType);
-
-//   }
-//   else {
-//     const stepIndex = stepsData.findIndex(step => step.type === stepType);
-//     if (stepIndex !== -1) {
-//       navigation.replace('MultiStepSurvey', {
-//         selectedGames,
-//         stepToEdit: stepIndex, // +1 if your flow starts after profile screen
-//       });
-//     } else {
-//       Alert.alert('Error', 'Unable to locate section for editing.');
-//     }
-//   }
-// };
 
 const handleEdit = (sectionTitle: string) => {
-  // Handle "Profile Details" specifically
   if (sectionTitle === 'Profile Details') {
     navigation.navigate('UserProfile', { src: 'review_src' });
+    return;
+  }
+  if (sectionTitle === 'Personal Records') {
+       navigation?.navigate('Athletic' , {selectedGames : selectedGames, stepToEdit : 1 , currentSteps : 1});
+    return;
+  }
+   if (sectionTitle === 'Academic Information') {
+       navigation?.navigate('Academic' , {selectedGames : selectedGames, stepToEdit : 1 , currentSteps : 1});
+    return;
+  }
+    if (sectionTitle === 'College Preferences') {
+       navigation?.navigate('CollegePreferences' , {selectedGames : selectedGames, stepToEdit : 1 , currentSteps : 1});
+    return;
+  }
+     if (sectionTitle === 'Connected Email Account') {
+              navigation?.navigate('EmailConnectionUI' , {selectedGames : selectedGames, stepToEdit : 1 , currentSteps : 1});
     return;
   }
 
@@ -120,38 +141,23 @@ const handleEdit = (sectionTitle: string) => {
   const matchedSport = selectedGames.find(
     (sport) => sport.sportName.toLowerCase() === sectionTitle.toLowerCase()
   );
-
+   
   if (matchedSport) {
     const stepIndex = stepsData.findIndex(
       (step) => step.type === 'games' && step.sportId === matchedSport.sportId
     );
-
+ 
     if (stepIndex !== -1) {
-      navigation.replace('MultiStepSurvey', {
+      navigation.navigate('MultiStepSurvey', {
         selectedGames,
         stepToEdit: stepIndex,
       });
     } else {
-      //Alert.alert('Error', 'Sport step not found.');
+       Alert.alert('Error', 'Sport step not found.');
     }
-
     return;
   }
-
-  // For static sections like Personal Records, Academic Information, etc.
-  const stepIndex = stepsData.findIndex(
-    (step) => step.title.toLowerCase() === sectionTitle.toLowerCase()
-  );
-
-  if (stepIndex !== -1) {
-    navigation.replace('MultiStepSurvey', {
-      selectedGames,
-      stepToEdit: stepIndex,
-    });
-  } else {
-   // Alert.alert('Error', 'Unable to locate section for editing.');
-  }
-};
+  };
 
 useFocusEffect(
   useCallback(() => {
@@ -167,7 +173,6 @@ useFocusEffect(
           {},
           accessToken ?? ''
         );
-
         if (mounted && res.status && res.data) {
           const d = res.data;
 
@@ -196,7 +201,7 @@ useFocusEffect(
                 { title: 'ZipCode', value: d.zipcode || '' },
                 { title: 'State', value: d.state || '' },
                 { title: 'City', value: d.city || '' },
-                { title: 'Gender', value: '' },
+                { title: 'Gender', value: d.gender || 'N/A' },
                 { title: 'Weight', value: `${d.weight ?? ''} ${d.weight_unit ?? ''}` },
                 { title: 'Height', value: `${d.height ?? ''} ${d.height_unit ?? ''}` },
               ],
@@ -213,11 +218,16 @@ useFocusEffect(
               title: 'Academic Information',
               data: [
                 { title: 'Unweighted GPA', value: d.unweighted_gpa || '' },
-                { title: 'Test Scores Type', value: d.test_score_type || '' },
-                { title: 'Test Scores', value: d.test_score?.toString() || '' },
+                // { title: 'Test Scores Type', value: d.test_score_type || '' },
+                // { title: 'SAT Scores', value: d.sat_score?.toString() || '' },
+                // { title: 'ACT Scores', value: d.act_score?.toString() || '' },
+                  ...(d.sat_score ? [{ title: 'SAT Scores', value: d.sat_score.toString() }] : []),
+  ...(d.act_score ? [{ title: 'ACT Scores', value: d.act_score.toString() }] : []),
                 { title: 'Intended Major 1', value: d.intended_major || '' },
-                { title: 'Intended Major 2', value: d.intended_major_2 || '' },
-                { title: 'Intended Major 3', value: d.intended_major_3 || '' },
+                // { title: 'Intended Major 2', value: d.intended_major_2 || '' },
+                // { title: 'Intended Major 3', value: d.intended_major_3 || '' },
+                  ...(d.intended_major_2 ? [{ title: 'Intended Major 2', value: d.intended_major_2 }] : []),
+  ...(d.intended_major_3 ? [{ title: 'Intended Major 3', value: d.intended_major_3 }] : []),
                 { title: 'High School Name', value: d.school_name || '' },
                 { title: 'High School Type', value: d.school_type || '' },
               ],
@@ -233,14 +243,15 @@ useFocusEffect(
                   title: 'NCAA Division Interest',
                   value: d.ncaa_division?.join(', ') || '',
                 },
-                { title: 'Preferred Region', value: d.preferred_region || '' },
-                { title: 'School Size', value: d.school_size || '' },
-                { title: 'Academic Rigor', value: d.academic_rigor || '' },
-                { title: 'Campus Type', value: d.campus_type || '' },
-                { title: 'Early Decision Willingness', value: d.early_decision_willingness || '' },
+              { title: 'Preferred Region', value: capitalizeFirst(d.preferred_region) },
+              { title: 'School Size', value: capitalizeFirst(d.school_size) },
+              { title: 'Academic Rigor', value: capitalizeFirst(d.academic_rigor) },
+              { title: 'Campus Type', value: capitalizeFirst(d.campus_type) },
+              { title: 'Early Decision Willingness', value: capitalizeFirst(d.early_decision_willingness) },
+
                 {
                   title: 'How much money do you estimate your family can pay in tuition per year?',
-                  value: d.required_financial_aid?.toString() || '',
+                  value: d.required_financial_aid?.toString() + 'k' || '0',
                 },
               ],
             },
@@ -253,21 +264,30 @@ useFocusEffect(
                 },
                 {
                   title: 'Email Provider',
-                  value: d.email_connect_provider ? 'Microsoft' : 'Gmail',
+                  value: d.email_connect_provider ? 'N/A' : 'N/A',
                 },
               ],
             },
           ];
-console.log(updatedSampleData);
-           setProfileSections(updatedSampleData);
+            setProfileSections(updatedSampleData);
+             setLoading(false);
+        }else{
+           setLoading(false);
         }
       } catch (err) {
-        console.log('Error fetching profile data', err);
+         setLoading(false);
+        //console.log('Error fetching profile data', err);
         Alert.alert('Error', 'Unexpected error occurred.');
       } finally {
         if (mounted) setLoading(false);
       }
     };
+
+    const capitalizeFirst = (str?: string) => {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
 
 // setTimeout(() => {
 //   requestAnimationFrame(() => {
@@ -300,9 +320,12 @@ InteractionManager.runAfterInteractions(() => {
         setItem(PREF_KEYS.profileCompleted , 'success');
            navigation.replace('SuccessProfileScreen')
         }, 300);
+      }else{
+          setLoading(false);
       }
     } catch (err) {
-      console.log('Error deleting school', err);
+        setLoading(false);
+    //  console.log('Error deleting school', err);
       Alert.alert('Error', 'Unexpected error occurred.');
     } finally {
       setLoading(false); // Hide global loader
@@ -311,144 +334,44 @@ InteractionManager.runAfterInteractions(() => {
 
 
 
-// useEffect(() => {
-//   let mounted = true;
-
-//   const fetchProfileData = async () => {
-//     try {
-//       setLoading(true);
-//       const accessToken = await getItem(PREF_KEYS.accessToken);
-//       const res = await httpRequest2<ProfileComplition>(
-//         Api_Url.profileSummary,
-//         'get',
-//         {},
-//         accessToken ?? ''
-//       );
-
-//       if (mounted && res.status && res.data) {
-//         const d = res.data;
-
-//         // // 🔁 Dynamically generate sport sections
-//         // const sportSections: ProfileSection[] = d.sportUserFormattedData?.map((sport) => ({
-//         //   title: sport.display_name || sport.sport_name,
-//         //   data: [
-//         //     { title: sport.display_name, value: sport.sport_name || '' },
-//         //   ],
-//         // })) || [];
-//         const sportSections: ProfileSection[] = d.sportUserFormattedData?.map((sport) => {
-//   const eventFields: ProfileField[] = sport.events.map((event) => ({
-//     title: event.display_name || event.event_name,
-//     value: `${event.eventValue ?? ''} ${event.eventUnit ?? ''}`.trim(),
-//   }));
-
-//   return {
-//     title: sport.display_name || sport.sport_name,
-//     data: [
-//       ...eventFields,
-//     ],
-//   };
-// }) || [];
-
-
-//         const updatedSampleData: ProfileSection[] = [
-//           {
-//             title: 'Profile Details',
-//             data: [
-//               { title: 'Full Name', value: d.full_name || '' },
-//               { title: 'Preferred Name', value: d.preferred_name || '' },
-//               { title: 'Email Address', value: d.email_connect_address || '' },
-//               { title: 'Phone Number', value: d.phone || '' },
-//               { title: 'Date of Birth', value: d.dob || '' },
-//               { title: 'ZipCode', value: d.zipcode || '' },
-//               { title: 'State', value: d.state || '' },
-//               { title: 'City', value: d.city || '' },
-//               { title: 'Gender', value: '' },
-//               { title: 'Weight', value: `${d.weight ?? ''} ${d.weight_unit ?? ''}` },
-//               { title: 'Height', value: `${d.height ?? ''} ${d.height_unit ?? ''}` },
-//             ],
-//           },
-
-//           // 🏀 Add each sport as a section
-//           ...sportSections,
-
-//           {
-//             title: 'Personal Records',
-//             data: [
-//               { title: 'Meet Highlighted Link', value: d.media_links || '' },
-//               { title: 'Additional Information', value: d.additional_info || '' },
-//             ],
-//           },
-//           {
-//             title: 'Academic Information',
-//             data: [
-//               { title: 'Unweighted GPA', value: d.unweighted_gpa || '' },
-//               { title: 'Test Scores Type', value: d.test_score_type || '' },
-//               { title: 'Test Scores', value: d.test_score?.toString() || '' },
-//               { title: 'Intended Major 1', value: d.intended_major || '' },
-//               { title: 'Intended Major 2', value: d.intended_major_2 || '' },
-//               { title: 'Intended Major 3', value: d.intended_major_3 || '' },
-//               { title: 'High School Name', value: d.school_name || '' },
-//               { title: 'High School Type', value: d.school_type || '' },
-//             ],
-//           },
-//           {
-//             title: 'College Preferences',
-//             data: [
-//               {
-//                 title: 'When it comes to recruiting, what matters most to you?',
-//                 value: d.what_matter_most || '',
-//               },
-//               {
-//                 title: 'NCAA Division Interest',
-//                 value: d.ncaa_division?.join(', ') || '',
-//               },
-//               { title: 'Preferred Region', value: d.preferred_region || '' },
-//               { title: 'School Size', value: d.school_size || '' },
-//               { title: 'Academic Rigor', value: d.academic_rigor || '' },
-//               { title: 'Campus Type', value: d.campus_type || '' },
-//               { title: 'Early Decision Willingness', value: d.early_decision_willingness || '' },
-//               {
-//                 title: 'How much money do you estimate your family can pay in tuition per year?',
-//                 value: d.required_financial_aid?.toString() + 'k' || '',
-//               },
-//             ],
-//           },
-//           {
-//             title: 'Connected Email Account',
-//             data: [
-//               {
-//                 title: 'Email Connected',
-//                 value: d.email_connect_status ? 'Yes' : 'No',
-//               },
-//               {
-//                 title: 'Email Provider',
-//                 value: d.email_connect_provider ? 'Microsoft' : 'Gmail',
-//               },
-//             ],
-//           },
-//         ];
-
-//         setProfileSections(updatedSampleData);
-//       }
-//     } catch (err) {
-//       console.log('Error fetching profile data', err);
-//       Alert.alert('Error', 'Unexpected error occurred.');
-//     } finally {
-//       if (mounted) setLoading(false);
-//     }
-//   };
-
-//   fetchProfileData();
-
-//   return () => {
-//     mounted = false;
-//   };
-// }, []);
-
-
-  
+    const handleBack = () => {
+      navigation.goBack();
+        //  navigation?.navigate('Academic' , {selectedGames : [], stepToEdit : null});
+    };
 
   return (
+
+            <View className="flex-1 bg-background px-4 pt-14"> 
+  <View className="flex-row items-center justify-between mb-1">
+                
+                   <TouchableOpacity
+                                  onPress={handleBack}
+                                  className="w-12 h-12 rounded-full bg-[#E3E9E5] items-center justify-center"
+                                >
+                                  <Ionicons name="chevron-back" size={24} color="#1A322E" />
+                                </TouchableOpacity>
+
+                                      <View className="flex-1 mx-10 my-5">
+                                            <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden">
+                                              <View
+                                                className="h-full bg-primary rounded-full"
+                                                style={{ width: `${((5 + 1) / 6) * 100}%` }}
+                                              />
+                                            </View>
+                                          </View>
+                              </View>
+                
+                    <View className="items-center mb-4 -mt-[6]">
+                            <TitleText className="text-center">
+                           Profile Summary
+                            </TitleText>
+                            <AppText className="text-center mb-5 -mt-2 ml-2 mr-2">
+                            Please review your details. To make any changes, go back and update them. Once you're ready, tap the button below to finalize your profile.
+                            </AppText>
+                          </View>
+
+
+    
     <View className="flex-1 bg-background">
       <Loader show={loading} />
 
@@ -501,5 +424,7 @@ InteractionManager.runAfterInteractions(() => {
         />
       </View>
     </View>
+
+ </View>
   );
 }

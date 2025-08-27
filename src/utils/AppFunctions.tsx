@@ -5,8 +5,10 @@ import messaging, { deleteToken, getMessaging, getToken } from '@react-native-fi
 import { setItem } from "./storage";
 import { PREF_KEYS } from "./Prefs";
 import { getApp } from "@react-native-firebase/app";
+import { Dimensions } from "react-native";
+ 
 
-/**
+ /**
  * Converts height in inches to a string like `5'7`.
  * @param inches Total inches
  * @returns Formatted height like "5'7"
@@ -94,7 +96,7 @@ export function isAtLeast13YearsOld(date: Date): boolean {
 }
 
  
- 
+ /*
  export const validateGPA = (
   value: string,
   setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
@@ -116,14 +118,45 @@ export function isAtLeast13YearsOld(date: Date): boolean {
     setErrors((e) => ({ ...e, unweighted_gpa: '' }));
   }
 };
+*/
+export const validateGPA = (
+  value: string,
+  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
+) => {
+  let fixedValue = value;
+
+  // If user leaves just a trailing dot, auto-fix it
+  if (fixedValue && fixedValue.endsWith(".")) {
+    fixedValue = fixedValue + "0";
+  }
+
+  // Regex: allow 0–4.5 with up to 2 decimals
+  const regex = /^(?:[0-3](?:\.\d{1,2})?|4(?:\.(?:[0-4]\d?|50?))?)$/;
+
+  if (fixedValue === "") {
+    setErrors((e) => ({ ...e, unweighted_gpa: "" }));
+    return fixedValue;
+  }
+
+  if (!regex.test(fixedValue)) {
+    setErrors((e) => ({
+      ...e,
+      unweighted_gpa: "GPA must be between 0 and 4.5 (up to 2 decimal places)",
+    }));
+  } else {
+    setErrors((e) => ({ ...e, unweighted_gpa: "" }));
+  }
+
+  return fixedValue;
+};
 
 
 
 // ~/utils/formValidators.ts
-
+/*
  export const validateScore = (
   value: string,
-  type: 'sat' | 'act',
+  type: 'SAT' | 'ACT',
   setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
 ) => {
   console.log('value_value', value);
@@ -131,18 +164,72 @@ export function isAtLeast13YearsOld(date: Date): boolean {
 
   const score = parseInt(value, 10);
   const isValid =
-    type === 'sat' ? score > 0 && score <= 1600 : score > 0 && score <= 36;
+    type === 'SAT' ? score > 0 && score <= 1600 : score > 0 && score <= 36;
 
   if (value === '' || !/^\d{1,4}$/.test(value) || !isValid) {
     setErrors((e) => ({
       ...e,
       test_score:
-        type === 'sat'
+        type === 'SAT'
           ? 'SAT score must be a number ≤ 1600'
           : 'ACT score must be a number ≤ 36',
     }));
   } else {
     setErrors((e) => ({ ...e, test_score: '' }));
+  }
+};
+*/
+
+
+
+
+ // SAT validator
+export const validateSATScore = (
+  value: string,
+  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
+) => {
+  const score = parseInt(value, 10);
+  const isValid = score > 0 && score <= 1600;
+
+  if (value === '' || !/^\d{1,4}$/.test(value) || !isValid) {
+    setErrors((e) => ({
+      ...e,
+      sat_score: 'SAT score must be a number ≤ 1600',
+    }));
+  } else {
+    setErrors((e) => ({ ...e, sat_score: '' }));
+  }
+};
+
+// ACT validator
+export const validateACTScore = (
+  value: string,
+  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
+) => {
+  const score = parseInt(value, 10);
+  const isValid = score > 0 && score <= 36;
+
+  if (value === '' || !/^\d{1,2}$/.test(value) || !isValid) {
+    setErrors((e) => ({
+      ...e,
+      act_score: 'ACT score must be a number ≤ 36',
+    }));
+  } else {
+    setErrors((e) => ({ ...e, act_score: '' }));
+  }
+};
+
+
+// Optional wrapper if you still want a single entry point
+export const validateScore = (
+  value: string,
+  type: 'SAT' | 'ACT',
+  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
+) => {
+  if (type === 'SAT') {
+    return validateSATScore(value, setErrors);
+  } else {
+    return validateACTScore(value, setErrors);
   }
 };
 
@@ -241,3 +328,11 @@ export async function getFCMToken() {
     return null; // ✅ Return null on failure
   }
 }
+
+
+
+   
+ 
+
+
+ 

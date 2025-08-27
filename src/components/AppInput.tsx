@@ -41,7 +41,11 @@ export default function AppInput({
           onChangeText={onChangeValue}
           placeholder={placeholder}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+            onBlur={(e) => {
+              setIsFocused(false);
+              props.onBlur?.(e);  
+            }}
+          // onBlur={() => setIsFocused(false)}
           className={`flex-1 rounded-xl px-4 py-3 ${color} ${size} ${fontFamily} ${className}`}
         />
       </View>

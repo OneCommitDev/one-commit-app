@@ -15,7 +15,6 @@ import GamesGrid from '~/screens/multi_info_screens/GamesGrid';
 import UserProfile from '~/screens/UserProfile';
 import SuccessScreen from '~/screens/SuccessScreen';
 import FillProfileInfoScreen from '~/screens/intoroScreeens/FillProfileInfoScreen';
-import CollegePreferences from '~/screens/multi_info_screens/CollegePreferences';
 import Splashscreen from '~/screens/Splashscreen';
 import EmailConnectionUI from '~/screens/multi_info_screens/EmailConnectionUI';
 import Dashboard from '~/screens/dashboard/Dashboard';
@@ -26,7 +25,13 @@ import ProfilePreview from '~/screens/multi_info_screens/ProfilePreview';
 import EmailCommunication from '~/screens/dashboard/EmailCommunication';
 import DeleteAccountSuccess from '~/screens/dashboard/DeleteAccountSuccess';
 import SuccessProfileScreen from '~/components/SuccessProfileScreen';
-
+import NewRegister from '~/screens/NewRegister';
+import PasswordScreen from '~/components/PasswordScreen';
+import CollegePreferences from '~/screens/multi_info_screens/CollegePreferences';
+import Athletic from '~/screens/multi_info_screens/Athletic';
+import Academic from '~/screens/multi_info_screens/Academic';
+import ContactUs from '~/screens/dashboard/ContactUs';
+ 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
@@ -50,6 +55,19 @@ export default function AppNavigator() {
          <Stack.Screen name="Register" 
         component={RegisterScreen} 
         options={{ headerShown: false ,  animation: 'slide_from_left'}} />
+
+  <Stack.Screen name="NewRegister" 
+        component={NewRegister} 
+        options={{ headerShown: false ,  animation: 'slide_from_left'}} />
+
+          <Stack.Screen name="PasswordScreen" 
+        component={PasswordScreen} 
+        options={{ headerShown: false , title : '' ,  animation: 'slide_from_left'}} />
+
+              <Stack.Screen name="ContactUs" 
+        component={ContactUs} 
+        options={{ headerShown: false ,  animation: 'slide_from_right'}} />
+        
 
          <Stack.Screen name="Forgotpassword" 
         component={ForgotPassword} 
@@ -118,9 +136,6 @@ options={{ headerShown: false,  animation: 'slide_from_bottom' , animationDurati
   component={DeleteAccount}  
 />
 
-<Stack.Screen name="ProfilePreview" component={ProfilePreview}
-options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
-
 
 <Stack.Screen name="EmailCommunication" component={EmailCommunication}
 options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
@@ -132,29 +147,205 @@ options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisibl
   component={DeleteAccountSuccess}  
 />
 
-<Stack.Screen
-  options={{
-    headerShown: true,
-    animation: 'slide_from_right',
-    animationDuration: 600
-  }}
-  name="EmailConnectionUI"
->
-  {(props) => (
-    <EmailConnectionUI
-      {...props}
-      onNext={() => console.log("Next clicked")}
-      goToLastStep={() => console.log("Go to last step")}
-      stepToEdit={0}
-    />
-  )}
-</Stack.Screen>
+
 
 <Stack.Screen name="SuccessProfileScreen" component={SuccessProfileScreen}
 options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
 
 
 
+
+{/* <Stack.Screen name="ProfilePreview" component={ProfilePreview}
+options={{ headerShown: false,   animation: 'slide_from_right' , headerBackVisible: true ,  gestureEnabled: false,}} /> */}
+<Stack.Screen
+  options={{
+    headerShown: false,
+    animation: "slide_from_right",
+    animationDuration: 600,
+  }}
+  name="ProfilePreview"
+>
+  {(props) => {
+    const { selectedGames,  stepToEdit, currentSteps } = props.route.params || {};
+    return (
+      <ProfilePreview
+        {...props}
+        selectedGames={selectedGames}
+        currentSteps={currentSteps}
+        stepToEdit={stepToEdit}
+        onNext={() => console.log("Next clicked")}
+        goToLastStep={() => console.log("Go to last step")}
+      />
+    );
+  }}
+</Stack.Screen>
+
+ 
+ {/* <Stack.Screen
+  options={{
+    headerShown: false,
+    animation: 'slide_from_right',
+    animationDuration: 600,
+  }}
+  name="EmailConnectionUI"   
+>
+  {(props) => (
+    <EmailConnectionUI
+      {...props}
+      onNext={() => console.log("Next clicked")}
+      goToLastStep={() => console.log("Go to last step")}
+      stepToEdit={null}
+    />
+  )}
+</Stack.Screen> */}
+
+
+<Stack.Screen
+  options={{
+    headerShown: false,
+    animation: "slide_from_right",
+    animationDuration: 600,
+  }}
+  name="EmailConnectionUI"
+>
+  {(props) => {
+    const { selectedGames,  stepToEdit, currentSteps } = props.route.params || {};
+    return (
+      <EmailConnectionUI
+        {...props}
+        selectedGames={selectedGames}
+        currentSteps={currentSteps}
+        stepToEdit={stepToEdit}
+        onNext={() => console.log("Next clicked")}
+        goToLastStep={() => console.log("Go to last step")}
+      />
+    );
+  }}
+</Stack.Screen>
+
+ {/* <Stack.Screen
+  options={{
+    headerShown: false,
+    animation: 'slide_from_right',
+    animationDuration: 600,
+  }}
+  name="CollegePreferences"   
+>
+  {(props) => (
+    <CollegePreferences
+      {...props}
+      onNext={() => console.log("Next clicked")}
+      goToLastStep={() => console.log("Go to last step")}
+      stepToEdit={0}
+    />
+  )}
+</Stack.Screen> */}
+
+<Stack.Screen
+  options={{
+    headerShown: false,
+    animation: "slide_from_right",
+    animationDuration: 600,
+  }}
+  name="CollegePreferences"
+>
+  {(props) => {
+    const { selectedGames,  stepToEdit, currentSteps } = props.route.params || {};
+    return (
+      <CollegePreferences
+        {...props}
+        selectedGames={selectedGames}
+        currentSteps={currentSteps}
+        stepToEdit={stepToEdit}
+        onNext={() => console.log("Next clicked")}
+        goToLastStep={() => console.log("Go to last step")}
+      />
+    );
+  }}
+</Stack.Screen>
+
+ {/* <Stack.Screen
+  options={{
+    headerShown: false,
+    animation: 'slide_from_right',
+    animationDuration: 600,
+  }}
+  name="Athletic"   
+>
+  {(props) => (
+    <Athletic
+          selectedGames={[]} currentSteps={0} {...props}
+          onNext={() => console.log("Next clicked")}
+          goToLastStep={() => console.log("Go to last step")}    />
+  )}
+</Stack.Screen> */}
+<Stack.Screen
+  options={{
+    headerShown: false,
+    animation: "slide_from_right",
+    animationDuration: 600,
+  }}
+  name="Athletic"
+>
+  {(props) => {
+    const { selectedGames,  stepToEdit, currentSteps } = props.route.params || {};
+    return (
+      <Athletic
+        {...props}
+        selectedGames={selectedGames}
+        currentSteps={currentSteps}
+        stepToEdit={stepToEdit}
+        onNext={() => console.log("Next clicked")}
+        goToLastStep={() => console.log("Go to last step")}
+      />
+    );
+  }}
+</Stack.Screen>
+
+
+
+ {/* <Stack.Screen
+  options={{
+    headerShown: false,
+    animation: 'slide_from_right',
+    animationDuration: 600,
+    
+  }}
+  name="Academic"   
+>
+  {(props) => (
+    <Academic
+      {...props}
+      onNext={() => console.log("Next clicked")}
+      goToLastStep={() => console.log("Go to last step")}
+      stepToEdit={0}
+    />
+  )}
+</Stack.Screen> */}
+
+
+<Stack.Screen
+  options={{
+    headerShown: false,
+    animation: "slide_from_right",
+    animationDuration: 600,
+  }}
+  name="Academic"
+>
+  {(props) => {
+    const { selectedGames,  stepToEdit, currentSteps } = props.route.params || {};
+    return (
+      <Academic
+        {...props}
+        selectedGames={selectedGames}
+        currentSteps={currentSteps}
+        stepToEdit={stepToEdit}
+        onNext={() => console.log("Next clicked")}
+        goToLastStep={() => console.log("Go to last step")}
+      />
+    );
+  }}
+</Stack.Screen>
 
       </Stack.Navigator>
     // </NavigationContainer>

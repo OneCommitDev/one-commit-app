@@ -19,6 +19,9 @@ type CustomDualPickerModalProps = {
   selectedUnit: 'kg' | 'lbs';
   onUnitChange: (unit: 'kg' | 'lbs') => void;
   onSave: (mainValue: number, decimalValue: number, unit: 'kg' | 'lbs') => void;
+
+  initialMainValue?: number;
+  initialDecimalValue?: number;
 };
 
 export const CustomDualPickerModal: React.FC<CustomDualPickerModalProps> = ({
@@ -27,19 +30,12 @@ export const CustomDualPickerModal: React.FC<CustomDualPickerModalProps> = ({
   selectedUnit,
   onUnitChange,
   onSave,
+  initialMainValue,
+  initialDecimalValue,
 }) => {
-  const [mainIndex, setMainIndex] = useState(149); // lbs default (index for 150)
+  const [mainIndex, setMainIndex] = useState(0);
   const [decimalIndex, setDecimalIndex] = useState(0);
-
-  // Update indexes based on unit toggle
-  useEffect(() => {
-    if (selectedUnit === 'kg') {
-      setMainIndex(69); // index for 70
-    } else {
-      setMainIndex(149); // index for 150
-    }
-    setDecimalIndex(5); // ✅ Reset to 5 whenever modal opens or unit changes
-  }, [selectedUnit, visible]);
+  const [firstOpen, setFirstOpen] = useState(true); // to detect first open
 
   const generateRange = (start: number, end: number) =>
     Array.from({ length: end - start + 1 }, (_, i) => ({
@@ -49,10 +45,47 @@ export const CustomDualPickerModal: React.FC<CustomDualPickerModalProps> = ({
     }));
 
   const mainItems = selectedUnit === 'kg'
-    ? generateRange(1, 150) // 1 to 150 kg
-    : generateRange(1, 300); // 1 to 300 lbs
+    ? generateRange(1, 150)
+    : generateRange(1, 300);
 
-  const decimalItems = generateRange(0, 9); // 0 to 9
+  const decimalItems = generateRange(0, 9);
+
+  // set indexes when modal opens
+  useEffect(() => {
+    if (visible) {
+      if (firstOpen) {
+        // first time open → show initial values if provided
+        const mainStart = 1;
+        const mainIdx = initialMainValue
+          ? initialMainValue - mainStart
+          : selectedUnit === 'kg'
+          ? 69 // 70 kg
+          : 149; // 150 lbs
+
+        const decimalIdx = initialDecimalValue ?? 0;
+        setMainIndex(mainIdx >= 0 ? mainIdx : 0);
+        setDecimalIndex(decimalIdx >= 0 ? decimalIdx : 0);
+        setFirstOpen(false);
+      } else {
+        // do nothing, will be handled by toggle press if needed
+      }
+    } else {
+      // reset for next open
+      setFirstOpen(true);
+    }
+  }, [visible]);
+
+  const handleUnitChange = (unit: 'kg' | 'lbs') => {
+    onUnitChange(unit);
+    // When unit changes, set default values for that unit
+    if (unit === 'kg') {
+      setMainIndex(69); // 70 kg
+      setDecimalIndex(0);
+    } else {
+      setMainIndex(149); // 150 lbs
+      setDecimalIndex(0);
+    }
+  };
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -97,7 +130,7 @@ export const CustomDualPickerModal: React.FC<CustomDualPickerModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          {/* Toggle */}
+          {/* Unit Toggle */}
           <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 16 }}>
             <View
               style={{
@@ -110,7 +143,7 @@ export const CustomDualPickerModal: React.FC<CustomDualPickerModalProps> = ({
               }}
             >
               <TouchableOpacity
-                onPress={() => onUnitChange('lbs')}
+                onPress={() => handleUnitChange('lbs')}
                 activeOpacity={1}
                 style={{
                   paddingHorizontal: 24,
@@ -122,7 +155,7 @@ export const CustomDualPickerModal: React.FC<CustomDualPickerModalProps> = ({
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => onUnitChange('kg')}
+                onPress={() => handleUnitChange('kg')}
                 activeOpacity={1}
                 style={{
                   paddingHorizontal: 24,
@@ -146,8 +179,7 @@ export const CustomDualPickerModal: React.FC<CustomDualPickerModalProps> = ({
             }}
           >
             <WheelPickerExpo
-              key={`main-${selectedUnit}`} // ✅ forces re-render on unit switch
-
+              key={`main-${selectedUnit}-${visible}`}
               height={250}
               width={screenWidth / 3}
               items={mainItems}
@@ -160,7 +192,7 @@ export const CustomDualPickerModal: React.FC<CustomDualPickerModalProps> = ({
             <Text style={{ fontSize: 28, fontWeight: '600', marginHorizontal: 8 }}>.</Text>
 
             <WheelPickerExpo
-              key={`decimal-${selectedUnit}`} // ✅ optional if you also want decimal to reset
+              key={`decimal-${selectedUnit}-${visible}`}
               height={250}
               width={screenWidth / 3}
               items={decimalItems}

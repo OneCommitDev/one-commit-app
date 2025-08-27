@@ -55,8 +55,6 @@ const ForgotPasswordRequest = async () => {
     const requestBody = {
       email,
     };
-    console.log(requestBody);
-
     const res = await httpRequest<SimpleResponse>(
       Api_Url.forgotpassword,    'post',    requestBody,    undefined,   true 
     );

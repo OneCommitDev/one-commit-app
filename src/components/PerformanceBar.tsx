@@ -438,9 +438,10 @@ interface PerformanceBarProps {
   score: number;
   min: number;
   max: number;
+  show_min : number;
 }
 
-const PerformanceBar: React.FC<PerformanceBarProps> = ({ title, score, min, max }) => {
+const PerformanceBar: React.FC<PerformanceBarProps> = ({ title, score, min, max , show_min }) => {
   const [labelWidth, setLabelWidth] = useState(0);
   const [barWidth, setBarWidth] = useState(0);
   const barRef = useRef<View>(null);
@@ -509,7 +510,9 @@ const PerformanceBar: React.FC<PerformanceBarProps> = ({ title, score, min, max 
         {/* <Text className="text-sm text-black">{Number(min).toFixed(1)}</Text>
         <Text className="text-sm text-black">{Number(max).toFixed(1)}</Text> */}
 
-        <Text className="text-sm text-black ml-[90px]">{Number(min).toFixed(1)}</Text>
+        {/* <Text className="text-sm text-black ml-[90px]">{Number(min).toFixed(1)}</Text> */}
+                <Text className="text-sm text-black ml-[90px]">{Number(show_min).toFixed(1)}</Text>
+
         <Text className="text-sm text-black mr-[90px]">{Number(max).toFixed(1)}</Text>
         
       </View>

@@ -130,7 +130,8 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           accessToken ?? '',
           true
         );
-
+// console.log('dots_',url);
+        console.log('dots_', res.data);
         const newData = Array.isArray(res.data) ? res.data : [];
 
         if (newData.length === 0) {
@@ -221,7 +222,6 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           const url = Api_Url.schoolsMatchesDelete(deleteId , type);
           const res = await httpRequest2<SimpleResponse>(url, 'post', {}, accessToken ?? '', true);
 
-          console.log('save_res' , res);
           if (res.status) {
             setMatches(prev => prev.filter(item => item.school_id !== deleteId));
             setTotal(prev => Math.max(prev - 1, 0));
@@ -232,7 +232,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
             // await fetchColleges(offset, true); // safer
           }
         } catch (err) {
-          console.log('Error deleting school', err);
+         // console.log('Error deleting school', err);
           Alert.alert('Error', 'Unexpected error occurred.');
         } finally {
           setLoading(false); // Hide global loader
@@ -241,8 +241,6 @@ const [isArchiveData, setIsArchiveData] = useState(false);
  
 
       const deleteCollegesTemp = async (deleteId: string , type : string) => {
-            console.log('deleteColleges');
-
         try {
           setLoading(true);  
 
@@ -268,7 +266,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           // Optional: fetch fresh data if needed
           await fetchColleges(offset, true);
         } catch (err) {
-          console.log('Error deleting school', err);
+         // console.log('Error deleting school', err);
           Alert.alert('Error', 'Unexpected error occurred.');
         } finally {
           setLoading(false);
@@ -354,7 +352,6 @@ const handleSlideCard = () => {
 const handleSelect = (item: SearchSchoolData) => {
   setSearchText(item.name);
   setFilteredData([]); // Hide dropdown
-  console.log('Selected:', item.school_id);
     if (item.school_id) {
     searchschoolByID(item.school_id); // 🔥 Call API with selected ID
   }
@@ -373,7 +370,6 @@ const handleSelect = (item: SearchSchoolData) => {
       url,      'post',      {school_id : schoolId},      accessToken ?? '',      true    );
 
     const resultData = Array.isArray(res.data) ? res.data : [];
-      console.log('resultData' , resultData);
     if (resultData.length === 0) {
       setNoMoreData(true);
       setMatches([]);
@@ -389,7 +385,6 @@ const handleSelect = (item: SearchSchoolData) => {
 
   } catch (err) {
     Alert.alert('Error', 'Failed to fetch school by ID.');
-    console.error(err);
   } finally {
     setLoading(false);
   }

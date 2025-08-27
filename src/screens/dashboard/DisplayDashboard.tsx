@@ -61,7 +61,7 @@ const [sheetData, setSheetData] = useState<{ schoolid: string }>({ schoolid: '' 
           setTotal(res.pagination.total);
         }
       } catch (err) {
-        console.log('Error fetching school matches', err);
+       // console.log('Error fetching school matches', err);
          Alert.alert('Error', 'Unexpected error occurred.');
       } finally {
          if (append) setLoadingMore(false);
@@ -304,24 +304,24 @@ const [sheetData, setSheetData] = useState<{ schoolid: string }>({ schoolid: '' 
             <Loader show={loading} />
       
       <TitleText size="text-24">Dashboard</TitleText>
-      <AppText className="mb-3">{matches.length} Active Schools</AppText>
 
       {!loading && connectedEmail === false && (
-  <View className="bg-yellow-100 border border-yellow-400 rounded-lg p-4 flex-row items-center mb-10">
+  <View className="bg-yellow-100 border border-yellow-50 rounded-lg p-4 flex-row items-center mb-1">
     <Ionicons name="warning-outline" size={24} color="#B45309" style={{ marginRight: 8 }} />
     
     <View style={{ flex: 1 }}>
-      <AppText className="text-yellow-800 font-semibold">
+      <TitleText className="text-yellow-800  -mt-3">
         Email account not connected
-      </AppText>
-      <AppText className="text-yellow-700 text-sm">
+      </TitleText>
+      <AppText className="text-yellow-700 text-sm -mt-[10px]">
         Connect your email to send and receive emails. Go to the profile settings and connect the email account
       </AppText>
     </View>
   </View>
 )}
 
- 
+       <AppText className="mb-3">{matches.length} Active Schools</AppText>
+
       <FlatList
         data={matches}
         keyExtractor={(item, index) => `${item.school_id}_${index}`}

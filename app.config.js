@@ -1,7 +1,32 @@
+import * as dotenv from "dotenv";
+import fs from "fs";
+
 
 
 export default ({ config }) => ({
+  
   ...config,
+  // "scripts": {
+  //   "build:android": "eas build --platform android --profile production",
+  //   "build:ios": "eas build --platform ios --profile production"
+  //   },
+  //   "expo": {
+  //   "jsEngine": "hermes"
+  // },
+   extra: {
+    appEnv: process.env.EXPO_PUBLIC_APP_ENV,
+    apiUrl: process.env.EXPO_PUBLIC_API_URL,
+    baseImgUrl: process.env.EXPO_PUBLIC_BASE_IMG_URL,
+    xKey: process.env.EXPO_PUBLIC_X_KEY,
+
+    fcm_apiKey : 'AIzaSyDvPcP77wTfw2DjaiLcz9lra7HP7rGsqVI',
+    fcm_authDomain : 'onecommit.firebaseapp.com',
+    fcm_projectId : 'onecommit',
+    fcm_storageBucket : 'onecommit.firebasestorage.app',
+    fcm_messagingSenderId : '429115153068',
+    fcm_appId : '1:429115153068:web:bf3ddb7b230dce9844dd09',
+    fcm_measurementId : 'G-6PFWFC5JHC',
+    },
   name: 'OneCommit',
   slug: 'OneCommit',
   scheme: "com.onecommit.app",
@@ -57,6 +82,7 @@ export default ({ config }) => ({
     bundleIdentifier: 'com.onecommit.app',
      entitlements: {
       'aps-environment': 'development', // or 'production' for production builds
+      "com.apple.developer.applesignin": ["Default"],
     },
     infoPlist: {
      NSUserTrackingUsageDescription: 'This identifier will be used to deliver personalized ads to you.',
@@ -90,8 +116,9 @@ export default ({ config }) => ({
   android: {
         googleServicesFile: './fcm/google-services.json',
         permissions: [
-             'NOTIFICATIONS', 
+             'NOTIFICATIONS', 'POST_NOTIFICATIONS',
     ],
+     allowBackup: false,
     package: 'com.onecommit.app',
      "userInterfaceStyle": "light",
     usesCleartextTraffic: true,
@@ -122,5 +149,6 @@ export default ({ config }) => ({
   navigationBar: {
     backgroundColor: '#007BFF',
     barStyle: 'light-content'
-  }
+  },
+    jsEngine: "hermes", 
 });

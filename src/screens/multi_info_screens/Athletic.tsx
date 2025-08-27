@@ -15,12 +15,20 @@ import { HeightPickerModal2 } from '~/components/HeightPickerModal2';
 import { NumberPickerModal } from '~/components/NumberPickerModal';
 import { Applog } from '~/utils/logger';
 import TitleText from '~/components/TitleText';
-import { useFocusEffect } from '@react-navigation/native';
+import { StackActions, useFocusEffect, useNavigation } from '@react-navigation/native';
+ import { unstable_batchedUpdates } from 'react-native';
+import * as Sentry from '@sentry/react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SelectedGame } from './GamesGrid';
+import Animated, { SlideInRight } from "react-native-reanimated";
 
 type Props = {
   onNext?: () => void;
   stepToEdit?: any;
     goToLastStep?: () => void;
+    selectedGames: SelectedGame[];
+    currentSteps : number;
 };
 
 type InputItem = {
@@ -39,7 +47,33 @@ type Section = {
 
 const MAX_CHARS = 500;
 
-const Athletic: React.FC<Props> = ({ onNext , stepToEdit , goToLastStep}) => {
+export type RootStackParamList = {
+    MultiStepSurvey: {
+  selectedGames: SelectedGame[];
+    stepToEdit?: number | null;
+  };
+   Academic: {
+  selectedGames: SelectedGame[];
+    stepToEdit?: number | null;
+    currentSteps : number;
+};
+   ProfilePreview: {
+  selectedGames: SelectedGame[];
+    stepToEdit?: number | null;
+    currentSteps : number;
+};
+
+
+
+  };
+
+ 
+type Nav = NativeStackNavigationProp<RootStackParamList>;
+
+//selectedGames: SelectedGame[]
+const Athletic: React.FC<Props> = ({ onNext , stepToEdit , goToLastStep, selectedGames , currentSteps}) => {
+      const navigation = useNavigation<Nav>(); 
+  
   const [form, setForm] = useState<
     Record<
       string,
@@ -63,12 +97,13 @@ const Athletic: React.FC<Props> = ({ onNext , stepToEdit , goToLastStep}) => {
   const [heightInputKey, setHeightInputKey] = useState<string | null>(null);
   const [showMeterModal, setShowMeterModal] = useState(false);
   const [meterInputKey, setMeterInputKey] = useState<string | null>(null);
-// const [rawSportData, setRawSportData] = useState<GetSportsAlldata['sportUserData']>([]);
-const [rawSportData, setRawSportData] = useState<
+  const [rawSportData, setRawSportData] = useState<
   GetSportsAlldata['data']['sportUserFormattedData']
->([]);
+  >([]);
 
   const [events, setEvents] = useState<HoldSportsdata[]>([]);
+  const [showExtraFields, setShowExtraFields] = useState(false);
+  const [screenload, setScreenload] = useState(false);
 
   const handleChange = (key: string, value: string) => {
     setForm((prev) => ({
@@ -88,22 +123,6 @@ const [rawSportData, setRawSportData] = useState<
     section.inputs.every((input) => form[input.key]?.input?.trim().length)
   );
 
-  // const handleSubmit = () => {
-  //   const charCount = form['additional']?.input?.length || 0;
-  //   if (charCount > MAX_CHARS) {
-  //     Alert.alert('Character Limit Exceeded', `Please limit your response to ${MAX_CHARS} characters.`);
-  //     return;
-  //   }
-  //   // onNext?.();
-  //   const temp_data = sections;
-  //  // SaveApiRequest(temp_data);
-  //  console.log(temp_data);
-  // };
-
-
-
-
-
 
 
   const metricOptions = ['Metric', 'Imperial'];
@@ -122,146 +141,39 @@ const [rawSportData, setRawSportData] = useState<
     },
     {} as Record<string, { key: string; label: string; value: string }[]>
   );
+
+
+// useFocusEffect(
+//   React.useCallback(() => {
+//     fetchAthletic();
+//     return () => {};
+//   }, [])
+// );
 /*
- useEffect(() => {
-  let mounted = true;
+  useEffect(() => {   
+     fetchAthletic();
+  }, []);  
 
   const fetchAthletic = async () => {
     try {
       setLoading(true);
       const accessToken = await getItem(PREF_KEYS.accessToken);
       const res = await httpRequest2<GetSportsAlldata>(
-        Api_Url.save_sports,
-        'get',
-        {},
-        accessToken ?? ''
-      );
-
-      if (mounted && res.status && res.data.sportUserFormattedData) {
-        // 1. Save raw data
-        setRawSportData(res.data.sportUserFormattedData);
-
-        // 2. Transform to FlatList-friendly format
-        const transformedSections: Section[] = res.data.sportUserFormattedData.map((sport) => ({
-          title: sport.display_name,
-          img: `${base_url_images}${sport.img_path?.startsWith('/') ? sport.img_path.slice(1) : sport.img_path}`,
-          inputs: (sport.events || []).map((event) => ({
-            key: event.event_name,
-            label: event.display_name,
-            placeholder: `Enter value in ${event.measurement_unit || ''}`,
-            type: event.measurement_type || '',
-            value : event.eventValue || '',
-          })),
-        }));
-        setSections(transformedSections);
-
-        // 3. Initialize form state
-        const initialForm: typeof form = {};
-        res.data.sportUserFormattedData.forEach((sport) => {
-          sport.events?.forEach((event) => {
-            const key = event.event_name;
-            const type = event.measurement_type;
-            const eventValue = event.eventValue;
-
-            initialForm[key] = {
-              input: eventValue,  
-              selected: '',
-              selectedUnit: (type === 'height' || type === 'distance') ? undefined : undefined,
-              feet: '',
-              meters: '',
-            };
-          });
-        });
-
-        
-
-        // // Additional keys (videoLink and additional info)
-        // initialForm['videoLink'] = { input: '' };
-        // initialForm['additional'] = { input: '' };
-
-        // Additional keys (videoLink and additional info)
-          initialForm['videoLink'] = { input: res.data.media_links || '' };
-          initialForm['additional'] = { input: res.data.additional_links || '' };
-
-
-        setForm(initialForm);
-      }
-    } catch (err) {
-      console.log('Error fetching athletic data', err);
-      Alert.alert('Error', 'Unexpected error occurred.');
-    } finally {
-      if (mounted) setLoading(false);
-    }
-  };
-
-   //fetchAthletic();
-
-
-  return () => {
-    mounted = false;
-  };
-}, []);
-*/
-  
-/*
-useFocusEffect(
-  React.useCallback(() => {
-    const task = InteractionManager.runAfterInteractions(() => {
-      fetchAthletic();
-    });
-
-    return () => task.cancel();
-  }, [])
-);
-*/
-useFocusEffect(
-  React.useCallback(() => {
-    fetchAthletic();
-    return () => {};
-  }, [])
-);
-/*
-useFocusEffect(
-  React.useCallback(() => {
- const task = InteractionManager.runAfterInteractions(() => {
-  try {
-    fetchAthletic();
-  } catch (e) {
-    console.log('InteractionManager error:', e);
-  }
-});
-
-
-    return () => task.cancel();
-  }, [])
-);
-*/
-
-  const fetchAthletic = async () => {
-    try {
-      setLoading(true);
-      const accessToken = await getItem(PREF_KEYS.accessToken);
-      const res = await httpRequest2<GetSportsAlldata>(
-        Api_Url.save_sports,
-        'get',
-        {},
-        accessToken ?? ''
-      );
+        Api_Url.save_sports,     'get',    {},   accessToken ?? ''   );
 
       if (res.status && res.data.sportUserFormattedData) {
-        // 1. Save raw data
+        InteractionManager.runAfterInteractions(() => {
+           requestAnimationFrame(() => {
         setRawSportData(res.data.sportUserFormattedData);
 
-        // 2. Transform to FlatList-friendly format
         const transformedSections: Section[] = res.data.sportUserFormattedData.map((sport) => ({
           title: sport.display_name,
-          // img: `${base_url_images}${sport.img_path?.startsWith('/') ? sport.img_path.slice(1) : sport.img_path}`,
-          img: `${base_url_images}${
-  (sport.img_path?.startsWith('/') 
-    ? sport.img_path.slice(1) 
-    : sport.img_path
-  )?.replace(/^v1\//, '') // remove v1/ at the start if present
-}`,
+                  img: `${base_url_images}${
+          (sport.img_path?.startsWith('/') 
+            ? sport.img_path.slice(1) 
+            : sport.img_path
+          )?.replace(/^v1\//, '') 
+        }`,
 
           inputs: (sport.events || []).map((event) => ({
             key: event.event_name,
@@ -291,30 +203,153 @@ useFocusEffect(
           });
         });
 
-        
-
-        // // Additional keys (videoLink and additional info)
-        // initialForm['videoLink'] = { input: '' };
-        // initialForm['additional'] = { input: '' };
-
-        // Additional keys (videoLink and additional info)
           initialForm['videoLink'] = { input: res.data.media_links || '' };
           initialForm['additional'] = { input: res.data.additional_links || '' };
 
 
-        setForm(initialForm);
+             setForm(initialForm);
+           setLoading(false);
+
+        });
+         });
       }
     } catch (err) {
+       setLoading(false);
       console.log('Error fetching athletic data', err);
       Alert.alert('Error', 'Unexpected error occurred.');
     } finally {
       setLoading(false);
     }
+
+  };
+*/
+
+
+
+ const fetchAthletic = async () => {
+    setLoading(true);
+    try {
+      const accessToken = await getItem(PREF_KEYS.accessToken);
+      const res = await httpRequest2<GetSportsAlldata>(
+        Api_Url.save_sports,   'get',      {},    accessToken ?? ''    );
+
+      if (res.status && res.data.sportUserFormattedData) {
+        InteractionManager.runAfterInteractions(() => {
+          // setRawSportData(res.data.sportUserFormattedData);
+          processSportsDataInChunks(res.data.sportUserFormattedData);
+/*
+          const transformedSections: Section[] = res.data.sportUserFormattedData.map((sport) => ({
+            title: sport.display_name,
+            img: `${base_url_images}${
+              (sport.img_path?.startsWith('/')
+                ? sport.img_path.slice(1)
+                : sport.img_path
+              )?.replace(/^v1\//, '')
+            }`,
+            inputs: (sport.events || []).map((event) => ({
+              key: event.event_name,
+              label: event.display_name,
+              placeholder: `Enter value in ${event.measurement_unit || ''}`,
+              type: event.measurement_type || '',
+              value: event.eventValue || '',
+            })),
+          }));
+*/
+          const initialForm: typeof form = {};
+          res.data.sportUserFormattedData.forEach((sport) => {
+            sport.events?.forEach((event) => {
+              const key = event.event_name;
+              const type = event.measurement_type;
+              const eventValue = event.eventValue;
+
+              initialForm[key] = {
+                input: eventValue,
+                selected: '',
+                selectedUnit: (type === 'height' || type === 'distance') ? undefined : undefined,
+                feet: '',
+                meters: '',
+              };
+            });
+          });
+      unstable_batchedUpdates(() => {
+         // setSections(transformedSections);
+          setForm(initialForm);
+        });
+          initialForm['videoLink'] = { input: res.data.media_links || '' };
+          initialForm['additional'] = { input: res.data.additional_links || '' };
+          setLoading(false);  
+          setScreenload(true);
+        });
+      }else{
+        setScreenload(true);
+         setLoading(false);
+      }
+    } catch (err) {
+      setLoading(false);
+      setScreenload(true);
+      console.log('Error fetching athletic data', err);
+      Alert.alert('Error', 'Unexpected error occurred.');
+    }
   };
 
 
+
+  useEffect(() => {
+ 
+      const task = InteractionManager.runAfterInteractions(() => {
+    setTimeout(() => { 
+         fetchAthletic();
+         }, 100);
+     });
+      return () => task.cancel();
+   }, []);
+
+ 
+
+  const processSportsDataInChunks = (data: GetSportsAlldata['data']['sportUserFormattedData']) => {
+  let chunkSize = 10;  
+  let index = 0;
+
+  const processNext = () => {
+    const chunk = data.slice(index, index + chunkSize);
+    setSections(prev => [
+      ...prev,
+      ...chunk.map(sport => ({
+        title: sport.display_name,
+        img: `${base_url_images}${
+          (sport.img_path?.startsWith('/')
+            ? sport.img_path.slice(1)
+            : sport.img_path
+          )?.replace(/^v1\//, '')
+        }`,
+        inputs: (sport.events || []).map(event => ({
+          key: event.event_name,
+          label: event.display_name,
+          placeholder: `Enter value in ${event.measurement_unit || ''}`,
+          type: event.measurement_type || '',
+          value: event.eventValue || '',
+        })),
+      })),
+    ]);
+
+    index += chunkSize;
+    if (index < data.length) {
+      requestAnimationFrame(processNext); // yields to UI
+    }
+  };
+
+
+  processNext();
+    setRawSportData(data);
+
+};
+
+
+
+
+
 const handleSubmit = () => {
-  const charCount = form['additional']?.input?.length || 0;
+   const charCount = form['additional']?.input?.length || 0;
   if (charCount > MAX_CHARS) {
     Alert.alert('Character Limit Exceeded', `Please limit your response to ${MAX_CHARS} characters.`);
     return;
@@ -354,13 +389,12 @@ const handleSubmit = () => {
     sports_profile: JSON.stringify(sportsDataToSave),
     additional_info: form['additional']?.input || '',
     media_links: form['videoLink']?.input || '',
-      ...(stepToEdit != null && { ui_flow: 'profile_edit' })  
   };
 
- 
 
   SaveApiRequest(payload);  
 };
+
   const SaveApiRequest = async (allData: any) => {
     try {
       setLoading(true);
@@ -383,16 +417,30 @@ const handleSubmit = () => {
         accessToken ?? '',
         true
       );
-
-      console.log('reseseeses' , res);
-
       if (res.status) {
+         setLoading(false);
          setTimeout(() => {
-          if(stepToEdit != null){
+      /*    if(stepToEdit != null){
             goToLastStep?.();
-          }else{
-            onNext?.();
+                Alert.alert(stepToEdit+'part');
+              }else{
+               Alert.alert('hgffgfghfghfghf');
+            // onNext?.();
+             navigation?.navigate('Academic' , {selectedGames : [], stepToEdit : 0});
           }
+             */
+            if(stepToEdit != null || stepToEdit != undefined){
+                // navigation.popToTop();
+                navigation.dispatch(StackActions.popTo('ProfilePreview'));
+                navigation.navigate('ProfilePreview', {
+                  selectedGames : selectedGames,
+                  stepToEdit : 1,
+                  currentSteps : 1,
+                });
+            }else{
+               navigation?.navigate('Academic' , {selectedGames : selectedGames, stepToEdit : 0, currentSteps : 2});
+            }
+
         }, 300);
       } else {
         Alert.alert('Error', res.message ?? 'Failed to submit.');
@@ -405,16 +453,57 @@ const handleSubmit = () => {
   };
 
 
+  const handleBack = () => {
+   // navigation.goBack();
+    navigation.goBack();
+     //   navigation.navigate('GamesGrid');
+          // navigation.replace('MultiStepSurvey', {
+          //     selectedGames: selectedGames,
+          //     stepToEdit: null, // ✅ use colon, not semicolon
+          //   });
+  };
 
+ 
 
   return (
-    <KeyboardAvoidingView
-      className="bg-background"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    
+<View className="flex-1 bg-background px-4 pt-14">
+      <View className="flex-row items-center justify-between mb-1">
+
+   <TouchableOpacity
+                  onPress={handleBack}
+                  className="w-12 h-12 rounded-full bg-[#E3E9E5] items-center justify-center"
+                >
+                  <Ionicons name="chevron-back" size={24} color="#1A322E" />
+                </TouchableOpacity>
+
+<View className="flex-1 mx-10 my-5">
+          <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden">
+            <View
+              className="h-full bg-primary rounded-full"
+              style={{ width: `${((1 + 1) / 6) * 100}%` }}
+            />
+          </View>
+        </View>
+
+
+              </View>
+
+               {/* <Animated.View
+      entering={SlideInRight.duration(500)} // 500ms slide from right
       style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
     >
-      <Loader show={loading} />
+ </Animated.View> */}
+      <View className="items-center mb-4 -mt-[6]">
+      <TitleText className="text-center">
+        Personal Records
+      </TitleText>
+      <AppText className="text-center mb-5 -mt-2 ml-2 mr-2">
+        Showcase your physical stats and achievements
+      </AppText>
+      </View>
+
+      <View className='flex-1'>
 
       <HeightPickerModal2
         title="Select Feet"
@@ -478,80 +567,80 @@ const handleSubmit = () => {
         />
       )}
 
-      <TimePickerModal
-        visible={showTimePicker}
-        initialValue={{ minutes: 0, seconds: 0, milliseconds: 0 }}
-        onClose={() => setShowTimePicker(false)}
-        onSave={(selected) => {
-          const formatted = `${selected.minutes.toString().padStart(2, '0')}:${selected.seconds
-            .toString()
-            .padStart(2, '0')}:${selected.milliseconds.toString().padStart(2, '0')}`;
-          if (activePickerKey) {
-            setForm((prev) => ({
-              ...prev,
-              [activePickerKey]: {
-                ...(prev[activePickerKey] || {}),
-                input: formatted,
-              },
-            }));
-            setShowTimePicker(false);
-            setActivePickerKey(null);
-          }
-        }}
-      />
+     
 
+      <TimePickerModal
+  visible={showTimePicker}
+  initialValue={{
+    minutes: parseInt(
+      activePickerKey && form[activePickerKey]?.input
+        ? form[activePickerKey].input.split(':')[0]
+        : '0',
+      10
+    ),
+    seconds: parseInt(
+      activePickerKey && form[activePickerKey]?.input
+        ? form[activePickerKey].input.split(':')[1]
+        : '0',
+      10
+    ),
+    milliseconds: parseInt(
+      activePickerKey && form[activePickerKey]?.input
+        ? form[activePickerKey].input.split(':')[2]
+        : '0',
+      10
+    ),
+  }}
+  onClose={() => setShowTimePicker(false)}
+  onSave={(selected) => {
+    const formatted = `${selected.minutes
+      .toString()
+      .padStart(2, '0')}:${selected.seconds
+      .toString()
+      .padStart(2, '0')}:${selected.milliseconds
+      .toString()
+      .padStart(2, '0')}`;
+
+    if (activePickerKey) {
+      setForm((prev) => ({
+        ...prev,
+        [activePickerKey]: {
+          ...(prev[activePickerKey] || {}),
+          input: formatted,
+        },
+      }));
+      setShowTimePicker(false);
+      setActivePickerKey(null);
+    }
+  }}
+/>
+   {screenload ? (
+      //Screen content shows after screenload = true
+    <>
+    <KeyboardAvoidingView
+    className='bg-background'
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={80}
+    >
       <FlatList
         data={sections}
-          scrollIndicatorInsets={{ right: 1 }}  
-           /* ---- SCROLLBAR FIX / OPTIONS ---- */
-        //  showsVerticalScrollIndicator={false}   
-        automaticallyAdjustsScrollIndicatorInsets={false}
+         initialNumToRender={5}
+         maxToRenderPerBatch={8}
+          windowSize={5}
+            removeClippedSubviews={true}
+             updateCellsBatchingPeriod={50}
+               getItemLayout={(data, index) => ({
+                length: 300, // approximate row height
+                offset: 300 * index,
+                index,
+              })}
+          onLayout={() => {
+          requestAnimationFrame(() => setShowExtraFields(true));
+        }}
+         showsVerticalScrollIndicator={true}   
+        automaticallyAdjustsScrollIndicatorInsets={true}
         keyExtractor={(section) => section.title}
-        ListFooterComponent={
-  <View className="px-4">
-    <View className="mb-5 -mt-3">
-      <TitleText>Meet Highlight Link (optional)</TitleText>
-      <AppInput
-        value={form['videoLink']?.input || ''}
-        keyboardType="default"
-        multiline
-        numberOfLines={4}
-        onChangeValue={(text) => handleChange('videoLink', text)}
-        placeholder="Meet Highlight Link"
-        className="h-24"
-        textAlignVertical="top"
-      />
-    </View>
-
-    <View className="mb-5 -mt-3">
-      <TitleText>Any additional information</TitleText>
-      <AppInput
-        value={form['additional']?.input || ''}
-        keyboardType="default"
-        multiline
-        numberOfLines={4}
-        onChangeValue={(text) => handleChange('additional', text)}
-        placeholder="Any additional information..."
-        className="h-24"
-        textAlignVertical="top"
-      />
-      <View className="flex-row justify-end mt-1">
-        <Text
-          className={`text-xs text-right ${
-            (form['additional']?.input?.length || 0) > MAX_CHARS
-              ? 'text-red-500'
-              : 'text-gray-500'
-          }`}
-        >
-          {(form['additional']?.input?.length || 0)}/{MAX_CHARS}
-        </Text>
-      </View>
-    </View>
-           <ArrowButton text="Continue" onPress={handleSubmit} fullWidth disabled={!isFormValid} />
-  </View>
-}
-
-        renderItem={({ item: section }) => (
+           renderItem={({ item: section }) => (
           <View className="mb-8 bg-[#f7f9f9] rounded-2xl px-5 py-5 border border-gray-300">
             <View className="flex-row items-center mb-2 px-1">
               <Image
@@ -695,10 +784,78 @@ const handleSubmit = () => {
             ))}
           </View>
         )}
-        contentContainerStyle={{ paddingBottom: 100 }}
+ 
+ListFooterComponent={
+  loading
+    ? null
+    : (
+      <View className="px-4">
+        <View className="mb-5 -mt-3">
+          <TitleText>Meet Highlight Link (optional)</TitleText>
+          <AppInput
+            value={form['videoLink']?.input || ''}
+            keyboardType="default"
+            multiline
+            numberOfLines={4}
+            onChangeValue={(text) => handleChange('videoLink', text)}
+            placeholder="Meet Highlight Link"
+            className="h-24"
+            textAlignVertical="top"
+          />
+        </View>
+
+        <View className="mb-5 -mt-3">
+          <TitleText>Any additional information</TitleText>
+          <AppInput
+            value={form['additional']?.input || ''}
+            keyboardType="default"
+            multiline
+            numberOfLines={4}
+            onChangeValue={(text) => handleChange('additional', text)}
+            placeholder="Any additional information..."
+            className="h-24"
+            textAlignVertical="top"
+          />
+          <View className="flex-row justify-end mt-1">
+            <Text
+              className={`text-xs text-right ${
+                (form['additional']?.input?.length || 0) > MAX_CHARS
+                  ? 'text-red-500'
+                  : 'text-gray-500'
+              }`}
+            >
+              {(form['additional']?.input?.length || 0)}/{MAX_CHARS}
+            </Text>
+          </View>
+        </View>
+
+        <ArrowButton
+          text="Continue"
+          onPress={handleSubmit}
+          fullWidth
+          disabled={!isFormValid}
+        />
+      </View>
+    )
+}
+
+
+     
+          contentContainerStyle={{ paddingBottom: showExtraFields ? 100 : 20 }}
         keyboardShouldPersistTaps="handled"
       />
-    </KeyboardAvoidingView>
+</KeyboardAvoidingView>
+ </>
+    ) : (
+      // ⏳ Loader while screenload = false
+      <View className="flex-1 items-center justify-center">
+        
+      </View>
+    )}
+            <Loader show={loading} />
+</View>
+
+  </View>
   );
 };
 

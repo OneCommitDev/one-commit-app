@@ -4,3 +4,12 @@ declare module "nativewind" {
     children: React.ReactNode;
   }>;
 }
+
+declare global {
+  interface Global {
+    HermesInternal?: any;
+  }
+  
+  var global: Global;
+}
+export {};

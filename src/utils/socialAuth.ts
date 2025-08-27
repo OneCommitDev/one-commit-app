@@ -2,8 +2,9 @@
 import * as AuthSession from 'expo-auth-session';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as WebBrowser from 'expo-web-browser';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import {  APP_CONFIG_MICROSOFT } from './constants';
+import { useEffect } from 'react';
 
 WebBrowser.maybeCompleteAuthSession(); // Required for auth flows
 
@@ -34,6 +35,11 @@ export const handleAppleLogin = async () => {
     return null;
   }
 };
+
+
+ 
+ 
+
 
 
 // ---------------------------
@@ -143,3 +149,64 @@ export const useMicrosoftEmailConnect = (extraScopes: string[] = []) => {
   return { request, response, promptAsync, handleResponse };
 };
 
+
+
+
+
+
+
+ 
+ WebBrowser.maybeCompleteAuthSession();
+
+const APPLE_CLIENT_ID = "5H5G7LRTHJ";
+const REDIRECT_URI = AuthSession.makeRedirectUri({
+  path: "auth/callback",
+});
+
+export const useAppleLogin = () => {
+  const [request, response, promptAsync] = AuthSession.useAuthRequest(
+    {
+      clientId: APPLE_CLIENT_ID,
+      redirectUri: REDIRECT_URI,
+      responseType: "code id_token",
+      scopes: ["name", "email"],
+    },
+    { authorizationEndpoint: "https://appleid.apple.com/auth/authorize" }
+  );
+
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { code, id_token, email } = response.params;
+      Alert.alert("Apple Login Success", `Email: ${email ?? "N/A"}`);
+      // 👉 Send code or id_token to your backend for verification
+    } else if (response?.type === "error") {
+      Alert.alert("Error", "Apple Sign-In failed");
+    }
+  }, [response]);
+
+  // Call this from your button click
+  const signIn = async () => {
+    if (Platform.OS === "ios") {
+      try {
+        const credential = await AppleAuthentication.signInAsync({
+          requestedScopes: [
+            AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+            AppleAuthentication.AppleAuthenticationScope.EMAIL,
+          ],
+        });
+        Alert.alert("Apple Login (Native)", `User: ${credential.user}`);
+      } catch (e: any) {
+        if (e.code === "ERR_CANCELED") {
+          Alert.alert("Cancelled", "User cancelled sign in.");
+        } else {
+          Alert.alert("Error", e?.message ?? JSON.stringify(e));
+        }
+      }
+    } else {
+      // Android / Web → Web OAuth
+      promptAsync();
+    }
+  };
+
+  return { signIn, request };
+};

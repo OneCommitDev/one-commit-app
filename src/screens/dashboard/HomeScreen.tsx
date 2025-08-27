@@ -1,5 +1,5 @@
-import React, { JSX, useEffect, useState } from 'react';
-import { View, Text, FlatList, Alert, TouchableOpacity } from 'react-native';
+import React, { JSX, useCallback, useEffect, useState } from 'react';
+import { View, Text, FlatList, Alert, TouchableOpacity, Linking, Platform, AppState } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import TitleText from '~/components/TitleText';
 import AppText from '~/components/AppText';
@@ -8,10 +8,12 @@ import { getItem, setItem } from 'expo-secure-store';
 import Loader from '~/components/Loader';
 import { Api_Url, httpRequest2 } from '~/services/serviceRequest';
 import { HomeToDo, SimpleResponse, todo_items } from '~/services/DataModals';
-import { RouteProp, useNavigation } from '@react-navigation/native';
+import { RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '~/navigation/types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getFCMToken } from '~/utils/AppFunctions';
+import messaging from "@react-native-firebase/messaging";
+import { checkNotifications, requestNotifications } from "react-native-permissions";
 
 type CardItem = {
   id: string;
@@ -27,10 +29,15 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: 'Explore'
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [loading, setLoading] = useState(false);
   const [todoList, setTodoList] = useState<HomeToDo | null>(null);
+  const [notificationsAllowed, setNotificationsAllowed] = useState<boolean | null>(null);
+const isHermes = () => typeof global.HermesInternal !== "undefined";
 
   useEffect(() => {
-    fetchTODO();
+    console.log("Hermes enabled:", isHermes());
+
+   fetchTODO();
     fcmTokenSavingAPi();
+    checkPermissionOnLoad();
   }, []);
 
   const fetchTODO = async () => {
@@ -46,19 +53,17 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: 'Explore'
         accessToken ?? ''
       );
 
-      console.log('res_res ' , res);
-
-      if (res.status && res.data) {
+      if (res.status) {
         setTodoList(res);
-        setItem(PREF_KEYS.displayName , res.data.profile.name);
-        setItem(PREF_KEYS.connected_id , res.data.connected_email.email);
-         setItem(PREF_KEYS.connected_id_provider , res.data.connected_email.provider);
+       setItem(PREF_KEYS.displayName, String(res.data?.profile?.name ?? ''));
+      setItem(PREF_KEYS.connected_id, String(res.data?.connected_email?.email ?? ''));
+      setItem(PREF_KEYS.connected_id_provider, String(res.data?.connected_email?.provider ?? ''));
+
       } else {
         Alert.alert('Notice', 'No To-Do items found.');
       }
     } catch (err) {
-      console.log('Error fetching to-do list:', err);
-      Alert.alert('Error', 'Unexpected error occurred.');
+     // Alert.alert('Error', 'Unexpected error occurred.');
     } finally {
       setLoading(false);
     }
@@ -80,9 +85,8 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: 'Explore'
         true
       );
 
-      console.log('FCM token saved:', fcm);
     } catch (err) {
-      Alert.alert('Error', 'Unexpected error occurred.');
+       
     }
   };
 
@@ -98,8 +102,6 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: 'Explore'
   ];
 
   const handleTodoClick = (item: todo_items) => {
-    console.log('Clicked To-Do Item:', item);
-
     if (item.redirect_type === 'dashboard_school' && item.school_id) {
       navigation.navigate('EmailCommunication', {
         id: item.school_id,
@@ -152,22 +154,140 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: 'Explore'
     weekday: 'short',
     day: '2-digit',
     month: 'short',
+     year: 'numeric',   // 2025
   }).format(today);
 
+
+  const requestNotificationPermission = async () => {
+  if (Platform.OS === "ios") {
+    // iOS flow
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+     // Alert.alert("✅ Notifications Enabled (iOS)");
+    } else {
+      Alert.alert(
+        "Notifications Alert",
+        "Notifications are off. Please enable them in Settings to continue receiving alerts.",
+        [
+          {
+            text: "Open Settings",
+            onPress: () => Linking.openURL("app-settings:"),
+          },
+          { text: "Cancel", style: "cancel" },
+        ]
+      );
+    }
+  } else if (Platform.OS === "android") {
+    // Android flow
+    const { status } = await checkNotifications();
+
+    if (status === "granted") {
+      // Alert.alert("✅ Notifications already allowed (Android)");
+      return;
+    }
+
+    const { status: newStatus } = await requestNotifications([
+      "alert",
+      "sound",
+      "badge",
+    ]);
+
+    if (newStatus === "granted") {
+      // Alert.alert("✅ Notifications Enabled (Android)");
+    } else {
+      Alert.alert(
+        "Notifications Alert",
+        "Notifications are off. Please enable them in Settings to continue receiving alerts.",
+        [
+          {
+            text: "Open Settings",
+            onPress: () => Linking.openSettings(),
+          },
+          { text: "Cancel", style: "cancel" },
+        ]
+      );
+    }
+  }
+};
+
+ const checkPermissionOnLoad = async () => {
+    if (Platform.OS === "ios") {
+      const authStatus = await messaging().hasPermission();
+      setNotificationsAllowed(authStatus === messaging.AuthorizationStatus.AUTHORIZED);
+    } else {
+      const { status } = await checkNotifications();
+      setNotificationsAllowed(status === "granted");
+    }
+  };
+
+useFocusEffect(
+  useCallback(() => {
+    (async () => {
+      await checkPermissionOnLoad();
+    })();
+    const sub = AppState.addEventListener('change', (next) => {
+      if (next === 'active') {
+        checkPermissionOnLoad();
+      }
+    });
+    return () => {
+      sub.remove();
+    };
+  }, [])
+);
+
   return (
-    <View className="flex-1 bg-background pt-14">
+    <View className="flex-1 bg-background pt-14 px-4">
       <View className="px-4 mb-6">
         <TitleText size="text-24">
           Hi, {todoList?.data?.profile?.name ?? 'User'} 👋
         </TitleText>
-        <AppText className="-mt-3">{formattedDate}</AppText>
+        <AppText className="-mt-4">{formattedDate}</AppText>
       </View>
+
+      {/* Banner for Notifications if not allowed */}
+      {notificationsAllowed === false && (
+        
+  <View className="bg-yellow-100 border border-yellow-50 rounded-lg p-4 flex-row items-center mb-1">
+  {/* Left side with icon + text */}
+  <View className="flex-1 flex-row items-start">
+    <Ionicons
+      name="warning-outline"
+      size={22}
+      color="#B45309"
+      style={{ marginTop: 2, marginRight: 8 }}
+    />
+    <View className="flex-1">
+      <TitleText className="text-yellow-800  -mt-3">
+        Notifications disabled
+      </TitleText>
+      <AppText className="text-yellow-700 text-sm -mt-3">
+        Please enable notifications to ensure you don’t miss important emails and alerts.
+      </AppText>
+    </View>
+  </View>
+
+  {/* Button */}
+  <TouchableOpacity
+    onPress={requestNotificationPermission}
+    className="bg-yellow-500 px-4 py-2 rounded-lg"
+  >
+    <Text className="text-white font-semibold text-sm">Allow</Text>
+  </TouchableOpacity>
+</View>
+
+
+      )}
 
       <FlatList
         data={buildCardData()}
         renderItem={renderCard}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingHorizontal: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 4 }}
         showsVerticalScrollIndicator={false}
       />
 
@@ -175,3 +295,5 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: 'Explore'
     </View>
   );
 }
+ 
+

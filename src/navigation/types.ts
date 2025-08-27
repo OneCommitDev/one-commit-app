@@ -23,22 +23,25 @@ export type RootStackParamList = {
   SuccessScreen: { message: string; title?: string };
   Success: { message: string; title?: string };
   FillProfileInfoScreen: undefined;
-  CollegePreferences : undefined;
-  EmailConnectionUI: {
-    stepToEdit?: number;
-    onNext?: () => void;
-    goToLastStep?: () => void;
-  };
-  Dashboard : undefined;
+  ContactUs : undefined;
+  Dashboard : {onload : string};
   CollegeMatchDetails: { school: SchoolMatchItem };
 
   AppWebview : {url : string , title : string};
   DeleteAccount : undefined;
 
-  ProfilePreview : { selectedGames: SelectedGame[] , stepToEdit : any };
+    ProfilePreview : { selectedGames: SelectedGame[] , stepToEdit : any , currentSteps : number};
+    CollegePreferences : { selectedGames: SelectedGame[] , stepToEdit : any  , currentSteps : number};
+    EmailConnectionUI : { selectedGames: SelectedGame[] , stepToEdit : any , currentSteps : number};
+    Athletic : { selectedGames: SelectedGame[] , stepToEdit : any , currentSteps : number };
+
+    Academic : { selectedGames: SelectedGame[] , stepToEdit : any ,  currentSteps : number};
+
+
   EmailCommunication : {id : string , type : string};
   ExplorSchools : undefined;
   DeleteAccountSuccess : undefined;
   SuccessProfileScreen : undefined;
-
+NewRegister : undefined;
+PasswordScreen : {emailid : string};
 };

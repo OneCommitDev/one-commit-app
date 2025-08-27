@@ -73,12 +73,10 @@ const OTP = await getItem(PREF_KEYS.forgot_otp);
        code : OTP ?? '',
        pass : confirmPassword
      };
-     console.log(requestBody);
  
      const res = await httpRequest<SimpleResponse>(
        Api_Url.resetPassword,    'post',    requestBody,    undefined,   true 
      );
- console.log(res);
      if (res.status) {
         removeItem(PREF_KEYS.forgot_email);
         removeItem(PREF_KEYS.forgot_otp);

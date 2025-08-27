@@ -1,8 +1,10 @@
 import { getItem, setItem } from "expo-secure-store";
 import { PREF_KEYS } from "./Prefs";
-import { Api_Url, base_url, httpRequest2, TokenRequest } from "~/services/serviceRequest";
+import { Api_Url,  httpRequest2, TokenRequest } from "~/services/serviceRequest";
 import { Applog, Applogerror } from "./logger";
 import { LoginResponse, TokenResponse } from "~/services/DataModals";
+import Constants from "expo-constants";
+const { apiUrl, appEnv , xKey , baseImgUrl} = Constants.expoConfig?.extra ?? {};
 
 export const decodeAccessToken = (token: string) => {
   try {
@@ -17,8 +19,9 @@ export const decodeAccessToken = (token: string) => {
     return null;
   }
 };
-
-export const isTokenExpiringSoon = (token: string, bufferSeconds = 120): boolean => {
+// 2592000 30days
+// 86400 1 day
+export const isTokenExpiringSoon = (token: string, bufferSeconds = 86400): boolean => {
   const decoded = decodeAccessToken(token);
   if (!decoded?.exp) return true;
 
@@ -39,8 +42,7 @@ export const isTokenExpiringSoon = (token: string, bufferSeconds = 120): boolean
 
     if (!refreshToken || !email) return null;
 
-    const url = `${base_url.replace(/\/+$/, '')}/${Api_Url.refreshToken.replace(/^\/+/, '')}`;
-    console.log("Refresh URL:", url);
+    const url = `${apiUrl.replace(/\/+$/, '')}/${Api_Url.refreshToken.replace(/^\/+/, '')}`;
 
     const res = await fetch(url, {
       method: 'POST',
@@ -61,7 +63,7 @@ export const isTokenExpiringSoon = (token: string, bufferSeconds = 120): boolean
 
     return null;
   } catch (error) {
-    console.error("Silent token refresh failed:", error);
+    //console.error("Silent token refresh failed:", error);
     return null;
   }
 };
@@ -85,12 +87,12 @@ export const getValidAccessToken = async (): Promise<string | null> => {
 export const Savedetailsafterlogin = async () => {
   const accessToken = await getItem(PREF_KEYS.accessToken); // Ensure you fetch the token first
   const payload = decodeAccessToken(accessToken ?? '');
-  console.log('ididiidididdiid',String(payload.id));
+  //console.log('ididiidididdiid',String(payload.id));
   if (payload && payload.email) {
     await setItem(PREF_KEYS.userEmailID, payload.email);
     await setItem(PREF_KEYS.userId, String(payload.id)); // Optional: convert ID to string if needed
   } else {
-    console.warn('Token payload is invalid or missing email');
+    //console.warn('Token payload is invalid or missing email');
   }
 };
 

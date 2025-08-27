@@ -20,6 +20,8 @@ export const PREF_KEYS = {
     fcmToken : 'fcm_token',
     connected_id : 'connected_email_id',
     connected_id_provider : 'connected_email_id_provider',
+    apple_display_name : 'apple_display_name',
+
 }as const;
 
 export const logAllPrefs = async () => {
@@ -39,7 +41,9 @@ export const clearAllPrefs = async () => {
     await removeItem(key);
   }
 
-  setItem(PREF_KEYS.fcmToken , fcmToken);
+   if (fcmToken) {
+    await setItem(PREF_KEYS.fcmToken, fcmToken);
+  }
   // Alert.alert("All PREF_KEYS cleared"); 
 };
 

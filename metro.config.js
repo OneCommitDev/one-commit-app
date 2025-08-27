@@ -1,15 +1,10 @@
-// const { getDefaultConfig } = require('expo/metro-config');
-// const { withNativeWind } = require('nativewind/metro');
-
-// const config = getDefaultConfig(__dirname);
-
-// module.exports = withNativeWind(config, { input: './global.css' });
-
-const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
 const path = require('path');
+const {
+  getSentryExpoConfig
+} = require("@sentry/react-native/metro");
 
-const config = getDefaultConfig(__dirname);
+const config = getSentryExpoConfig(__dirname);
 
 config.resolver.extraNodeModules = {
   '~': path.resolve(__dirname, 'src'),

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
@@ -61,43 +62,37 @@ const ExplorCards: React.FC<Props> = ({
         if (direction === 'right') onSwipeRight?.(item);
       }}
     >
+      
       <View className="bg-white rounded-xl shadow-md overflow-hidden">
 
-        {/* Background Image and overlays */}
         <View className="relative mb-10">
           <Image
             source={{
+            // uri: item.img_path,
               uri: 'https://images.unsplash.com/photo-1542404937-2132aa1fa6fc?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
             }}
-            className="w-full h-[300px] rounded-[10px]"
+            className="w-full h-[200px] rounded-[10px]"
             resizeMode="cover"
           />
 
-          {/* Serial Number top-left */}
-          {/* <View className="absolute top-3 left-3 bg-white px-3 py-1 rounded-full z-30 shadow-sm">
-            <AppText className="text-sm font-bold text-gray-800">#{index + 1}</AppText>
-          </View> */}
+       
 
-          {/* University Title top-middle */}
           <View className="absolute top-1 left-4 px-3 py-1 rounded z-20">
-            <TitleText size="text-26" color="text-white">{item.name}</TitleText>
+            <TitleText size="text-24" color="text-white">{item.name}</TitleText>
           </View>
 
-          {/* Description bottom-left */}
           <View className="absolute bottom-4 left-4 z-10 mr-[40%] bg-black/60 rounded-[10px]">
             <AppText className="leading-5 px-2 py-2" color="text-white">
               {item.name} is located in {item.city}, {item.state} - {item.region}.
             </AppText>
           </View>
 
-          {/* Match Score Badge bottom-right */}
           <View className="absolute bottom-[-30px] right-4 bg-white rounded-full w-[80px] h-[80px] items-center justify-center border-4 border-yellow-400 z-20 shadow-md">
             <TitleText size="text-[22px]" className="text-green-800">{matchPercent}</TitleText>
             <AppText size="text-[10px]" className="-mt-5">Match Score</AppText>
           </View>
         </View>
 
-        {/* Segment Tabs and Data */}
         <View className="px-4 pt-2 pb-4 flex-col justify-between">
           <View className="w-full">
             <SegmentControl selectedIndex={selectedTab} onChange={setSelectedTab} />
@@ -121,25 +116,39 @@ const ExplorCards: React.FC<Props> = ({
                   <PerformanceBar
                     title="GPA:"
                     score={Number(item.match_criteria.academic_fit.unweighted_gpa) || 0}
+                    show_min={Number(item.match_criteria.academic_fit.unweighted_gpa_school_min) || 0}
                     min={Number(item.match_criteria.academic_fit.unweighted_gpa_school_min) || 0}
                     max={Number(item.match_criteria.academic_fit.unweighted_gpa_school_avg) || 4.5}
                   />
-                  {item.match_criteria.academic_fit.test_type?.toLowerCase() === 'sat' && (
-                    <PerformanceBar
-                      title="SAT:"
-                      score={Number(item.match_criteria.academic_fit.test_score) || 0}
-                      min={Number(item.match_criteria.academic_fit.test_score_min) || 0}
-                      max={Number(item.match_criteria.academic_fit.test_score_avg) || 1600}
-                    />
+                     
+                  {item.match_criteria.academic_fit.sat_score &&(
+                      <>
+                        
+                        <PerformanceBar
+                          title="SAT:"
+                          score={Number(item.match_criteria.academic_fit.sat_score) || 0}
+                          // min={Number(item.match_criteria.academic_fit.sat_score_min) || 0}
+                           min={Number(0) || 0}
+                           show_min={Number(item.match_criteria.academic_fit.sat_score_min) || 0}
+                          max={Number(item.match_criteria.academic_fit.sat_score_avg) || 1600}
+                        />
+                      </>
+                    )}
+
+                {item.match_criteria.academic_fit.act_score &&
+                  item.match_criteria.academic_fit.act_score > 0 && (
+                    <>
+
+                      <PerformanceBar
+                        title="ACT:"
+                        score={Number(item.match_criteria.academic_fit.act_score) || 0}
+                        min={Number(0) || 0}
+                        show_min={Number(item.match_criteria.academic_fit.act_score) || 0}
+                        max={Number(item.match_criteria.academic_fit.act_score_avg) || 36}
+                      />
+                    </>
                   )}
-                  {item.match_criteria.academic_fit.test_type?.toLowerCase() === 'act' && (
-                    <PerformanceBar
-                      title="ACT:"
-                      score={Number(item.match_criteria.academic_fit.test_score) || 0}
-                      min={Number(item.match_criteria.academic_fit.test_score_min) || 0}
-                      max={Number(item.match_criteria.academic_fit.test_score_avg) || 36}
-                    />
-                  )}
+
                 </View>
               )}
 
@@ -148,9 +157,11 @@ const ExplorCards: React.FC<Props> = ({
                   {item.match_criteria.athlietic_fit.map((fit, index) => (
                     <PerformanceBar
                       key={index}
+                      show_min={parseFloat(fit?.event_school_bm_min)}
                       title={fit.event_name?.replace('_', ' ')}
                       score={Number(fit?.event_performance) || 0}
-                      min={parseFloat(fit?.event_school_bm_min)}
+                      // min={parseFloat(fit?.event_school_bm_min)}
+                       min={0}
                       max={parseFloat(fit?.event_school_bm_max)}
                     />
                   ))}
@@ -159,7 +170,6 @@ const ExplorCards: React.FC<Props> = ({
             </View>
           </View>
 
-          {/* Skip This Card button */}
           <TouchableOpacity
   onPress={onSkipCard}
   className="mt-6 items-center justify-center"
