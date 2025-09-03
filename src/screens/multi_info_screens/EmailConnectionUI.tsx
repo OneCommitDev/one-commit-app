@@ -210,7 +210,7 @@ const checkGmailScopeAccess = async (serverAuthCode : string) => {
         // console.log(requestBody);
           const token = getItem(PREF_KEYS.accessToken);
           const res = await httpRequest2<SimpleResponse>(api_url, 'post', requestBody, token ?? '' , true);
-        
+      //  console.log('res', res);
          if (res.status) {
             setLoading(false);
             setTimeout(() => {

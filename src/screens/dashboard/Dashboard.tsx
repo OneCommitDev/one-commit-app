@@ -11,6 +11,7 @@ import DisplayDashboard from './DisplayDashboard';
 import CollegeMatches from '../multi_info_screens/CollegeMatches';
 import ExplorSchools from './ExplorSchools';
 import { RouteProp, useRoute } from '@react-navigation/native';
+import EditProfileInfo from './EditProfileinfo';
 
 type TabType = 'Home' | 'Dashboard' | 'Explore' | 'Profile';
 
@@ -84,7 +85,7 @@ export default function Dashboard() {
         {activeTab === 'Home' && <HomeScreen onRedirect={setActiveTab} />}
         {activeTab === 'Dashboard' && <DisplayDashboard  />}
         {activeTab === 'Explore' && <ExplorSchools  />}
-        {activeTab === 'Profile' && <ProfileSetting />}
+        {activeTab === 'Profile' && <EditProfileInfo />}
       </View>
         </Animated.View>
 

@@ -88,7 +88,7 @@ const isSmallScreen = width < 768;
         </TouchableOpacity>
 
         <View className="flex-1 ml-3">
-          <TitleText>Contact Us</TitleText>
+          <TitleText>Contact us</TitleText>
         </View>
       </View>
 

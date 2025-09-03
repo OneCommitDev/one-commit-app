@@ -23,7 +23,9 @@ const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>(
      navigation.replace('Dashboard' , {onload : 'Home'});
       }
      else  if (login_status === 'success' ) {
-        navigation.replace('UserProfile' , {src : ''});
+            //    navigation.replace('UserProfile' , {src : ''});
+              navigation.replace('Dashboard' , {onload : 'Home'});
+
       }    
       else {
         navigation.replace('Intro');

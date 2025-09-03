@@ -22,6 +22,7 @@ import {  NativeSyntheticEvent,  NativeScrollEvent,  ScrollView,} from 'react-na
 import SuccessModal from '~/components/SuccessModal';
 import ExplorCards from '~/components/ExplorCards';
 import NoDataAvailable from '~/components/NoDataAvailable';
+import AnimatedCard from '~/components/AnimatedCard';
 
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -130,7 +131,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           accessToken ?? '',
           true
         );
-// console.log('dots_',url);
+  console.log('dots_',url);
         console.log('dots_', res.data);
         const newData = Array.isArray(res.data) ? res.data : [];
 
@@ -389,7 +390,19 @@ const handleSelect = (item: SearchSchoolData) => {
     setLoading(false);
   }
 };
+  const scaleAnim = useRef(new Animated.Value(0)).current; // start at 0 (invisible)
+ useEffect(() => {
+    if (matches[currentIndex]) {
+      scaleAnim.setValue(0); // reset before animation
 
+      Animated.spring(scaleAnim, {
+        toValue: 1,     // zoom to full size
+        friction: 6,    // controls bounce
+        tension: 50,    // controls speed
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [currentIndex]);
  
   return (
   <View className="flex-1 bg-background px-4 pb-6">
@@ -427,12 +440,29 @@ const handleSelect = (item: SearchSchoolData) => {
   </View>
 )}
 
-      
+        <AnimatedCard matches={matches} currentIndex={currentIndex}>
+
+        <View>
+            <ExplorCards
+            key={`${matches[currentIndex]?.school_id}_${currentIndex}`}  
+            item={matches[currentIndex]}
+            index={currentIndex}
+            flippingCardId={flippingCardId}
+            base_url_images={base_url_images}
+            onSwipeLeft={() => deleteColleges(matches[currentIndex].school_id, "save")}
+            onSwipeRight={() => deleteColleges(matches[currentIndex].school_id, "remove")}
+            onSkipCard={handleSlideCard}
+          />
+        </View>
+        </AnimatedCard>
 
       {!loading && matches.length > 0 && matches[currentIndex] && noMoreData == false  && (
         <Animated.View
           style={{
-            transform: [{ translateX: slideAnim }],
+            
+            transform: [
+              { scale: 0.2 }
+            ],
           }}
         >
 
@@ -444,16 +474,7 @@ const handleSelect = (item: SearchSchoolData) => {
     )}
 
 
-          <ExplorCards
-            key={`${matches[currentIndex]?.school_id}_${currentIndex}`}  
-            item={matches[currentIndex]}
-            index={currentIndex}
-            flippingCardId={flippingCardId}
-            base_url_images={base_url_images}
-            onSwipeLeft={() => deleteColleges(matches[currentIndex].school_id, "save")}
-            onSwipeRight={() => deleteColleges(matches[currentIndex].school_id, "remove")}
-            onSkipCard={handleSlideCard}
-          />
+
         </Animated.View>
       )}
 
@@ -469,6 +490,7 @@ const handleSelect = (item: SearchSchoolData) => {
         </View>
       )}
   </View>
+
 </View>
 
   );

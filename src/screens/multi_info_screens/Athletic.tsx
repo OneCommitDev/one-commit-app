@@ -23,7 +23,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SelectedGame } from './GamesGrid';
 import Animated, { SlideInRight } from "react-native-reanimated";
 
-type Props = {
+interface Props {
   onNext?: () => void;
   stepToEdit?: any;
     goToLastStep?: () => void;
@@ -71,8 +71,10 @@ export type RootStackParamList = {
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 //selectedGames: SelectedGame[]
-const Athletic: React.FC<Props> = ({ onNext , stepToEdit , goToLastStep, selectedGames , currentSteps}) => {
-      const navigation = useNavigation<Nav>(); 
+// const Athletic: React.FC<Props> = ({ onNext , stepToEdit , goToLastStep, selectedGames , currentSteps}) => {
+   const Athletic = ({ onNext, stepToEdit, goToLastStep, selectedGames, currentSteps }: Props) => {
+  
+const navigation = useNavigation<Nav>(); 
   
   const [form, setForm] = useState<
     Record<

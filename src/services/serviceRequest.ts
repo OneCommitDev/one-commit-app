@@ -5,6 +5,8 @@ import { getValidAccessToken } from '~/utils/decodeAccessToken';
 import { PREF_KEYS } from '~/utils/Prefs';
 import Constants from "expo-constants";
 import { parseApiError } from './parseApiError';
+import { Platform } from 'react-native';
+import * as Application from "expo-application";
 
 const { apiUrl, appEnv , xKey , baseImgUrl} = Constants.expoConfig?.extra ?? {};
 export const  base_url_images = baseImgUrl;
@@ -17,6 +19,22 @@ const api = axios.create({
     'x-api-key' : xKey,
   },
 });
+
+// 👇 Add deviceId dynamically before each request
+api.interceptors.request.use(async (config) => {
+  let deviceId;
+  if (Platform.OS === "android") {
+    deviceId = Application.getAndroidId;
+  } else {
+    deviceId = await Application.getIosIdForVendorAsync();
+  }
+    config.headers["app-device-id"] = deviceId;   
+  //  config.headers.device_ = deviceId;
+  //  console.log("➡️ Request Headers:", config.headers);
+  return config;
+});
+export default api;
+
 
 export const setAuthToken = (token: string) => {
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;

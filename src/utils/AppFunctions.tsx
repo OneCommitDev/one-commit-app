@@ -181,7 +181,7 @@ export const validateGPA = (
 */
 
 
-
+/*
 
  // SAT validator
 export const validateSATScore = (
@@ -210,6 +210,55 @@ export const validateACTScore = (
   const isValid = score > 0 && score <= 36;
 
   if (value === '' || !/^\d{1,2}$/.test(value) || !isValid) {
+    setErrors((e) => ({
+      ...e,
+      act_score: 'ACT score must be a number ≤ 36',
+    }));
+  } else {
+    setErrors((e) => ({ ...e, act_score: '' }));
+  }
+};
+*/
+
+// SAT validator
+export const validateSATScore = (
+  value: string,
+  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
+) => {
+  // allow empty value → clear error
+  if (value.trim() === '') {
+    setErrors((e) => ({ ...e, sat_score: '' }));
+    return;
+  }
+
+  const score = parseInt(value, 10);
+  const isValid = score > 0 && score <= 1600;
+
+  if (!/^\d{1,4}$/.test(value) || !isValid) {
+    setErrors((e) => ({
+      ...e,
+      sat_score: 'SAT score must be a number ≤ 1600',
+    }));
+  } else {
+    setErrors((e) => ({ ...e, sat_score: '' }));
+  }
+};
+
+// ACT validator
+export const validateACTScore = (
+  value: string,
+  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
+) => {
+  // allow empty value → clear error
+  if (value.trim() === '') {
+    setErrors((e) => ({ ...e, act_score: '' }));
+    return;
+  }
+
+  const score = parseInt(value, 10);
+  const isValid = score > 0 && score <= 36;
+
+  if (!/^\d{1,2}$/.test(value) || !isValid) {
     setErrors((e) => ({
       ...e,
       act_score: 'ACT score must be a number ≤ 36',
@@ -336,3 +385,22 @@ export async function getFCMToken() {
 
 
  
+export function getInitials(name?: string): string {
+  if (!name) return '';
+  const parts = name.trim().split(/\s+/);
+  return parts.map(p => p.charAt(0).toUpperCase()).join('');
+}
+ 
+export function capitalizeFirst(str?: string): string {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+export function capitalizeWords(str?: string): string {
+  if (!str) return '';
+  return str
+    .trim()
+    .split(/\s+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}

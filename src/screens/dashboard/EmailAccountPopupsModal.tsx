@@ -26,6 +26,39 @@ import { setItem } from '~/utils/storage';
   const [selectedTemp, setSelectedTemp] = useState<'gmail' | 'outlook' | null>(null);
   const [loading, setLoading] = useState(false);
 
+    const [emailAccount, setEmailAccount] = useState(false);
+    const [connectedProvider, setConnectedProvider] = useState('');
+    const [connectedEmail, setConnectedEmail] = useState('');
+
+          const loadConnectedEmail = async () => {
+          const provider = await getItem(PREF_KEYS.connected_id_provider);
+          const email = await getItem(PREF_KEYS.connected_id);
+
+          if (provider) {
+            setConnectedProvider(provider ?? '');
+            setConnectedEmail(email ?? '');
+            setEmailAccount(true);
+
+            if (provider?.toLowerCase() === 'gmail') {
+              setSelectedTemp('gmail');
+              setSelected('gmail');
+            } else if (
+              provider?.toLowerCase() === 'microsoft' ||
+              provider?.toLowerCase() === 'outlook'
+            ) {
+              setSelectedTemp('outlook');
+              setSelected('outlook');
+            }
+          } else {
+            setSelectedTemp(null);
+            setSelected(null);
+          }
+        };
+
+    useEffect(() => {
+      loadConnectedEmail();
+    }, []);
+
   const { promptAsync: microsoftPrompt, response: microsoftResponse, handleResponse: handleMicrosoftResponse } =
     useMicrosoftEmailConnect([
       'https://graph.microsoft.com/Mail.ReadWrite',
@@ -91,13 +124,13 @@ import { setItem } from '~/utils/storage';
 
   const SocialLoginRequestVerifyTokens = async (authCode: string, api_url: string) => {
     try {
-      setLoading(true);
+       setLoading(true);
       const requestBody = { authCodeToken: authCode };
       const token = await getItem(PREF_KEYS.accessToken);
       const res = await httpRequest2<SimpleResponse>(api_url, 'post', requestBody, token ?? '', true);
-
+      setLoading(false);
       if (res.status) {
-        onClose(); 
+       // onClose(); 
         EmilgetApiRequest();
       } else {
         Alert.alert('Error', res.message);
@@ -105,7 +138,7 @@ import { setItem } from '~/utils/storage';
     } catch (err) {
       Alert.alert('Error', 'Unexpected error occurred.');
     } finally {
-      setLoading(false);
+      
     }
   };
 
@@ -120,7 +153,7 @@ import { setItem } from '~/utils/storage';
 
      const EmilgetApiRequest = async () => {
        try {
-         setLoading(true);
+          setLoading(true);
          const accessToken = await getItem(PREF_KEYS.accessToken); // await required
          const res = await httpRequest2<EmailConnectionResponse>(
            Api_Url.get_email_connection,
@@ -129,8 +162,8 @@ import { setItem } from '~/utils/storage';
            accessToken ?? '',
          );
            setLoading(false);
-     
-         if (res.status ) {
+            setTimeout(() => {
+                  if (res.status ) {
             if(res.data.provider === 'Gmail'){
               setItem(PREF_KEYS.connected_id , res.data.email)
               setItem(PREF_KEYS.connected_id_provider , "Gmail")
@@ -140,14 +173,13 @@ import { setItem } from '~/utils/storage';
               setItem(PREF_KEYS.connected_id_provider , "Outlook")
             } 
              onClose(); 
-            
-         } else {
-             
-         }
+         } 
+            } , 100);
+
        } catch (err) {
          Alert.alert('Error', 'Unexpected error occurred.');
        } finally {
-         setLoading(false);
+          
        }
      };
 
@@ -179,7 +211,7 @@ import { setItem } from '~/utils/storage';
       <TouchableOpacity
         onPress={() => setSelected('gmail')}
         activeOpacity={0.8}
-        className={`flex-row items-center p-4 mb-3 rounded-xl shadow-sm ${
+        className={`flex-row items-center p-4 mb-3 rounded-[8px] shadow-sm ${
           selected === 'gmail' ? 'bg-primary/10 border-2 border-primary' : 'bg-white border border-gray-200'
         }`}
       >
@@ -188,7 +220,7 @@ import { setItem } from '~/utils/storage';
           className="w-10 h-10 rounded-full"
         />
         <TitleText className="ml-4">
-          {selectedTemp === 'gmail' ? 'Gmail Account Connected' : 'Connect Gmail Account'}
+          {selectedTemp === 'gmail' ? 'Gmail Connected' : 'Connect Gmail Account'}
         </TitleText>
       </TouchableOpacity>
 
@@ -196,7 +228,7 @@ import { setItem } from '~/utils/storage';
       <TouchableOpacity
         onPress={() => setSelected('outlook')}
         activeOpacity={0.8}
-        className={`flex-row items-center p-4 rounded-xl shadow-sm ${
+        className={`flex-row items-center p-4 rounded-[8px] shadow-sm ${
           selected === 'outlook' ? 'bg-primary/10 border-2 border-primary' : 'bg-white border border-gray-200'
         }`}
       >
@@ -205,15 +237,17 @@ import { setItem } from '~/utils/storage';
           className="w-10 h-10"
         />
         <TitleText className="ml-4">
-          {selectedTemp === 'outlook' ? 'Outlook Account Connected' : 'Connect Outlook Account'}
+          {selectedTemp === 'outlook' ? 'Outlook Connected' : 'Connect Outlook Account'}
         </TitleText>
+                      {/* <Ionicons name="checkmark-outline" size={20} color="green" className='ml-10' /> */}
+
       </TouchableOpacity>
 
       {/* Action Buttons */}
       <View className="mt-6 flex-row justify-between">
         <TouchableOpacity
           onPress={onClose}
-          className="flex-1 bg-gray-200 py-3 rounded-xl mr-2"
+          className="flex-1 bg-gray-200 py-3 rounded-[8px] mr-2"
         >
           <AppText className="text-center font-semibold text-gray-700">
             Cancel
@@ -223,7 +257,7 @@ import { setItem } from '~/utils/storage';
         <TouchableOpacity
           onPress={handleSubmit}
           disabled={!selected}
-          className={`flex-1 py-3 rounded-xl ml-2 ${
+          className={`flex-1 py-3 rounded-[8px] ml-2 ${
             selected ? 'bg-primary' : 'bg-gray-300'
           }`}
         >
@@ -233,7 +267,10 @@ import { setItem } from '~/utils/storage';
         </TouchableOpacity>
       </View>
     </View>
+    
   </View>
+              <Loader show={loading} />
+
 </Modal>
 
   );

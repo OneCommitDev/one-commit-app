@@ -68,12 +68,12 @@ function generateStepsData(selectedGames: SelectedGame[]): Step[] {
   return [...dynamicSteps, ...staticSteps];
 }
 
-type ProfileField = {
+export type ProfileField = {
   title: string;
   value: string;
 };
 
-type ProfileSection = {
+export type ProfileSection = {
   title: string;
   data: ProfileField[];
 };

@@ -31,6 +31,11 @@ import CollegePreferences from '~/screens/multi_info_screens/CollegePreferences'
 import Athletic from '~/screens/multi_info_screens/Athletic';
 import Academic from '~/screens/multi_info_screens/Academic';
 import ContactUs from '~/screens/dashboard/ContactUs';
+import EditProfileinfo from '~/screens/dashboard/EditProfileinfo';
+import EditProfileInfo from '~/screens/dashboard/EditProfileinfo';
+import AppSystemSettings from '~/screens/dashboard/AppSystemSettings';
+import AppPreferences from '~/screens/dashboard/AppPreferences';
+import ChangePassword from '~/screens/dashboard/ChangePassword';
  
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -152,6 +157,18 @@ options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisibl
 <Stack.Screen name="SuccessProfileScreen" component={SuccessProfileScreen}
 options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
 
+
+<Stack.Screen name="EditProfileInfo" component={EditProfileInfo}
+options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
+
+<Stack.Screen name="AppSystemSettings" component={AppSystemSettings}
+options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
+
+<Stack.Screen name="AppPreferences" component={AppPreferences}
+options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
+
+<Stack.Screen name="ChangePassword" component={ChangePassword}
+options={{ headerShown: false,  animation: 'slide_from_right' , headerBackVisible: false ,  gestureEnabled: false,}} />
 
 
 

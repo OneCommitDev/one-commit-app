@@ -5,7 +5,6 @@ import TitleText from '~/components/TitleText';
 import AppText from '~/components/AppText';
 import { Route, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '~/navigation/types';
 import { clearAllPrefs, PREF_KEYS } from '~/utils/Prefs';
 import { getItem, removeItem } from '~/utils/storage';
 import Loader from '~/components/Loader';
@@ -15,15 +14,27 @@ import { SimpleResponse } from '~/services/DataModals';
 import EmailAccountPopupsModal from './EmailAccountPopupsModal';
 import { setItem } from 'expo-secure-store';
 
-type RootStackParamListP = {
-EmailConnectionUI: { selectedGames: string[]; stepToEdit: number };
-ProfilePreview: { selectedGames: string[]; stepToEdit: number };
-CollegePreferences: { selectedGames: string[]; stepToEdit: number };
+ type RootStackParamList = {
+  Splash: undefined;
+  Intro: undefined;
+  Login: undefined;
+  Register: undefined;
+  Home: undefined;
 
-Academic: { selectedGames: string[]; stepToEdit: number };
-Athletic: { selectedGames: string[]; stepToEdit: number };
+  EditProfileInfo: {src : string};
+  EmailConnectionUI: { selectedGames: string[]; stepToEdit: number };
+  ProfilePreview: { selectedGames: string[]; stepToEdit: number };
+  CollegePreferences: { selectedGames: string[]; stepToEdit: number };
+  Academic: { selectedGames: string[]; stepToEdit: number };
+  Athletic: { selectedGames: string[]; stepToEdit: number };
+
+  DeleteAccount: undefined;
+  ContactUs: undefined;
+  AppWebview: { url: string; title: string };
+};
+
+
  
-  };
  
 export default function ProfileSetting() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -61,7 +72,7 @@ const [fcmToken, setFcmToken] = useState('');
   };
 
 
-    const logoutWithFCMDeletion = async () => {
+      const logoutWithFCMDeletion = async () => {
         setLoading(true);
       try {
       const accessToken = await getItem(PREF_KEYS.accessToken);
@@ -150,14 +161,14 @@ const handleEmailDelete = () => {
   
 
 
-type RouteName = keyof RootStackParamListP;
+// type RouteName = keyof RootStackParamList;
 
-const tetsing = async (stepToEdit: number, screen: RouteName) => {
-  navigation.navigate(screen, {
-    selectedGames: [],
-    stepToEdit,
-  } as never);
-};
+// const tetsing = async (stepToEdit: number, screen: RouteName) => {
+//   navigation.navigate(screen, {
+//     selectedGames: [],
+//     stepToEdit,
+//   } as never);
+// };
     
 
 
@@ -297,13 +308,7 @@ const tetsing = async (stepToEdit: number, screen: RouteName) => {
                 <TitleText className="mb-3">Account Controls</TitleText>
 
                 <SettingItem icon="person-outline" text="Edit Profile Info"
-                  // onPress={() =>
-                  //   navigation.navigate('ProfilePreview', {
-                  //     selectedGames: [], // or the actual list of games if available
-                  //     stepToEdit: 6, // go to last step (ProfilePreview)
-                  //   })
-                  // }
-                  onPress={() => navigation.navigate('UserProfile', {src : 'profileSettings'})}
+                onPress={() => navigation.navigate("EditProfileInfo" , {src : '123'})}
 
                    />
                 <SettingItem icon="trash-outline" text="Delete Account" textClass="text-red-800" onPress={() => navigation.navigate('DeleteAccount')} />

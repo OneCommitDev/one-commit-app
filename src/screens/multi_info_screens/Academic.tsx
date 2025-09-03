@@ -80,7 +80,7 @@ const Academic: React.FC<Props> = ({ onNext , goToLastStep , stepToEdit, selecte
 
   const getFilteredMajors = (search: string) =>
     apiMajors.filter((item) => item.display_name.toLowerCase().includes(search.toLowerCase()));
-
+/*
   const isFormValid = () => {
     const requiredFields = [
       'unweighted_gpa',
@@ -91,10 +91,35 @@ const Academic: React.FC<Props> = ({ onNext , goToLastStep , stepToEdit, selecte
       'school_type',
       'test_score_type',
     ];
-    const hasErrors = Object.values(errors).some((e) => e);
+     const hasErrors = Object.values(errors).some((e) => e);
     const isEmpty = requiredFields.some((f) => !form[f as keyof typeof form]);
     return !hasErrors && !isEmpty;
   };
+*/
+const isFormValid = () => {
+  const requiredFields = [
+    "unweighted_gpa",
+    "intended_major_1",
+    "school_name",
+    "school_type",
+    "test_score_type",
+  ];
+
+  const hasErrors = Object.values(errors).some((e) => e);
+
+  const isEmpty = requiredFields.some(
+    (f) => !form[f as keyof typeof form]?.toString().trim()
+  );
+
+  // ✅ At least one test score required
+  const hasTestScore =
+    !!form.sat_score?.toString().trim() ||
+    !!form.act_score?.toString().trim();
+
+  return !hasErrors && !isEmpty && hasTestScore;
+};
+
+
 
   const addMajor = () => {
     if (majors.length < 3) {
@@ -123,8 +148,12 @@ const Academic: React.FC<Props> = ({ onNext , goToLastStep , stepToEdit, selecte
         setTestType(testType);
         handleChange('test_score_type', testType);
 */
-         handleChange('sat_score', res.data?.sat_score?.toString());
-         handleChange('act_score', res.data?.act_score?.toString());
+        if(res.data?.sat_score > 0){
+          handleChange('sat_score', res.data?.sat_score?.toString());
+        }
+        if(res.data?.act_score > 0){
+            handleChange('act_score', res.data?.act_score?.toString());
+        }
 
           // validateSATScore(form.sat_score, setErrors);
           // validateACTScore(form.act_score, setErrors);

@@ -542,3 +542,13 @@ export type CommunicationHistory = {
   data : string;
   message : string;
 };
+
+
+export type Editprofilemodal ={
+ status: boolean;
+  profile: {
+    complete: boolean;
+    stage: string;
+  };
+  data: ProfileComplitionData;
+}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+/*import React, { useState, useEffect } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -67,6 +67,84 @@ export default function MultiSelectToggle({
                 size={20}
                 color={isSelected ? "green" : "gray"}
                 style={{ marginHorizontal: 4 }}
+              />
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+*/
+
+
+
+import React, { useState, useEffect } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
+type Props = {
+  options: string[];
+  initialValues?: string[];
+  onSelect: (selected: string[]) => void;
+};
+
+export default function MultiSelectToggle({
+  options,
+  initialValues = [],
+  onSelect,
+}: Props) {
+  const [selectedItems, setSelectedItems] = useState<string[]>(initialValues);
+
+  // 🔥 Sync when initialValues changes
+  useEffect(() => {
+    setSelectedItems(initialValues);
+  }, [initialValues]);
+
+  const toggleSelect = (value: string) => {
+    let updated: string[];
+    if (selectedItems.includes(value)) {
+      updated = selectedItems.filter((item) => item !== value);
+    } else {
+      updated = [...selectedItems, value];
+    }
+    setSelectedItems(updated);
+    onSelect(updated);
+  };
+
+  const capitalizeWords = (text: string) =>
+    text.replace(/\b\w/g, (char) => char.toUpperCase());
+
+  return (
+    <View className="mt-3 mb-3 w-full">
+      <View className="flex-row flex-wrap w-full">
+        {options.map((item) => {
+          const isSelected = selectedItems.includes(item);
+          return (
+            <TouchableOpacity
+              key={item}
+              onPress={() => toggleSelect(item)}
+              className="flex-row items-center justify-center px-4 py-2 rounded-full mr-2 mb-2"
+              style={{
+                backgroundColor: isSelected ? "white" : "transparent",
+                borderWidth: 0.2,
+                borderColor: isSelected ? "#235D48" : "#E5E7EB",
+              }}
+            >
+              <Text
+                className={`${
+                  isSelected
+                    ? "text-primary font-nunitoextrabold text-16"
+                    : "text-gray-500 text-14"
+                }`}
+              >
+                {capitalizeWords(item)}
+              </Text>
+              <Ionicons
+                name={isSelected ? "checkmark" : "checkmark"}
+                size={18}
+                color={isSelected ? "green" : "gray"}
+                style={{ marginLeft: 6 }}
               />
             </TouchableOpacity>
           );

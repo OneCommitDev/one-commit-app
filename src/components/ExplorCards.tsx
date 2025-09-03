@@ -27,23 +27,26 @@ const ExplorCards: React.FC<Props> = ({
   const logoSource = `${base_url_images}${item.img_path?.startsWith('/') ? item.img_path.slice(1) : item.img_path}`;
   const location = [item.city, item.state].filter(Boolean).join(', ');
   const [selectedTab, setSelectedTab] = useState(0);
+  
 
   const renderLeftActions = () => (
-    <TouchableOpacity
+   <View className='w-full flex-row'>
+     <TouchableOpacity
       onPress={() => onSwipeLeft?.(item)}
-      className="bg-background mt-40 items-start px-4 flex-1 justify-center"
+      className="bg-black mt-0 items-start px-4 flex-1 justify-center rounded-[30px]"
     >
       <View className="flex-row items-center">
         <Ionicons name="heart" size={24} color="#235D48" />
         <Text className="text-[#235D48] font-bold text-lg ml-2">Interested</Text>
       </View>
     </TouchableOpacity>
+   </View>
   );
 
   const renderRightActions = () => (
     <TouchableOpacity
       onPress={() => onSwipeRight?.(item)}
-      className="bg-background mt-40 items-end px-4 flex-1 justify-center"
+      className="bg-black mt-0 items-end px-4 flex-1 justify-center"
     >
       <View className="flex-row items-center">
         <Ionicons name="archive" size={24} color="red" />

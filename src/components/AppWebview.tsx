@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { Linking, Platform, TouchableOpacity, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation, NavigationProp, RouteProp, useRoute } from '@react-navigation/native';
@@ -18,6 +18,27 @@ export default function AppWebview() {
     const handleBack = () => {
        navigation.goBack();
     };
+
+    let localFile;
+    if (title === 'Privacy Policy') {
+      localFile = Platform.OS === 'ios'
+        ? require('../../assets/html/privacy.html') // adjust relative to AppWebview.tsx
+        : { uri: 'file:///android_asset/html/privacy.html' };
+    } else if (title === 'Terms of Service') {
+      localFile = Platform.OS === 'ios'
+        ? require('../../assets/html/terms.html')
+        : { uri: 'file:///android_asset/html/terms.html' };
+    }
+
+     const handleNavigation = (event: any) => {
+    if (event.url.startsWith('mailto:')) {
+      Linking.openURL(event.url).catch(err => console.error('Error opening email:', err));
+      return false; // prevent WebView from trying to load the mailto link
+    }
+    return true;
+  };
+
+
   return (
 <View className='flex-1 bg-background'>
       <View className="flex-row mt-14">
@@ -34,7 +55,15 @@ export default function AppWebview() {
            </View>
         </View>
          <View className='flex-1 mt-4'>
-             <WebView source={{ uri: url }} />
+             {/* <WebView source={{ uri: url }} /> */}
+               {localFile && (
+          <WebView
+           onShouldStartLoadWithRequest={handleNavigation} // iOS
+      onNavigationStateChange={handleNavigation}      // Android
+            originWhitelist={['*']}
+            source={localFile}
+          />
+        )}
          </View>
 
 </View>
