@@ -40,7 +40,7 @@ export async function clearKeychainOnFirstRun() {
 
     if (!firstRun) {
       console.log('🆕 Fresh install detected → clearing SecureStore');
-     // await clearAllPrefss();
+       await clearAllPrefss();
 
       await AsyncStorage.setItem(FIRST_RUN_FLAG, 'true');
     }

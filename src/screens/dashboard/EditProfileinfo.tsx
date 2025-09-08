@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {  View,  Text,  TouchableOpacity,  ScrollView,  Image, Dimensions, Alert, InteractionManager,} from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import TitleText from "~/components/TitleText";
@@ -13,7 +13,7 @@ import { getItem } from "expo-secure-store";
 import { Api_Url, httpRequest2 } from "~/services/serviceRequest";
 import { AcademicResponse, Editprofilemodal, ProfileComplition, ProfileComplitionData, SimpleResponse, SportEvent, SportUserFormattedData } from "~/services/DataModals";
 import { PREF_KEYS } from "~/utils/Prefs";
-import { capitalizeFirst, capitalizeWords, formatInchesToFeetAndInches, getInitials } from "~/utils/AppFunctions";
+import { capitalizeFirst, capitalizeWords, clampDecimal, formatInchesToFeetAndInches, getInitials, parseHeightToInches } from "~/utils/AppFunctions";
 import MultiSelectToggle from "~/components/MultiSelectToggle";
 import ListviewShhet from "~/components/ListviewShhet";
 import { decodeAccessToken } from "~/utils/decodeAccessToken";
@@ -21,6 +21,9 @@ import { HeightPickerModal2 } from "~/components/HeightPickerModal2";
 import { CustomDualPickerModal } from "~/components/CustomDualPickerModal";
 import BottomInputModal from "~/components/BottomInputModal";
 import { TimePickerModal } from "~/components/TimePickerModal";
+import { HeightPickerModal } from "~/components/HeightPickerModal";
+import { FeetMeterPickerModal } from "~/components/FeetMetterPickerModal";
+import { stopProfiling } from "@sentry/react-native/dist/js/profiling/integration";
 
  type RootStackParamList = {
   EmailConnectionUI: { selectedGames: string[]; stepToEdit: number };
@@ -77,38 +80,118 @@ const [schoolSizeSelected, setSchoolSizeSelected] = useState<string[]>(["small"]
   label: "",
   typeis : "",
   value : "",
+  params : "",
   onSave: (val: string) => {},
 });
 
   const [showTimePicker, setShowTimePicker] = useState(false);
    const [sporteventdata, setSportsdata] = useState<SportEvent>();
+   const [modalVisible, setModalVisible] = useState(false);
+ const [disunit, setdisUnit] = useState<"feet" | "meters">("feet");
 
    // Handlers
+   /*
  const schoolSizeToggle = (key: string) => {
   setSchoolSizeSelected(prev => {
     const updated = prev.includes(key)
-      ? prev.filter(x => x !== key) // remove if already selected
-      : [...prev, key];             // add if not selected
-    console.log("School Size:", updated);
+      ? prev.filter(x => x !== key)  
+      : [...prev, key];              
+   console.log("School Size:", updated);
+   const payload = {
+      school_size: updated.join(","),
+    };
+    SaveRequest(payload);
+    return updated;
+  });
+};
+*/
+const schoolSizeToggle = (key: string) => {
+  setSchoolSizeSelected(prev => {
+    let updated: string[];
+
+    if (prev.includes(key)) {
+      // trying to deselect
+      if (prev.length === 1) {
+        return prev; // 🚫 don't allow removing the last one
+      }
+      updated = prev.filter(x => x !== key);
+    } else {
+      // add new selection
+      updated = [...prev, key];
+    }
+
+    const payload = {
+      school_size: updated.join(","),
+    };
+    SaveRequest(payload);
+
     return updated;
   });
 };
 
-  const toggleRegion = (region: string) => {
-    setSelectedRegion([region]); // single region select
-    console.log("Region:", region);
-  };
 
+  // const toggleRegion = (region: string) => {
+  //   setSelectedRegion([region]); 
+  //  console.log("Regionssss:", region);
+  //    const payload = {
+  //     campus_type: region,
+  //   };
+  //  };
+/*
 const toggleCampus = (key: string) => {
   setSelectedCampus(prev => {
     const updated = prev.includes(key) ? prev.filter(x => x !== key) : [...prev, key];
+    
+    return updated;
+  });
+};
+*/
+
+/*
+const toggleCampus = (key: string) => {
+  setSelectedCampus((prev) => {
+    const updated = prev.includes(key)
+      ? prev.filter((x) => x !== key)
+      : [...prev, key];
+
+    // ✅ trigger save outside of setState
+    const payload = {
+      campus_type: updated.join(","),
+    };
+    SaveRequest(payload);
+
+    return updated;
+  });
+};
+*/
+
+const toggleCampus = (key: string) => {
+  setSelectedCampus(prev => {
+    let updated: string[];
+
+    if (prev.includes(key)) {
+      // trying to deselect
+      if (prev.length === 1) {
+        return prev; //  don't allow removing the last one
+      }
+      updated = prev.filter(x => x !== key);
+    } else {
+      // add new selection
+      updated = [...prev, key];
+    }
+
+    const payload = {
+      campus_type: updated.join(","),
+    };
+    SaveRequest(payload);
+
     return updated;
   });
 };
 
 
  
-
+/*
 useFocusEffect(
   useCallback(() => {
     let mounted = true;
@@ -163,30 +246,84 @@ useFocusEffect(
     };
   }, []) // include any dependencies like selectedGames
 );
+*/
+useFocusEffect(
+  useCallback(() => {
+    let mounted = true;
+    InteractionManager.runAfterInteractions(() => {
+      if (mounted) fetchProfileData();
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [])
+);
+
+const fetchProfileData = async () => {
+  try {
+    setLoading(true);
+    const accessToken = getItem(PREF_KEYS.accessToken);
+    const res = await httpRequest2<Editprofilemodal>(
+      Api_Url.profileSummary,
+      'get',
+      {},
+      accessToken ?? ''
+    );
+console.log('accccc__' , accessToken);
+
+    if (res.status && res.data) {
+      setProfile(res.data);
+      setsportsdata(res.data.sportUserFormattedData ?? []);
+      if (res.data.school_size) {
+        const schoolArray = res.data.school_size
+          .split(",")
+          .map((s: string) => s.trim().toLowerCase())
+          .filter((s: string) => schoolOptions.some(opt => opt.key === s));
+        setSchoolSizeSelected(schoolArray);
+      }
+      if (res.data.campus_type) {
+        const campusArray = res.data.campus_type
+          .split(",")
+          .map((c: string) => c.trim().toLowerCase())
+          .filter((c: string) => campusOptions.some(opt => opt.key === c));
+        setSelectedCampus(campusArray);
+      }
 
 
-const openBoxModal = (title: string, label: string, typeis : string , value : string, onSave: (val: string) => void) => {
-  setModalConfig({ title, label,typeis, value ,  onSave });
+      setScreenload(true);
+    } else {
+      // Alert.alert("Error", res.message ?? "Request failed");
+    }
+  } catch (err) {
+    Alert.alert("Error", "Something went wrong. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const openBoxModal = (title: string, label: string, typeis : string , value : string, params : string , onSave: (val: string) => void) => {
+  setModalConfig({ title, label,typeis, value , params ,  onSave });
   setShowModal(true);
 };
 
 
 
-const SaveRequest = async (payload: Record<string, string>) => {
+const SaveRequest = async (payload: Record<string, any>) => {
   try {
      const token = await getItem(PREF_KEYS.accessToken);
 
     const res = await httpRequest2<SimpleResponse>(
-      Api_Url.academic,
-      "post",
+      Api_Url.quickEditapi,
+      "put",
       payload,  
       token ?? "",
       true
     );
 
     if (res.status) {
-        
+      await  fetchProfileData();
     } else {
+       await  fetchProfileData();
        Alert.alert("Error", res.message ?? "Request failed");
     }
   } catch (err) {
@@ -197,18 +334,30 @@ const SaveRequest = async (payload: Record<string, string>) => {
 };
 
 
+useEffect(() => {
+  if (modalVisible) {
+    if (!sporteventdata?.eventUnit) {
+      setdisUnit("meters"); // default
+    } else if (sporteventdata.eventUnit === "feet_inches") {
+      setdisUnit("feet");
+    } else {
+      setdisUnit("meters");
+    }
+  }
+}, [modalVisible, sporteventdata]);
+
 
   return (
     
     <View className="flex-1 bg-background px-1">
       <Loader show={loading} />
-{screenload ? (
-   <> 
+
       {/* Header */}
       <View className="px-4 mb-6 pt-14">
         <TitleText size="text-24">Profile Settings</TitleText>
       </View>
-
+{screenload ? (
+   <> 
       <ScrollView
         contentContainerStyle={{ paddingBottom: 40 }}
         className="px-4"
@@ -222,7 +371,7 @@ const SaveRequest = async (payload: Record<string, string>) => {
             <View className="ml-3">
             <TitleText color="text-white" size="text-18">{capitalizeWords(profile?.full_name)}</TitleText>
             <Text className="text-white font-nunitoregular -mt-[4px]">
-                Class of 2025 • {profile?.sportUserFormattedData?.[0]?.display_name}
+                 {profile?.sportUserFormattedData?.[0]?.display_name}
             </Text>
             <Text className="text-white font-nunitoregular">
                 Student at {profile?.school_name}
@@ -275,29 +424,46 @@ const SaveRequest = async (payload: Record<string, string>) => {
     <SectionTitle title={section.display_name} />
 
     <View className="flex-row flex-wrap">
-    {section.events.map((item, index) => (
+ {section.events.map((item, index) => (
   <InfoCard
     key={index}
-    label={item.event_name.toUpperCase().replace('_', ' ')}
+    label={capitalizeWords(item.event_name).replaceAll('_', ' ')}
     value={item.eventValue?.toString() || ''}
     onPressEdit={() => {
-      console.log('item_item',item);
-        setSportsdata(item);  
-        if(item.measurement_type === 'time'){
-            setShowTimePicker(true);
-        }
-       else if(item.measurement_type === 'points'){ // show box
-            
-        }
-         else if(item.measurement_type === 'meters'){
-            
-        }
-         else if(item.measurement_type === 'feet_inches'){
-            
-        }
+        item.sport_id = section.sport_id;
+     console.log('itemitemitemitem ' , item);
+      setSportsdata(item);  
+      if(item.measurement_type === 'time' ){
+          setShowTimePicker(true);
+       }
+      else if(item.measurement_type === 'points'){ 
+        openBoxModal(
+          section.display_name,
+          item.event_name.replaceAll("_", " "),
+          item.event_name.toLowerCase(),
+          item.eventUnit?.toString() ?? '',
+          "sports", // track the type
+          (val) => console.log("Saved Name:", val)
+        );
+      }
+         else if(item.measurement_type === 'distance' || item.measurement_type === 'height'){
+           setModalVisible(true);
+          // setShowHeightModal(true);
+      }
+      // else if(item.measurement_type === 'meters'){
+      //     // setShowMeterModal(true);
+      // }
+      // else if(item.measurement_type === 'feet_inches'){
+      //     // setShowHeightModal(true);
+      // }
+    
+
+      
     }}
+    className={index % 2 === 0 ? "mr-[14px]" : ""} // 👈 add conditional margin
   />
 ))}
+
 
     </View>
   </View>
@@ -339,20 +505,20 @@ const SaveRequest = async (payload: Record<string, string>) => {
         <View className="flex-row flex-wrap justify-between">
           <InfoCard label="GPA (UWW)" value={profile?.unweighted_gpa || ''} 
            onPressEdit={() => 
-                openBoxModal("Academics Info", "GPA (UWW)", "gpa" , profile?.unweighted_gpa.toString() ?? '', (val) => console.log("Saved Name:", val))
+                openBoxModal("Academics Info", "GPA (UWW)", "gpa" , profile?.unweighted_gpa.toString() ?? '' , "unweighted_gpa", (val) => console.log("Saved Name:", val))
            } />
 
            {profile?.sat_score != null && (
           <InfoCard label="SAT" value={profile?.sat_score != null ? profile.sat_score.toString() : ''}
            onPressEdit={() => 
-                openBoxModal("Academics Info", "SAT", "sat", profile.sat_score.toString(), (val) => console.log("Saved Name:", val))
+                openBoxModal("Academics Info", "SAT", "sat", profile.sat_score.toString(), "sat_score",  (val) => console.log("Saved Name:", val))
            }
           />
           )}
            {profile?.sat_score != null && (
           <InfoCard label="ACT" value={profile?.act_score != null ? profile.act_score.toString() : ''} 
              onPressEdit={() => 
-                openBoxModal("Academics Info", "ACT", "act", profile.act_score.toString() , (val) => console.log("Saved Name:", val))
+                openBoxModal("Academics Info", "ACT", "act", profile.act_score.toString() , "act_score" , (val) => console.log("Saved Name:", val))
            }
           />
          )}
@@ -370,12 +536,19 @@ const SaveRequest = async (payload: Record<string, string>) => {
             {/* <USRegionsMap selected={selectedRegion} onToggle={toggleRegion}/> */}
              <MultiSelectToggle
                           options={['Midwest', 'Northeast', 'West', 'Southeast' ]}
-                          initialValues={[profile?.preferred_region ?? '']}
+                          initialValues={
+                            profile?.preferred_region
+                              ? profile.preferred_region.split(",").map((s) => s.trim().toLowerCase())
+                              : []
+                          }
                           onSelect={(selected) => {
                             const asString = selected.join(", ");
-                          console.log("Selected Options:", asString);
-                          // setCampusType(asString);
-                          //   handleChange('campus_type', asString);
+                              const payload = {
+                                  preferred_region: asString ,
+                                };
+                                console.log('payload_', payload);
+                            SaveRequest(payload);
+                          
                           }}
                         />
       </View>
@@ -470,15 +643,13 @@ const SaveRequest = async (payload: Record<string, string>) => {
             setSelected(item);
             switch (item) {
             case "SAT":
-                openBoxModal("Academics Info", "SAT", "sat", '', (val) => console.log("Saved Name:", val))
+                openBoxModal("Academics Info", "SAT", "sat", '' , "sat_score", (val) => console.log("Saved Name:", val))
             break;
             case "ACT":
-                openBoxModal("Academics Info", "ACT", "act", '', (val) => console.log("Saved Name:", val))
+                openBoxModal("Academics Info", "ACT", "act", '' , "act_score", (val) => console.log("Saved Name:", val))
             break;
             case "Athletics":
             break;
-        
-          
             default:
                 //console.warn("No action defined for", item);
             }
@@ -495,15 +666,20 @@ const SaveRequest = async (payload: Record<string, string>) => {
                       }}
                       onSave={(main, decimal, unit) => {
                         const selectedWeight = `${main}.${decimal} ${unit}`;
-                        setShowWeightModal(false); // close after save
+                        setShowWeightModal(false);  
+                          const payload = {
+                          "weight": selectedWeight.toString().replace(/[^0-9.]/g, '') ?? '',  
+                          "weight_unit" : unit  
+                          };
+                          console.log('payload_', payload);
+                           SaveRequest(payload);
+
+
                       }}
-                     initialMainValue={
-                      parseInt(profile?.weight.toString()?.split('.')[0] || (unit === 'kg' ? "70" : "150"), 10)
-                    }
-                    initialDecimalValue={
-                      parseInt(profile?.weight.toString()?.split('.')[1] || "0", 10)
-                    }
-        
+                      initialMainValue={
+                        parseInt(profile?.weight?.split('.')[0] || (unit === 'kg' ? "70" : "150"), 10)
+                      }
+                     initialDecimalValue={clampDecimal(profile?.weight?.split(".")[1])}
                      />
 
             <HeightPickerModal2
@@ -514,6 +690,12 @@ const SaveRequest = async (payload: Record<string, string>) => {
               onSave={(feet, inches) => {
                 const formatted = `${feet}'${inches}"`;
                 setTimeout(() => setShowHeightModal(false), 50);
+                        const payload = {
+                          "height": parseHeightToInches(formatted).toString(),  
+                          "feet_inches" : "feet_inches"  
+                        };
+                        console.log('payload_', payload);
+                      SaveRequest(payload);
               }}
             />
            <BottomInputModal
@@ -522,38 +704,92 @@ const SaveRequest = async (payload: Record<string, string>) => {
             label={modalConfig.label}
             typeis={modalConfig.typeis}
             value={modalConfig.value}
+            params={modalConfig.params}
             onClose={() => setShowModal(false)}
-            onSave={async (val) => {
+            onSave={async (val , params) => {
+              if(modalConfig?.params === "sports"){
               const payload = {
-                unweighted_gpa: val,    
-              };
+                        sport_event: {
+                          sport_id: sporteventdata?.sport_id,  
+                          event_id: sporteventdata?.event_id,  
+                          eventValue: val,  
+                            eventUnit: "points",  
+                        },
+                      };
 
-              await SaveRequest(payload);
+                      SaveRequest(payload);
+              }else{
+                  const payload = {
+                  [params]: val,    
+                  };
+                  await SaveRequest(payload);
+                  }
+          
             }}
           />
 
-
-
-      <TimePickerModal
+  <TimePickerModal
           visible={showTimePicker}
           initialValue={{
-            minutes: Number(sporteventdata?.eventValue.split(":")[0]),
-            seconds: Number(sporteventdata?.eventValue.split(":")[1]),
-            milliseconds: Number(sporteventdata?.eventValue.split(":")[2]),
+             minutes: Number(sporteventdata?.eventValue?.split(":")[0] ?? 0),
+          seconds: Number(sporteventdata?.eventValue?.split(":")[1] ?? 0),
+          milliseconds: Number(sporteventdata?.eventValue?.split(":")[2] ?? 0),
+                }}
+                onClose={() => setShowTimePicker(false)}
+                onSave={(selected) => {
+                  const formatted = `${selected.minutes
+                    .toString()
+                    .padStart(2, '0')}:${selected.seconds
+                    .toString()
+                    .padStart(2, '0')}:${selected.milliseconds
+                    .toString()
+                    .padStart(2, '0')}`;
+                        setShowTimePicker(false);
+                        const payload = {
+                              sport_event: {
+                                sport_id: sporteventdata?.sport_id,  
+                                event_id: sporteventdata?.event_id,  
+                                eventValue: formatted,  
+                                eventUnit: sporteventdata?.eventUnit,  
+                              },
+                            };
+
+                      SaveRequest(payload);
+                  
+                 }}
+                title={sporteventdata?.event_name.replaceAll('_', ' ')}
+      />
+
+  
+
+
+        <FeetMeterPickerModal
+            title={sporteventdata?.display_name ?? ''}
+            visible={modalVisible}
+            onClose={() => setModalVisible(false)}
+            selectedUnit={disunit}
+            onUnitChange={(u) => setdisUnit(u)}
+            // onUnitChange={(u) => setdisUnit(u)}
+            initialMainValue={Number(sporteventdata?.eventValue?.split(".")[0] ?? 0)}
+            initialDecimalValue={Number(sporteventdata?.eventValue?.split(".")[1] ?? 0)}     
+            onSave={(main, decimal, unit) => {
+            const values = `${main}.${decimal}`;   
+          
+            const payload = {
+              sport_event: {
+                sport_id: sporteventdata?.sport_id,  
+                event_id: sporteventdata?.event_id,  
+                eventValue: values,  
+                  eventUnit: unit === "feet" ? "feet_inches" : "meters",  
+              },
+            };
+
+                      SaveRequest(payload);
+
+
+          console.log('payload_',payload);      
           }}
-          onClose={() => setShowTimePicker(false)}
-          onSave={(selected) => {
-            const formatted = `${selected.minutes
-              .toString()
-              .padStart(2, '0')}:${selected.seconds
-              .toString()
-              .padStart(2, '0')}:${selected.milliseconds
-              .toString()
-              .padStart(2, '0')}`;
-                  setShowTimePicker(false);
-            console.log(formatted);
-          }}
-/>
+        />
 
 
 
@@ -586,13 +822,15 @@ function SectionTitle({ title, showAddButton = false, onAddPress }: SectionTitle
   label,
   value,
   onPressEdit,
+  className = "",
 }: {
   label: string;
   value: string;
   onPressEdit?: () => void;
+  className?: string;
 }) {
   return (
-    <View className="w-[48%] bg-white rounded-2xl p-3 mb-3 border border-gray-200">
+    <View className={`w-[48%] bg-white rounded-2xl p-3 mb-3 border border-gray-200 ${className}`}>
       <View className="flex-row items-center -mt-[12px]">
         <Ionicons name="walk-outline" size={24} color="#6B7280" />
         <View className="mt-1 w-[80%] ml-[5px]">
@@ -602,18 +840,16 @@ function SectionTitle({ title, showAddButton = false, onAddPress }: SectionTitle
           </View>
         </View>
       </View>
-
-     
-        <TouchableOpacity
-          className="absolute top-2 right-2 bg-white rounded-full p-[4px]"
-          onPress={onPressEdit}
-        >
-          <Ionicons name="pencil-outline" size={16} color="black" />
-        </TouchableOpacity>
-      
+      <TouchableOpacity
+        className="absolute top-2 right-2 bg-white rounded-full p-[4px]"
+        onPress={onPressEdit}
+      >
+        <Ionicons name="pencil-outline" size={16} color="black" />
+      </TouchableOpacity>
     </View>
   );
 }
+
 
 
  
@@ -636,3 +872,4 @@ function Tag({ label, active = false }: { label: string; active?: boolean }) {
     </View>
   );
 }
+

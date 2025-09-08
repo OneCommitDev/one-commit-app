@@ -13,8 +13,9 @@ type BottomInputModalProps = {
   label: string;
   typeis : string;
   value : string;
+  params : string;
   onClose: () => void;
-  onSave: (value: string) => void;
+  onSave: (value: string , params : string) => void;
 };
 
 export default function BottomInputModal({
@@ -23,6 +24,7 @@ export default function BottomInputModal({
   label,
   typeis,
   value,
+  params,
   onClose,
   onSave,
 }: BottomInputModalProps) {
@@ -37,7 +39,7 @@ const isDisabled = !inputValue || hasError;
   }, [value, visible]);
 
     const handleSubmit = () => {
-     onSave(inputValue);
+     onSave(inputValue , params);
                   onClose();
                   setInputValue(""); // reset
   };

@@ -1,19 +1,7 @@
 // HomeScreen.tsx
 import React, { JSX, useCallback, useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  Alert,
-  TouchableOpacity,
-  Linking,
-  Platform,
-  AppState,
-  Animated,
-  Easing,
-  UIManager,
-  LayoutAnimation,
-} from "react-native";
+import {  View,  Text,  FlatList,  Alert,  TouchableOpacity, Linking,  Platform,  AppState,  Animated,  Easing,  UIManager,
+  LayoutAnimation,} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import TitleText from "~/components/TitleText";
 import AppText from "~/components/AppText";
@@ -21,13 +9,14 @@ import { PREF_KEYS } from "~/utils/Prefs";
 import { getItem, setItem } from "expo-secure-store";
 import Loader from "~/components/Loader";
 import { Api_Url, httpRequest2 } from "~/services/serviceRequest";
-import { HomeToDo, SimpleResponse, todo_items } from "~/services/DataModals";
+import { communication_history, HomeToDo, SimpleResponse, todo_items } from "~/services/DataModals";
 import { RouteProp, useFocusEffect, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "~/navigation/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { capitalizeWords, getFCMToken } from "~/utils/AppFunctions";
 import messaging from "@react-native-firebase/messaging";
 import { checkNotifications, requestNotifications } from "react-native-permissions";
+import LottieView from "lottie-react-native";
 
 // enable LayoutAnimation on Android (keeps it for small layout tweaks)
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -40,6 +29,7 @@ type CardItem = {
   icon: JSX.Element;
   items: string[];
   todoItems?: todo_items[];
+  communication_history : communication_history[];
 };
 
 export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore") => void }) {
@@ -48,15 +38,42 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
   const [todoList, setTodoList] = useState<HomeToDo | null>(null);
   const [notificationsAllowed, setNotificationsAllowed] = useState<boolean | null>(null);
   const [expandedCards, setExpandedCards] = useState<{ [key: string]: boolean }>({});
+  const [screenload, setScreenload] = useState(false);
 
   // per-card animation & measured height store
   const animRefs = useRef<Record<string, { animated: Animated.Value; measuredHeight: number | null }>>({});
+const slideAnim = useRef(new Animated.Value(50)).current; // start 50px lower
+const opacityAnim = useRef(new Animated.Value(0)).current; // start hidden
 
   useEffect(() => {
-    fetchTODO();
+    // fetchTODO();
     fcmTokenSavingAPi();
     checkPermissionOnLoad();
   }, []);
+
+  useFocusEffect(
+  useCallback(() => {
+    fetchTODO();
+  }, [])
+);
+
+
+const runEnterAnimation = () => {
+  Animated.parallel([
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 500,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }),
+    Animated.timing(opacityAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }),
+  ]).start();
+};
+
 
   const fetchTODO = async () => {
     try {
@@ -65,9 +82,9 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
       const url = Api_Url.homeToDo;
 
       const res = await httpRequest2<HomeToDo>(url, "get", {}, accessToken ?? "");
-
+setScreenload(true);
       if (res.status) {
-        let updatedRes = { ...res };
+      /*  let updatedRes = { ...res };
         let apiItems = updatedRes?.data?.todo_items ?? [];
 
         if (apiItems.length < 20) {
@@ -84,12 +101,15 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
         }
 
         setTodoList(updatedRes);
-
+        */
+ 
+          setTodoList(res);
         setItem(PREF_KEYS.displayName, String(res.data?.profile?.name ?? ""));
         setItem(PREF_KEYS.connected_id, String(res.data?.connected_email?.email ?? ""));
         setItem(PREF_KEYS.connected_id_provider, String(res.data?.connected_email?.provider ?? ""));
+  runEnterAnimation();
       } else {
-        Alert.alert("Notice", "No To-Do items found.");
+       // Alert.alert("Notice", "No To-Do items found.");
       }
     } catch (err) {
       // console.error(err);
@@ -119,13 +139,20 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
       icon: <Ionicons name="warning-outline" size={20} color="#14532D" />,
       items: todoList?.data?.todo_items?.map((item) => item.notification) ?? [],
       todoItems: todoList?.data?.todo_items ?? [],
+      communication_history : []
     },
     {
       id: "2",
       title: "INBOX (COACH THREADS)",
       icon: <Ionicons name="mail-outline" size={20} color="#14532D" />,
       items: todoList?.data?.todo_items?.map((item) => item.notification) ?? [],
-      todoItems: todoList?.data?.todo_items ?? [],
+      todoItems: [],
+      communication_history: Array.isArray(todoList?.data?.communication_history) 
+      ? todoList.data.communication_history 
+      : todoList?.data?.communication_history 
+        ? [todoList.data.communication_history] 
+        : [],
+
     },
   ];
 
@@ -141,6 +168,14 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
       Alert.alert("Info", "No action available for this item.");
     }
   };
+
+  const handleInboxClick = (item: communication_history) => {
+  navigation.navigate("EmailCommunication", {
+    id: item.school_id,
+    type: item.email_status,
+  });
+};
+
 
   // Toggle expand: animate container height (pixel-based Animated.Value).
   const toggleExpand = (id: string) => {
@@ -159,8 +194,8 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
     if (animObj.measuredHeight != null) {
       Animated.timing(animObj.animated, {
         toValue: next ? animObj.measuredHeight! : 0,
-        duration: 300,
-        easing: Easing.out(Easing.ease),
+        duration: 600,
+        easing: Easing.inOut(Easing.ease),
         useNativeDriver: false, // height animation requires false
       }).start();
     }
@@ -218,7 +253,7 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
             visibleBase.map((todoItem, idx) => (
               <TouchableOpacity key={`base-${idx}`} onPress={() => handleTodoClick(todoItem)}>
                 <View className="flex-row items-start mt-1">
-                  <AppText className="ml-5">•</AppText>
+      <TitleText className="ml-5 -mt-2" size="text-24">•</TitleText>
                   <AppText className="ml-5">{todoItem.notification}</AppText>
                 </View>
               </TouchableOpacity>
@@ -277,93 +312,103 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
 
   // renderInboxCard - similar approach
   const renderInboxCard = ({ item }: { item: CardItem }) => {
-    const allItems = item.items ?? [];
-    const visibleBase = allItems.slice(0, 2);
-    const extras = allItems.slice(2);
-    const expanded = expandedCards[item.id] ?? false;
+  const allItems = item.communication_history ?? [];
+  const visibleBase = allItems.slice(0, 2);
+  const extras = allItems.slice(2);
+  const expanded = expandedCards[item.id] ?? false;
 
-    if (!animRefs.current[item.id]) {
-      animRefs.current[item.id] = { animated: new Animated.Value(0), measuredHeight: null };
-    }
-    const animObj = animRefs.current[item.id];
-    const animatedHeight = animObj.animated;
+  if (!animRefs.current[item.id]) {
+    animRefs.current[item.id] = { animated: new Animated.Value(0), measuredHeight: null };
+  }
+  const animObj = animRefs.current[item.id];
+  const animatedHeight = animObj.animated;
 
-    return (
-      <View className="bg-white rounded-2xl p-4 mb-4 border border-gray-200">
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row items-center">
-            {item.icon}
-            <TitleText className="ml-2">{item.title}</TitleText>
-          </View>
+  const renderMessage = (msg: communication_history, key: string) => (
+     <TouchableOpacity key={key} onPress={() => handleInboxClick(msg)}>
+    <View key={key} className="flex-row items-start mt-1">
+      <TitleText className="ml-5 -mt-2" size="text-24">•</TitleText>
+      
+      <View>
+        <AppText className="ml-5 mr-10">
+          <Text className="font-nunitoextrabold text-16">
+            {msg.email_info}
+          </Text>
+          {msg.email_subject}
+        </AppText>
+        <Text className="ml-5">{formatDate(msg.email_sent_date)} - {msg.email_status}</Text>
+      </View>
+    </View>
+    </TouchableOpacity>
+  );
 
-          {allItems.length > 2 && (
-            <TouchableOpacity onPress={() => toggleExpand(item.id)}>
-              <View className="flex-1">
-                <Text className="text-blue-600 font-semibold">{expanded ? "View Less" : "View All"}</Text>
-              </View>
-            </TouchableOpacity>
-           
-          )}
+  const formatDate = (dateString: string): string => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  }).format(date);
+};
+
+
+  return (
+    <View className="bg-white rounded-2xl p-4 mb-4 border border-gray-200">
+      <View className="flex-row justify-between items-center">
+        <View className="flex-row items-center">
+          {item.icon}
+          <TitleText className="ml-2">{item.title}</TitleText>
         </View>
 
-        <View>
-          {visibleBase.length > 0 ? (
-            visibleBase.map((text, idx) => (
-              <View key={`base-inbox-${idx}`} className="flex-row items-start mt-1">
-                <AppText className="ml-5">•</AppText>
-               <View>
-                 {/* <AppText className="ml-5">{text}</AppText> */}
-<AppText className="ml-5 mr-10">
-  <Text className="font-nunitoextrabold text-16">Coach Smith (CWRU): </Text>
-  Thanks for reaching out — can we see film?
-</AppText>
-                               <Text className="ml-5">Aug 26 • 1 reply</Text>
-                </View>
-
-              </View>
-            ))
-          ) : (
-            <AppText className="ml-5 mt-2 text-gray-500 italic">No data available</AppText>
-          )}
-        </View>
-
-        {/* Offscreen measure */}
-        {extras.length > 0 && (
-          <View
-            pointerEvents="none"
-            style={{ position: "absolute", left: -10000, top: 0, opacity: 0, zIndex: -1 }}
-            onLayout={(e) => {
-              const measured = Math.round(e.nativeEvent.layout.height);
-              const prev = animRefs.current[item.id]?.measuredHeight ?? null;
-              if (prev !== measured) {
-                animRefs.current[item.id].measuredHeight = measured;
-                ensureAnimateAfterMeasure(item.id);
-              }
-            }}
-          >
-            {extras.map((text, idx) => (
-              <View key={`measure-extra-inbox-${idx}`} className="flex-row items-start mt-1">
-                <AppText className="ml-5">•</AppText>
-                <AppText className="ml-5">{text}</AppText>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Animated visible extras */}
-        {extras.length > 0 && (
-          <Animated.View style={{ height: animatedHeight, overflow: "hidden" }}>
-            {extras.map((text, idx) => (
-              <View key={`extra-inbox-${idx}`} className="flex-row items-start mt-1">
-                <AppText className="ml-5">•</AppText>
-                <AppText className="ml-5">{text}</AppText>
-              </View>
-            ))}
-          </Animated.View>
+        {allItems.length > 2 && (
+          <TouchableOpacity onPress={() => toggleExpand(item.id)}>
+            <View className="flex-1">
+              <Text className="text-blue-600 font-semibold">
+                {expanded ? "View Less" : "View All"}
+              </Text>
+            </View>
+          </TouchableOpacity>
         )}
       </View>
-    );
-  };
+
+      <View>
+        {visibleBase.length > 0 ? (
+          visibleBase.map((msg, idx) => renderMessage(msg, `base-inbox-${idx}`))
+        ) : (
+          <AppText className="ml-5 mt-2 text-gray-500 italic">
+            No data available
+          </AppText>
+        )}
+      </View>
+
+      {/* Hidden measure block */}
+      {extras.length > 0 && (
+        <View
+          pointerEvents="none"
+          style={{ position: "absolute", left: -10000, top: 0, opacity: 0, zIndex: -1 }}
+          onLayout={(e) => {
+            const measured = Math.round(e.nativeEvent.layout.height);
+            const prev = animRefs.current[item.id]?.measuredHeight ?? null;
+            if (prev !== measured) {
+              animRefs.current[item.id].measuredHeight = measured;
+              ensureAnimateAfterMeasure(item.id);
+            }
+          }}
+        >
+          {extras.map((msg, idx) => renderMessage(msg, `measure-extra-inbox-${idx}`))}
+        </View>
+      )}
+
+      {/* Animated visible extras */}
+      {extras.length > 0 && (
+        <Animated.View style={{ height: animatedHeight, overflow: "hidden" }}>
+          {extras.map((msg, idx) => renderMessage(msg, `extra-inbox-${idx}`))}
+        </Animated.View>
+      )}
+    </View>
+  );
+};
+
 
   // Notification/permissions code unchanged
   const requestNotificationPermission = async () => {
@@ -460,6 +505,9 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
         <AppText className="-mt-4">{formattedDate}</AppText>
       </View>
 
+      {screenload ? (
+   <> 
+
       {notificationsAllowed === false && (
         <View className="bg-yellow-100 border border-yellow-50 rounded-lg p-4 flex-row items-center mb-1">
           <View className="flex-1 flex-row items-start">
@@ -478,8 +526,13 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
         </View>
       )}
 
-      <Loader show={loading} />
-
+<Animated.View
+  style={{
+    flex: 1,
+    opacity: opacityAnim,
+    transform: [{ translateY: slideAnim }],
+  }}
+>
       <FlatList
         data={buildCardData()}
         renderItem={renderCard}
@@ -488,6 +541,21 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={false}
       />
+      </Animated.View>
+ </>
+) : (
+       <View className="flex-1 items-center justify-center">
+       {/* <LottieView
+        source={require('../../../assets/animations/bot_loading.json')}
+        autoPlay
+        loop={true}
+        style={{ width: 200, height: 200 }} 
+      /> */}
+
+      </View>
+    )}
+            <Loader show={loading} />
+
     </View>
   );
 }

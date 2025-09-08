@@ -404,3 +404,11 @@ export function capitalizeWords(str?: string): string {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 }
+
+
+export const clampDecimal = (val?: string) => {
+  // Take first digit only
+  const firstDigit = val?.charAt(0) || "0";
+  const num = parseInt(firstDigit, 10);
+  return isNaN(num) ? 0 : num;
+};

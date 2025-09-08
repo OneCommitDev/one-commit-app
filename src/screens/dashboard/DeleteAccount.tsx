@@ -45,7 +45,7 @@ export default function DeleteAccount() {
           const accessToken = getItem(PREF_KEYS.accessToken);
           const url = Api_Url.deactivateAPI;
           const res = await httpRequest2<SimpleResponse>(
-            url,  'post',   {},   accessToken ?? ''  );
+            url,  'delete',   {},   accessToken ?? ''  );
           if (res.status) {
                 clearAllPrefs();
                 navigation.navigate('DeleteAccountSuccess');

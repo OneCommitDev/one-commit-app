@@ -19,12 +19,12 @@ const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>(
     const profileCompleted = await getItem(PREF_KEYS.profileCompleted);
      setTimeout(() => {
        if ( profileCompleted === 'success') {
-           // navigation.replace('UserProfile' , {src : ''});
-     navigation.replace('Dashboard' , {onload : 'Home'});
+      //   navigation.replace('UserProfile' , {src : ''});
+        navigation.replace('Dashboard' , {onload : 'Home'});
       }
      else  if (login_status === 'success' ) {
-            //    navigation.replace('UserProfile' , {src : ''});
-              navigation.replace('Dashboard' , {onload : 'Home'});
+              navigation.replace('UserProfile' , {src : ''});
+            //   navigation.replace('Dashboard' , {onload : 'Home'});
 
       }    
       else {

@@ -10,6 +10,7 @@ import * as Application from "expo-application";
 
 const { apiUrl, appEnv , xKey , baseImgUrl} = Constants.expoConfig?.extra ?? {};
 export const  base_url_images = baseImgUrl;
+
 console.log('apiUrl_', apiUrl);
 const api = axios.create({
   baseURL: apiUrl, 
@@ -191,12 +192,12 @@ export async function httpRequest_social_token<T>(
 
     return response.data;
   } catch (error: any) {
-  /*  console.log(' HTTP error', {
+     console.log(' HTTP error', {
       message: error.message,
       response: error.response,
       request: error.request,
       config: error.config,
-    });*/
+    }); 
 
     const fallback: T = {
       status: false,
@@ -265,13 +266,13 @@ export async function httpRequest_social_token<T>(
     return response.data;
     
   } catch (error: any) {
-   /* console.log('❌ HTTP error', {
+  console.log('❌ HTTP error', {
   message: error.message,
   response: error.response,
   request: error.request,
   config: error.config,
   
-});*/
+}); 
 
     const fallback: T = {
       status: false,
@@ -435,6 +436,9 @@ export const Api_Url = {
   fcmTokenDeleteAPI : '/user/notification',
   deactivateAPI : '/user/deactivate',
   removeEmailApi : '/dashboard/remove-email',
+   changePassword: '/change-pass',
+      quickEditapi: '/user/profile-quick-edit',
+
 };
 
 

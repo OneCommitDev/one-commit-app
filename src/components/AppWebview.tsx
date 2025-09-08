@@ -11,8 +11,8 @@ type AppWebviewRouteProp = RouteProp<RootStackParamList, 'AppWebview'>;
 
 
 export default function AppWebview() {
-      const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-     const route = useRoute<AppWebviewRouteProp>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const route = useRoute<AppWebviewRouteProp>();
   const { url , title} = route.params;
 
     const handleBack = () => {
@@ -50,7 +50,7 @@ export default function AppWebview() {
           </TouchableOpacity>
   
           <View className="flex-1 justify-center ml-3">
-               <TitleText>{title}</TitleText>
+               {/* <TitleText>{title}</TitleText> */}
   
            </View>
         </View>

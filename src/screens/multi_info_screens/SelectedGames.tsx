@@ -136,7 +136,9 @@ export default function SelectedGames({
         media_links: '',
           ...(stepToEdit != null && { ui_flow: 'profile_edit' , ui_flow_data : sportId })  
       };
-      console.log('sportId ' , sportId);
+ console.log(Api_Url.save_sports);
+      console.log(payload);
+      // console.log('sportId ' , sportId);
 
       const res = await httpRequest2<SavedSportResponse>(
         Api_Url.save_sports,

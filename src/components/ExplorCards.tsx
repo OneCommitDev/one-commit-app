@@ -33,7 +33,7 @@ const ExplorCards: React.FC<Props> = ({
    <View className='w-full flex-row'>
      <TouchableOpacity
       onPress={() => onSwipeLeft?.(item)}
-      className="bg-black mt-0 items-start px-4 flex-1 justify-center rounded-[30px]"
+      className="bg-white mt-0 items-start px-4 flex-1 justify-center rounded-[30px]"
     >
       <View className="flex-row items-center">
         <Ionicons name="heart" size={24} color="#235D48" />
@@ -46,7 +46,7 @@ const ExplorCards: React.FC<Props> = ({
   const renderRightActions = () => (
     <TouchableOpacity
       onPress={() => onSwipeRight?.(item)}
-      className="bg-black mt-0 items-end px-4 flex-1 justify-center"
+      className="bg-white mt-0 items-end px-4 flex-1 justify-center"
     >
       <View className="flex-row items-center">
         <Ionicons name="archive" size={24} color="red" />

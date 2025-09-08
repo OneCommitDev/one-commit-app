@@ -441,6 +441,7 @@ export type SportUserFormattedData = {
 };
 
 export type SportEvent = {
+   sport_id?: string;
   event_id: string;
   eventValue: string;
   eventUnit: string;
@@ -473,7 +474,20 @@ export type HomeToDoModal = {
   todo_items : todo_items[];
   profile : todo_profile;
    connected_email : todo_connected_email;
+      communication_history : communication_history;
+
 };
+
+export type communication_history = {
+  email_info : string;
+  email_id : string;
+  email_subject : string;
+  email_to : string;
+  email_from : string;
+  email_status : string;
+  email_sent_date : string;
+  school_id : string;
+}
 
 export type todo_items ={
   id : string;

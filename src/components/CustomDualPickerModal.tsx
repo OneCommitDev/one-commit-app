@@ -33,6 +33,8 @@ export const CustomDualPickerModal: React.FC<CustomDualPickerModalProps> = ({
   initialMainValue,
   initialDecimalValue,
 }) => {
+
+
   const [mainIndex, setMainIndex] = useState(0);
   const [decimalIndex, setDecimalIndex] = useState(0);
   const [firstOpen, setFirstOpen] = useState(true); // to detect first open

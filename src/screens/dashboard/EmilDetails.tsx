@@ -20,6 +20,7 @@ import { Api_Url, httpRequest2 } from '~/services/serviceRequest';
 import { PREF_KEYS } from '~/utils/Prefs';
 import RenderHTML from 'react-native-render-html'; // ✅ HTML renderer
 import LottieView from 'lottie-react-native';
+import NoDataAvailable from '~/components/NoDataAvailable';
 
 type EmailDetailsProps = {
   isVisible: boolean;
@@ -132,13 +133,12 @@ console.log(res);
   </ScrollView>
 ) : !loading ? (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <LottieView
-      source={require('assets/animations/nodata.json')}
-      autoPlay
-      loop={false}
-      style={{ width: 200, height: 200 }}
-    />
-    <AppText className='-mt-10'>No data available</AppText>
+     <NoDataAvailable
+                      title="No content available"
+                      subtitle=""
+                      showRefresh={false}
+                      useLottie={true}
+                    />
   </View>
 ) : null}
 

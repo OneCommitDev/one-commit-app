@@ -53,7 +53,9 @@ const [campusType, setCampusType] = useState<string>("");
 
   const [aidType, setAidType] = useState<'Yes' | 'No' | 'Not sure'>('Yes');
   const [decisionType, setDecisionType] = useState<'Yes' | 'No' | 'Maybe'>('Yes');
-  const [schoolType, setSchoolType] = useState<'Small' | 'Medium' | 'Large'>('Small');
+  // const [schoolType, setSchoolType] = useState<'Small' | 'Medium' | 'Large'>('Small');
+  const [schoolType, setSchoolType] = useState<string>("");
+
   const [actRigorType, setActRigorType] = useState<'Low' | 'Medium' | 'High'>('Low');
   const [selectedReligious, setSelectedReligious] = useState('Doesn’t matter');
   const [regions, setRegions] = useState<string[]>([]);
@@ -195,9 +197,11 @@ const capitalize = (value: string | null | undefined): string => {
             setSelectedDivisions(divisions);
 
 
-      setSchoolType(
-          (capitalize(prefData.school_size) ?? 'Small') as 'Small' | 'Medium' | 'Large'
-        );
+      // setSchoolType(
+      //     (capitalize(prefData.school_size) ?? 'Small') as 'Small' | 'Medium' | 'Large'
+      //   );
+                setSchoolType(capitalize(prefData.school_size));
+
 
         setActRigorType(
           (capitalize(prefData.academic_rigor) ?? 'Low') as 'Low' | 'Medium' | 'High'
@@ -445,12 +449,22 @@ const parseShortNumber = (num: number): number => {
 
 
             
-            <TestTypeToggle
+            {/* <TestTypeToggle
               options={['Small', 'Medium', 'Large']}
               initialValue={schoolType}
               onSelect={(selected) => {
                 setSchoolType(selected as any);
                 handleChange('school_size', selected);
+              }}
+            /> */}
+                <MultiSelectToggle
+              options={['Small', 'Medium', 'Large']}
+              initialValues={schoolType ? schoolType.split(", ") : []}
+              onSelect={(selected) => {
+                const asString = selected.join(", ");
+              setSchoolType(asString);
+              console.log(asString);
+                handleChange('school_size', asString);
               }}
             />
           </View>

@@ -283,7 +283,6 @@ const handleEmailDelete = () => {
                 navigation.navigate('ContactUs')
             break;
            case "View connections":
-            console.log('sdfsdfsfsf');
            setShowModal(true);
 
                 break;

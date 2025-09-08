@@ -23,10 +23,12 @@ export default function ChangePassword() {
   const [showTooltip, setShowTooltip] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+    const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
 
   const isFormValid =
     newPassword.length >= 8 &&
@@ -64,14 +66,13 @@ export default function ChangePassword() {
    const emailID = await getItem(PREF_KEYS.forgot_email);
 const OTP = await getItem(PREF_KEYS.forgot_otp);
 
-  const requestBody: ResetPasswordRequest = {
-       email: emailID ?? '',  
-       code : OTP ?? '',
-       pass : confirmPassword
-     };
+    const payload = {
+        old_pass: oldPassword,
+        new_pass: confirmPassword,
+      };
  
      const res = await httpRequest<SimpleResponse>(
-       Api_Url.resetPassword,    'post',    requestBody,    undefined,   true 
+       Api_Url.changePassword,    'post',    payload,    undefined,   true 
      );
      if (res.status) {
         removeItem(PREF_KEYS.forgot_email);
@@ -128,6 +129,28 @@ const OTP = await getItem(PREF_KEYS.forgot_otp);
         extraScrollHeight={100}
       >
     
+            {/* old Password Field */}
+        <TitleText className="mb-2">Current Password</TitleText>
+      <View
+        className={`flex-row items-center rounded-xl px-3 h-14 bg-white ${
+          newPassword && !isPasswordValid(newPassword)
+            ? 'border border-red-500'  : 'border border-gray-300'  }`} >      
+    <MaterialIcons name="lock-outline" size={24} color="#124D3A" />
+          <TextInput
+            className="ml-3 flex-1 text-black font-nunitosemibold text-base"
+            placeholder="Enter current password"
+            secureTextEntry={!showCurrentPassword}
+            value={oldPassword}
+            onChangeText={setOldPassword}
+          />
+          <TouchableOpacity onPress={() => setShowCurrentPassword(!showCurrentPassword)}>
+            <MaterialIcons
+              name={showNewPassword ? 'visibility' : 'visibility-off'}
+              size={24}
+              color="#124D3A"
+            />
+          </TouchableOpacity>
+        </View>
 
         {/* New Password Field */}
         <TitleText className="mb-2">New Password</TitleText>
