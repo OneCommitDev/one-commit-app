@@ -7,14 +7,14 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "bundleIdentifier": "com.onecommit.app"
+        "bundleIdentifier": "us.onecommit.app"
       },
       "android": {
-        "package": "com.onecommit.app"
+        "package": "us.onecommit.app"
       },
       "env": {
         "EXPO_PUBLIC_APP_ENV": "development",
-        "EXPO_PUBLIC_API_URL": "http://devapi.onecommit.us/v1",
+        "EXPO_PUBLIC_API_URL": "https://devapi.onecommit.us:443/v1",
          "EXPO_PUBLIC_BASE_IMG_URL": "https://d2b1wekz0xjax3.cloudfront.net/",
         "EXPO_PUBLIC_X_KEY": "AXBpVmVyMS4wLWMzYjg3YmE3ZDY2NzdiMzI1M2I1MDc0N2U3MjFiODk3NjUwMDg1MDU2YjUzNmMyMTYwNjkxOGFjZTcxMTRhN2Qtb25lY29tbWl0"
       }
@@ -26,17 +26,17 @@
       
       "env": {
         "EXPO_PUBLIC_APP_ENV": "production",
-        "EXPO_PUBLIC_API_URL": "http://ec2-18-218-239-171.us-east-2.compute.amazonaws.com/v1",
+        "EXPO_PUBLIC_API_URL": "https://api.onecommit.us:443/v1",
         "EXPO_PUBLIC_BASE_IMG_URL": "https://d2b1wekz0xjax3.cloudfront.net/",
         "EXPO_PUBLIC_X_KEY": "AXBpVmVyMS4wLWMzYjg3YmE3ZDY2NzdiMzI1M2I1MDc0N2U3MjFiODk3NjUwMDg1MDU2YjUzNmMyMTYwNjkxOGFjZTcxMTRhN2Qtb25lY29tbWl0"
       },
       "android": {
         "buildType": "apk",
-        "package": "com.onecommit.app"
+        "package": "us.onecommit.app"
       },
       "ios": {
         "simulator": true,
-        "bundleIdentifier": "com.onecommit.app"
+        "bundleIdentifier": "us.onecommit.app"
       }
     }
   }

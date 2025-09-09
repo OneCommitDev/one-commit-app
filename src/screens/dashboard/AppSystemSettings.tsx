@@ -151,30 +151,33 @@ useFocusEffect(
  
 
     const logoutWithFCMDeletion = async () => {
-         setLoading(true);
-       try {
+        try {
        const accessToken = await getItem(PREF_KEYS.accessToken);
        const refreshToken = await getItem(PREF_KEYS.refreshToken);
        const url = Api_Url.fcmTokenDeleteAPI;
        const res = await httpRequest2<SimpleResponse>(
          url,   'delete',    {fcmToken : fcmToken , refreshToken : refreshToken},    accessToken ?? '',     true     );
-         setLoading(false);
- // console.log('logs_res', res);
-       if (res?.status) {
-         clearAllPrefs();
+        
+         
+        if (res?.status) {
+           clearAllPrefs();
          resetFCMToken();
-         navigation.replace('Login');
-     }else{
-        clearAllPrefs();
-         resetFCMToken();
+         
+         setTimeout(() => {
           navigation.replace('Login');
+          }, 100);
+     }else{
+      clearAllPrefs();
+         resetFCMToken();
+       setTimeout(() => {
+           navigation.replace('Login');
+           }, 100);
      }  
      } catch (err) {
-         setLoading(false);
+        
        Alert.alert('Error', 'Unexpected error occurred.');
      } finally {
-           setLoading(false);
-     }
+      }
    };
 
  const loadConnectedEmail = async () => {

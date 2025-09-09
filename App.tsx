@@ -79,6 +79,7 @@ async function setupNotifications() {
     authStatus === AuthorizationStatus.PROVISIONAL
   ) {
     const token = await getToken(messagingInstance);
+    console.log(token);
     await setItem(PREF_KEYS.fcmToken, token);
   }
 }

@@ -28,19 +28,19 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>OneCommit</string>
-				<string>com.onecommit.app</string>
+				<string>us.onecommit.app</string>
 				<string>com.googleusercontent.apps.156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.429115153068-i1sfo1crj65cbcjtaiu3256bu8epqlhu</string>
+				<string>com.googleusercontent.apps.429115153068-hd2tm7fpr9g1tvrr6amcs4hdvk507iti</string>
 			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>19</string>
+	<string>1</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>google</string>

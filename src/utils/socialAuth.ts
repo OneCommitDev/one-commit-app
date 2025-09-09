@@ -68,7 +68,7 @@ export const useMicrosoftLogin = () => {
   // console.log('request' , request);
 
 console.log(AuthSession.makeRedirectUri({
-  scheme: 'com.onecommit.app',
+  scheme: 'us.onecommit.app',
   path: 'oauthredirect',
 }));
 
@@ -77,7 +77,7 @@ console.log(AuthSession.makeRedirectUri({
   const handleResponse = async () => {
     if (response?.type === 'success') {
       const { code } = response.params;
-  console.log('codecodecodecodecode' , response);
+  // console.log('codecodecodecodecode' , response);
 
      // exchangeMicrosoftCode(code);
       return { code };
@@ -134,7 +134,7 @@ export const useMicrosoftEmailConnect = (extraScopes: string[] = []) => {
   );
 
   console.log('Redirect URI:', AuthSession.makeRedirectUri({
-    scheme: 'com.onecommit.app',
+    scheme: 'us.onecommit.app',
     path: 'oauthredirect',
   }));
 

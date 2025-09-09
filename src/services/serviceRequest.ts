@@ -10,10 +10,12 @@ import * as Application from "expo-application";
 
 const { apiUrl, appEnv , xKey , baseImgUrl} = Constants.expoConfig?.extra ?? {};
 export const  base_url_images = baseImgUrl;
+export const base_url =  apiUrl;
 
 console.log('apiUrl_', apiUrl);
 const api = axios.create({
-  baseURL: apiUrl, 
+  // baseURL: "https://devapi.onecommit.us:443/v1", 
+  baseURL: apiUrl,
   timeout: 60000,
   headers: {
     'Content-Type': 'application/json',  
@@ -40,7 +42,7 @@ export default api;
 export const setAuthToken = (token: string) => {
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 };
-/*
+ 
 //  GET request
 export const getRequest = async (url: string, params?: any) => {
   const response = await api.get(url, { params });
@@ -86,7 +88,7 @@ export const uploadFile = async (url: string, fileUri: string) => {
 };
 
 
-*/
+ 
 
 
 

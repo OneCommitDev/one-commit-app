@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:429115153068:android:100b3d989d99c26d44dd09",
+        "mobilesdk_app_id": "1:429115153068:android:7df5e61a6a2eadb144dd09",
         "android_client_info": {
-          "package_name": "us.onecommit.app"
+          "package_name": "com.onecommit.app"
         }
       },
       "oauth_client": [
@@ -20,7 +20,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCE37VfZ581cBaeNHRDBmucAwZCJuMZ_X8"
+          "current_key": "AIzaSyBA366DbKCHgY8Di6oelCt8hZ_44WQvolw"
         }
       ],
       "services": {

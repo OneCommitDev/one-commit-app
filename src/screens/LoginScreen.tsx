@@ -90,17 +90,13 @@ const GooglesignInApp = async () => {
       const err = error as { code: string; message?: string };
       switch (err.code) {
         case statusCodes.SIGN_IN_CANCELLED:
-         // console.log('User cancelled the login flow');
           break;
         case statusCodes.IN_PROGRESS:
-         // console.log('Sign in already in progress');
           break;
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-         // console.log('Play services not available or outdated');
           break;
         default:
-         // console.log('Unhandled error code:', err.code);
-          //console.log('Sign-in error full:', JSON.stringify(error, null, 2));
+          console.log('Sign-in error full:', JSON.stringify(error, null, 2));
       }
     } else {
       //console.log('Unknown error:', error);
@@ -113,16 +109,16 @@ useEffect(() => {
     const microsoftData = await handleMicrosoftResponse();
     if (microsoftData?.code) {
       const codeVerifier = microsoftData;
-      //  console.log("microsoftData.codee", microsoftData.code);
-      // console.log("codeVerifier", request?.codeVerifier);
-      // console.log('🪟 Microsoft Code:', microsoftData.code);
+       console.log("microsoftData.codee", microsoftData.code);
+      console.log("codeVerifier", request?.codeVerifier);
+      console.log('🪟 Microsoft Code:', microsoftData.code);
       setItem('microsoftCode', microsoftData.code);
     await  SocialLoginRequestVerifyTokens(microsoftData.code , Api_Url.microsoft_token );
     }
   })();
 }, [microsoftResponse]);
 
-
+/*
  const handleLogin = async (loginurls : string) => {
     const res = await WebBrowser.openAuthSessionAsync(loginurls, redirectUri);
         if (res.type === 'success' && 'url' in res && res.url) {
@@ -146,19 +142,16 @@ useEffect(() => {
            Alert.alert('Login Cancelled', `Type: ${res.type}`);
         }
   };
-
+*/
   
 
   const handleSocialClick = (platform: any) => {
     // const baseurl = base_url;
       if (platform === 'google') {
-      //  const loginUrl = baseurl + `/auth/google?redirectUri=${encodeURIComponent(redirectUri)}`;
        GooglesignInApp();
        }
        if (platform === 'microsoft') {
-          // const loginUrl = baseurl + `/auth/microsoft?redirectUri=${encodeURIComponent(redirectUri)}`;
-           //  handleLogin(loginUrl);
-          microsoftPrompt({ useProxy: false } as any); // 👈 triggers Microsoft login
+          microsoftPrompt({ useProxy: false } as any); 
        }
       if (platform === 'apple') {
         signInWithApple();
@@ -200,7 +193,7 @@ useEffect(() => {
           );
         });
      }
- 
+
       return userInfo;
     } catch (e: any) {
       if (e.code === "ERR_CANCELED") {
