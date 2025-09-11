@@ -26,8 +26,8 @@ babel-cache/
 metro-cache/
 
 # Misc
-.env
-.env.local
+# .env
+# .env.local
 *.log
 
 # VSCode
@@ -37,4 +37,4 @@ metro-cache/
 *.swp
 .idea/
 
-.env.local
+# .env.local
