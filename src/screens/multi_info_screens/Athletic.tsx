@@ -84,7 +84,7 @@ const navigation = useNavigation<Nav>();
         meters?: any;
         input: string;
         selected?: string;
-        selectedUnit?: 'feet_inches' | 'meters';
+        selectedUnit?: 'feet_inches' | 'metres';
       }
     >
   >({});
@@ -200,7 +200,7 @@ const navigation = useNavigation<Nav>();
               selected: '',
               selectedUnit: (type === 'height' || type === 'distance') ? undefined : undefined,
               feet: '',
-              meters: '',
+              metres: '',
             };
           });
         });
@@ -279,12 +279,13 @@ const navigation = useNavigation<Nav>();
         });
           initialForm['videoLink'] = { input: res.data.media_links || '' };
           initialForm['additional'] = { input: res.data.additional_links || '' };
-          setLoading(false);  
+          
           setScreenload(true);
         });
-      }else{
+      }else{  
+          setLoading(false);
         setScreenload(true);
-         setLoading(false);
+       
       }
     } catch (err) {
       setLoading(false);
@@ -292,6 +293,9 @@ const navigation = useNavigation<Nav>();
       console.log('Error fetching athletic data', err);
       Alert.alert('Error', 'Unexpected error occurred.');
     }
+    finally {
+       setLoading(false);
+      }
   };
 
 
@@ -301,7 +305,7 @@ const navigation = useNavigation<Nav>();
       const task = InteractionManager.runAfterInteractions(() => {
     setTimeout(() => { 
          fetchAthletic();
-         }, 100);
+         }, 500);
      });
       return () => task.cancel();
    }, []);
@@ -378,8 +382,8 @@ const handleSubmit = () => {
             event.measurement_type === 'time'
               ? 'seconds' :  event.measurement_type === 'points'
               ? 'points'
-              : userEntry.selectedUnit === 'meters'
-              ? 'meters'
+              : userEntry.selectedUnit === 'metres'
+              ? 'metres'
               : 'feet_inches',
         });
       }
@@ -393,8 +397,8 @@ const handleSubmit = () => {
     media_links: form['videoLink']?.input || '',
   };
 
-
-  SaveApiRequest(payload);  
+console.log(payload);
+   SaveApiRequest(payload);  
 };
 
   const SaveApiRequest = async (allData: any) => {
@@ -520,6 +524,7 @@ const handleSubmit = () => {
                 ...prev[heightInputKey],
                 input: formatted,
                 feet: `${feet}'${inches}"`,
+                selectedUnit: 'feet_inches'
               },
             }));
           }
@@ -539,6 +544,7 @@ const handleSubmit = () => {
                 ...prev[meterInputKey],
                 input: formatted,
                 meters: `${meters}.${decimal}`,
+                 selectedUnit: 'metres',
               },
             }));
           }
@@ -669,13 +675,16 @@ const handleSubmit = () => {
                       <View className="flex-row mt-2 w-[50%] border border-gray-300 rounded-full overflow-hidden">
                         <TouchableOpacity
                           onPress={() => {
-                            setForm((prev) => ({
+                        /*    setForm((prev) => ({
                               ...prev,
                               [key]: {
                                 ...prev[key],
                                 selectedUnit: 'feet_inches',
+                                // input: '',     // clear old value
+                                // feet: '',      // reset feet
+                                // meters: '',    // reset meters
                               },
-                            }));
+                            }));*/
                             setHeightInputKey(key);
                             setShowHeightModal(true);
                           }}
@@ -691,19 +700,23 @@ const handleSubmit = () => {
 
                       <TouchableOpacity
                         onPress={() => {
-                          setForm((prev) => ({
+                       /*   setForm((prev) => ({
                             ...prev,
                             [key]: {
                               ...prev[key],
-                              selectedUnit: 'meters',
+                              selectedUnit: 'metres',
+                                // input: '',     // clear old value
+                                // feet: '',      // reset feet
+                                // meters: '',    // reset meters
                             },
                           }));
+                          */
                           setMeterInputKey(key); // <-- this MUST be set before opening modal
                           setShowMeterModal(true); // <-- this opens the meter picker
                          }}
                         className="flex-1 px-4 py-2"
                         style={{
-                          backgroundColor: form[key]?.selectedUnit === 'meters' ? '#D1FAE5' : '#fff',
+                          backgroundColor: form[key]?.selectedUnit === 'metres' ? '#D1FAE5' : '#fff',
                         }}
                       >
                         <AppText className="text-center">Meters</AppText>
@@ -749,11 +762,11 @@ const handleSubmit = () => {
         if (selectedUnit === 'feet_inches') {
           setHeightInputKey(key);
           setShowHeightModal(true);
-        } else if (selectedUnit === 'meters') {
+        } else if (selectedUnit === 'metres') {
           setMeterInputKey(key);
           setShowMeterModal(true);
         } else {
-          Alert.alert('Select Unit', 'Please select Feet or Meters before entering value.');
+          Alert.alert('Select Unit', 'Please select Feet or metres before entering value.');
         }
       }
     }}
@@ -854,9 +867,9 @@ ListFooterComponent={
         
       </View>
     )}
-            <Loader show={loading} />
+           
 </View>
-
+ <Loader show={loading} />
   </View>
   );
 };

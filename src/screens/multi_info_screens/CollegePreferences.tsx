@@ -92,7 +92,8 @@ const isFormValid = () => {
     form.what_matter_most &&
     selectedDivisions.length > 0 &&
     form.school_size &&
-    form.academic_rigor 
+    form.academic_rigor &&
+    form.preferred_region
     );
 };
 
@@ -345,7 +346,6 @@ const parseShortNumber = (num: number): number => {
         contentContainerStyle={{ paddingBottom: 100 }}
         style={{ marginHorizontal: 12 }}
       >
-        <Loader show={loading} />
 
       <CustomAlert
       visible={adviceModal.visible}
@@ -363,7 +363,7 @@ const parseShortNumber = (num: number): number => {
 
 
         <View className="px-2">
-          <TitleText className='mb-5'>When it comes to recruiting, what matters most to you?</TitleText>
+          <TitleText className='mb-5'>When it comes to recruiting, what matters most to you? *</TitleText>
 
           {recruitingOptions.map((option) => (
             <TouchableOpacity
@@ -389,7 +389,7 @@ const parseShortNumber = (num: number): number => {
 
           <View>
             <View className="flex-row items-center justify-between">
-              <TitleText>NCAA Division Interest</TitleText>
+              <TitleText>NCAA Division Interest *</TitleText>
               <TouchableOpacity onPress={() => showDivisionAdvice()}>
                 <Ionicons name="information-circle-outline" size={22} color="#6b7280" />
               </TouchableOpacity>
@@ -427,7 +427,7 @@ const parseShortNumber = (num: number): number => {
 
           {/* Preferred Region */}
           <View className="mt-3">
-            <TitleText >Preferred Region</TitleText>
+            <TitleText >Preferred Region *</TitleText>
             <TouchableOpacity onPress={() => setShowRegionModal(true)}>
               <AppInput
                 value={form.preferred_region}
@@ -441,7 +441,7 @@ const parseShortNumber = (num: number): number => {
 
           <View className="flex-1 mt-3">
     <View className="flex-row items-center justify-between">
-              <TitleText>School Size</TitleText>
+              <TitleText>School Size *</TitleText>
 <TouchableOpacity onPress={() => showDivisionAdvice("School size ranges" , MessagesText.School_Size_MSG)}>
                 <Ionicons name="information-circle-outline" size={22} color="#6b7280" />
               </TouchableOpacity>
@@ -477,7 +477,7 @@ const parseShortNumber = (num: number): number => {
 
           <View className="flex-1 mt-3">
                 <View className="flex-row items-center justify-between">
-              <TitleText>Academic Rigor</TitleText>
+              <TitleText>Academic Rigor *</TitleText>
               {/* <TouchableOpacity onPress={() => showDivisionAdvice("Alert" , MessagesText.Academic_Rigor_MSG)}>
                 <Ionicons name="information-circle-outline" size={22} color="#6b7280" />
               </TouchableOpacity> */}
@@ -493,7 +493,7 @@ const parseShortNumber = (num: number): number => {
           </View>
 
           <View className="flex-1 mt-3">
-            <TitleText>Campus Type</TitleText>
+            <TitleText>Campus Type *</TitleText>
             {/* <TestTypeToggle
               options={['Urban', 'Suburban', 'Rural']}
               initialValue={campusType}
@@ -515,7 +515,7 @@ const parseShortNumber = (num: number): number => {
           </View>
 
           <View className="flex-1 mb-2 mt-3">
-            <TitleText>Early Decision Willingness</TitleText>
+            <TitleText>Early Decision Willingness *</TitleText>
             <TestTypeToggle
               options={['Yes', 'No', 'Maybe']}
               initialValue={decisionType}
@@ -552,7 +552,7 @@ const parseShortNumber = (num: number): number => {
 
             )} */}
 
-        <TitleText>How much money do you estimate your family can pay in tuition per year?</TitleText> 
+        <TitleText>How much money do you estimate your family can pay in tuition per year? *</TitleText> 
              <SliderComponents
             initialValue={selectedValue} 
             onValueChange={(value) => {
@@ -586,7 +586,7 @@ const parseShortNumber = (num: number): number => {
   >
     <View className="w-[100%] bg-white rounded-t-xl p-4 max-h-[70%]">
       <AppText size="text-18" className="mb-4 text-center font-semibold">
-        Select Region
+        Select Region 
       </AppText>
 
    <FlatList
@@ -620,6 +620,9 @@ const parseShortNumber = (num: number): number => {
     </View>
   </View>
 </Modal>
+
+        <Loader show={loading} />
+
 </View>
     </>
   );

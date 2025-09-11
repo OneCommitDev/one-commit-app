@@ -780,7 +780,7 @@ useEffect(() => {
                 sport_id: sporteventdata?.sport_id,  
                 event_id: sporteventdata?.event_id,  
                 eventValue: values,  
-                  eventUnit: unit === "feet" ? "feet_inches" : "meters",  
+                  eventUnit: unit === "feet" ? "feet_inches" : "metres",  
               },
             };
 

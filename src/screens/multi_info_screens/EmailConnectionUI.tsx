@@ -331,7 +331,7 @@ const checkGmailScopeAccess = async (serverAuthCode : string) => {
                                     selected === 'gmail' ? 'border-2 border-primary' : 'border border-transparent'
                                   } shadow-sm`}
                                 >
-                                          <Loader show={loading} />
+                                         
                                   
                                   <View className="flex-row items-center space-x-4">
                                     <Image
@@ -413,6 +413,7 @@ const checkGmailScopeAccess = async (serverAuthCode : string) => {
                                 </View>
                               </View>
                             </ScrollView>
+                             <Loader show={loading} />
             </View>
     
 

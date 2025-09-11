@@ -151,6 +151,7 @@ useFocusEffect(
  
 
     const logoutWithFCMDeletion = async () => {
+      setLoading(true);
         try {
        const accessToken = await getItem(PREF_KEYS.accessToken);
        const refreshToken = await getItem(PREF_KEYS.refreshToken);
@@ -160,23 +161,22 @@ useFocusEffect(
         
          
         if (res?.status) {
-           clearAllPrefs();
-         resetFCMToken();
-         
-         setTimeout(() => {
-          navigation.replace('Login');
+          clearAllPrefs();
+          resetFCMToken();
+          setTimeout(() => {
+            navigation.replace('Login');
           }, 100);
      }else{
-      clearAllPrefs();
-         resetFCMToken();
-       setTimeout(() => {
-           navigation.replace('Login');
-           }, 100);
+        clearAllPrefs();
+        resetFCMToken();
+        setTimeout(() => {
+          navigation.replace('Login');
+        }, 100);
      }  
      } catch (err) {
-        
        Alert.alert('Error', 'Unexpected error occurred.');
      } finally {
+       setLoading(false);
       }
    };
 

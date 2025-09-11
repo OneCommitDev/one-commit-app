@@ -99,10 +99,10 @@ const Academic: React.FC<Props> = ({ onNext , goToLastStep , stepToEdit, selecte
 const isFormValid = () => {
   const requiredFields = [
     "unweighted_gpa",
-    "intended_major_1",
-    "school_name",
-    "school_type",
-    "test_score_type",
+    // "intended_major_1",
+    // "school_name",
+    // "school_type",
+    // "test_score_type",
   ];
 
   const hasErrors = Object.values(errors).some((e) => e);
@@ -111,12 +111,14 @@ const isFormValid = () => {
     (f) => !form[f as keyof typeof form]?.toString().trim()
   );
 
-  // ✅ At least one test score required
+ /*
   const hasTestScore =
     !!form.sat_score?.toString().trim() ||
     !!form.act_score?.toString().trim();
 
   return !hasErrors && !isEmpty && hasTestScore;
+  */
+  return !hasErrors && !isEmpty;
 };
 
 
@@ -272,11 +274,16 @@ const isFormValid = () => {
           test_score_type: form.test_score_type.toLowerCase(),
           sat_score: form.sat_score,
           act_score: form.act_score,
-          intended_major: form.intended_major_1,
+          // intended_major: form.intended_major_1,
           school_name: form.school_name,
           school_type: form.school_type.toLowerCase(),
           ncaa_eligibility_status: form.ncaa_eligibility_status,
+                    intended_major: form.intended_major_1 || "00000000-0000-0000-0000-000000000000",  
+
         };
+
+        console.log(reqBody);
+
         if (form.intended_major_2) {
           reqBody.intended_major_2 = form.intended_major_2;
         }
@@ -355,7 +362,7 @@ const isFormValid = () => {
 
       {/* GPA */}
       <View className="px-2">
-        <TitleText text="Unweighted GPA" />
+        <TitleText text="Unweighted GPA *" />
         {/* <AppInput
           value={form.unweighted_gpa}
           keyboardType="decimal-pad"

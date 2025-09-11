@@ -377,8 +377,9 @@ const isFormValid =
             </TouchableOpacity>
           </View>
         </View>
-        <Loader show={loading} />
       </View>
+              <Loader show={loading} />
+
     </KeyboardAwareScrollView>
   );
 

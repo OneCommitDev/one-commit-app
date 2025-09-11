@@ -1,33 +1,33 @@
-import React from 'react';
-import { View, ActivityIndicator, StyleSheet, Modal } from 'react-native';
+// import React from 'react';
+// import { View, ActivityIndicator, StyleSheet, Modal } from 'react-native';
 
-type LoaderProps = {
-  show: boolean; // 👈 renamed from 'visible' to 'show'
-};
+// type LoaderProps = {
+//   show: boolean; // 👈 renamed from 'visible' to 'show'
+// };
 
-export default function Loader({ show }: LoaderProps) {
-  return (
-    <Modal
-      visible={show}
-      transparent={true}
-      animationType="fade"
-      statusBarTranslucent={true}
-    >
-      <View style={styles.overlay}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </View>
-    </Modal>
-  );
-}
+// export default function Loader({ show }: LoaderProps) {
+//   return (
+//     <Modal
+//       visible={show}
+//       transparent={true}
+//       animationType="fade"
+//       statusBarTranslucent={true}
+//     >
+//       <View style={styles.overlay}>
+//         <ActivityIndicator size="large" color="#ffffff" />
+//       </View>
+//     </Modal>
+//   );
+// }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent overlay
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+// const styles = StyleSheet.create({
+//   overlay: {
+//     flex: 1,
+//     backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent overlay
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+// });
 
 
 
@@ -91,3 +91,42 @@ const styles = StyleSheet.create({
 //     textAlign: 'center',
 //   },
 // });
+
+
+// components/LoaderOverlay.tsx
+import React from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+
+type Props = { show: boolean };
+
+export default function Loader({ show }: Props) {
+  if (!show) return null; // completely unmount when not showing
+
+  return (
+    <View style={styles.overlay} pointerEvents="auto">
+      <View style={styles.spinnerBox}>
+        <ActivityIndicator size="large" color="#ffffff" />
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.45)', // semi-transparent
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 9999,
+    elevation: 9999, // Android
+  },
+  spinnerBox: {
+    padding: 12,
+    borderRadius: 8,
+      // backgroundColor: 'rgba(0,0,0,0.35)', // optional box
+  },
+});

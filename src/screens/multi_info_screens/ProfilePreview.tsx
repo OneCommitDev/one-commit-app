@@ -373,7 +373,7 @@ InteractionManager.runAfterInteractions(() => {
 
     
     <View className="flex-1 bg-background">
-      <Loader show={loading} />
+     
 
       {!loading && profileSections.length === 0 && (
         <Text className="text-center text-gray-400 mt-8">
@@ -424,7 +424,7 @@ InteractionManager.runAfterInteractions(() => {
         />
       </View>
     </View>
-
+ <Loader show={loading} />
  </View>
   );
 }

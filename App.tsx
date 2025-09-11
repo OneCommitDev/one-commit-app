@@ -28,7 +28,7 @@ Sentry.init({
   sendDefaultPii: true,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1,
-  debug: true,
+  debug: false,
   tracesSampleRate: 1.0,
   enableAutoPerformanceTracing: true,
   enableAppHangTracking: true,

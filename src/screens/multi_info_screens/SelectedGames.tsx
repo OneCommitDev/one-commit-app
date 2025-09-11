@@ -20,6 +20,7 @@ import { EventsResponse, SavedSportResponse } from '~/services/DataModals';
 import AppText from '~/components/AppText';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './MultiStepSurvey';
+import LoaderModal from '~/components/LoaderModal';
 
 export type HoldSportsdata = {
   event_id: any;
@@ -220,7 +221,7 @@ export default function SelectedGames({
   return (
     <>
       <View className="flex-row items-center bg-white h-14 rounded-full px-4 mb-2">
-        <Loader show={loading} />
+        <LoaderModal show={loading} />
         <TextInput
           className="flex-1 py-2 text-black"
           placeholder="Search"

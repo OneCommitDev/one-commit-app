@@ -80,7 +80,7 @@ type CityState = { city: string; state: string } | null;
 
    const isFormValid =
   (form.fullName || '').trim() !== '' &&
-  (form.preferredName || '').trim() !== '' &&
+  // (form.preferredName || '').trim() !== '' &&
   (form.email || '').trim() !== '' &&
   (form.phone || '').trim() !== '' &&
   form.dob !== null &&
@@ -161,7 +161,7 @@ type CityState = { city: string; state: string } | null;
 
     const requestBody: CreateProfileRequest = {
         full_name: form.fullName,
-        preferred_name: form.preferredName,
+        // preferred_name: form.preferredName,
         phone: cleanPhoneNumber(form.phone),
          dob: form.dob ? format(form.dob, 'yyyy-MM-dd') : '', // ✅ ISO format
         city: form.city,
@@ -172,7 +172,12 @@ type CityState = { city: string; state: string } | null;
         weight_unit: form.weight_unit ?? '',
         height: form.heightis ? parseHeightToInches(form.heightis).toString() : '',  // 👈
         height_unit: form.height_unit ?? '',
+          // ...(form.preferredName ? { preferred_name: form.preferredName } : {}),  
+
       };
+        if (form.preferredName) {
+         requestBody.preferred_name = form.preferredName;
+        }
 
      await setItem(PREF_KEYS.displayName , form.preferredName);
 
@@ -237,7 +242,7 @@ const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
 
     if (!place) throw new Error('No location data found');
 
-    console.log('ZIP API Result:', place);
+    // console.log('ZIP API Result:', place);
 
     const city = place['place name'] || place['city'] || '';
     // const state = place['state'] || place['abbreviation'] || '';
@@ -328,10 +333,9 @@ const [fcmToken, setFcmToken] = useState('');
         enableOnAndroid={true}
         extraScrollHeight={100}
       >
-        <Loader show={loading} />
  
         <View className="bg-background ml-5 mr-5">
-          <TitleText text="Full Name"  />
+          <TitleText text="Full Name *"  />
           <AppInput
             value={form.fullName}
             leftIcon={<Ionicons name="person-outline" size={20} color="#6B7280" />}
@@ -347,7 +351,7 @@ const [fcmToken, setFcmToken] = useState('');
             placeholder="Enter preferred name"
           />
 
-          <TitleText text="Email"  />
+          <TitleText text="Email *"  />
           <AppInput
             value={form.email}
             editable={false}
@@ -358,7 +362,7 @@ const [fcmToken, setFcmToken] = useState('');
             keyboardType="email-address"
           />
 
-          <TitleText text="Phone Number"  />
+          <TitleText text="Phone Number *"  />
           <AppInput
             value={form.phone}
             leftIcon={<Ionicons name="phone-portrait-sharp" size={20} color="#6B7280" />}
@@ -371,7 +375,7 @@ const [fcmToken, setFcmToken] = useState('');
             }}
           />
 
-          <TitleText text="Date of Birth"  />
+          <TitleText text="Date of Birth *"  />
           <View className="bg-white px-1 py-1 rounded-full mt-2 mb-2">
             <TouchableOpacity
              onPress={() => {
@@ -395,7 +399,7 @@ const [fcmToken, setFcmToken] = useState('');
           <View>
             <View className="flex-row space-x-4">
               <View className="flex-1">
-                <TitleText text="ZipCode"  />
+                <TitleText text="ZipCode *"  />
                 <AppInput
                   value={form.zip}
                   keyboardType="number-pad"
@@ -435,7 +439,7 @@ const [fcmToken, setFcmToken] = useState('');
               </View>
 
               <View className="flex-1 ml-5">
-                <TitleText text="State"  />
+                <TitleText text="State *"  />
                 <AppInput
                   value={form.states}
                     editable={false}
@@ -454,7 +458,7 @@ const [fcmToken, setFcmToken] = useState('');
                 />
           </View>
 
-          <TitleText text="Gender"  />
+          <TitleText text="Gender *"  />
           <View className="mb-2">
             <TestTypeToggle
               options={['Male', 'Female']}
@@ -469,7 +473,7 @@ const [fcmToken, setFcmToken] = useState('');
           <View className="flex-row space-x-4">
             <View className="flex-1">
 
-              <TitleText text="Weight"  />
+              <TitleText text="Weight *"  />
             <TouchableOpacity onPress={() => setShowWeightModal(true)} activeOpacity={1}>
             <AppInput
               value={form.weightis}
@@ -486,7 +490,7 @@ const [fcmToken, setFcmToken] = useState('');
 
 
             <View className="flex-1 ml-5">
-              <TitleText text="Height"  />
+              <TitleText text="Height *"  />
               
               {/* <AppInput
               onPress={() => setShowHeightModal(true)}
@@ -526,6 +530,7 @@ const [fcmToken, setFcmToken] = useState('');
           </View>
         </View>
       </KeyboardAwareScrollView>
+        <Loader show={loading} />
 
       {/* iOS Date Picker Modal */}
       {Platform.OS === 'ios' && (

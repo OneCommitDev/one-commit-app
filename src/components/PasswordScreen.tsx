@@ -91,7 +91,7 @@ export default function PasswordScreen() {
       try {
         setLoading(true);
         const requestBody: RegisterRequest = {
-          email: email,
+          email: emailid,
           password: confirmPassword,
         };
           Applog('Sending data:', requestBody);
@@ -323,8 +323,9 @@ export default function PasswordScreen() {
             />
           </View>
         </View>
-        <Loader show={loading} />
       </View>
+              <Loader show={loading} />
+
     </KeyboardAwareScrollView>
 </View>
 

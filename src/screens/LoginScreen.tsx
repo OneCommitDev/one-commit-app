@@ -222,10 +222,17 @@ useEffect(() => {
           Api_Url.check_emailid,    'post',    {email},    undefined,   true 
         );
 
+        console.log(res);
         if (res.status && res.registration_status) {
+           if(res.registration_status.status === 'social_registered' || res.registration_status.status === 'not_registered'){   
+               Alert.alert('Error', res.message);
+           }
+           else{
             setLoading(false);
             SetloginButtonState(true);
-              
+           }
+           
+
             } else {
               Alert.alert('Error', res.message ?? 'Login failed');
             }
@@ -487,9 +494,10 @@ useEffect(() => {
             <TouchableOpacity onPress={handleForgot}>
               <Text className="text-center text-[#124D3A] underline">Forgot your password?</Text>
             </TouchableOpacity>
-        <Loader show={loading} />
           </View>
         </View>
+                <Loader show={loading} />
+
     </KeyboardAwareScrollView>
   );
 }

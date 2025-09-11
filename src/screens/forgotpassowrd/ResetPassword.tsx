@@ -213,9 +213,10 @@ const OTP = await getItem(PREF_KEYS.forgot_otp);
             disabled={!isFormValid}
           />
         </View>
-                <Loader show={loading} />
         
       </KeyboardAwareScrollView>
+                      <Loader show={loading} />
+
     </View>
   );
 }

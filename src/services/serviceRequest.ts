@@ -475,7 +475,7 @@ export interface ResetPasswordRequest {
 
 export interface CreateProfileRequest {
  full_name: string;
-        preferred_name: string;
+        preferred_name?: string;
         phone: string;
         dob: string;
         city: string;
