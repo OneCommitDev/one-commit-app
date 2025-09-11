@@ -429,7 +429,7 @@
     "build_v8_with_gn": "false",
     "legacy_peer_deps": "true",
     "global_prefix": "/Users/pardeepkumar/.nvm/versions/node/v20.19.2",
-    "local_prefix": "/Users/pardeepkumar/Documents/OneCommit/one-commit-app",
+    "local_prefix": "/Users/pardeepkumar/Documents/OneCommit/tetsing_PC_SCREENS/one-commit-app",
     "globalconfig": "/Users/pardeepkumar/.nvm/versions/node/v20.19.2/etc/npmrc",
     "userconfig": "/Users/pardeepkumar/.npmrc",
     "init_module": "/Users/pardeepkumar/.npm-init.js",

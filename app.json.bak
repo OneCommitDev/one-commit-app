@@ -33,11 +33,11 @@
     "ios": {
       "supportsTablet": true,
       "usesAppleSignIn": true,
-      "bundleIdentifier": "com.onecommit.app"
+      "bundleIdentifier": "us.onecommit.app"
       
     },
     "android": {
-       "package": "com.onecommit.app",
+       "package": "us.onecommit.app",
          "intentFilters": [
         {
           "action": "VIEW",

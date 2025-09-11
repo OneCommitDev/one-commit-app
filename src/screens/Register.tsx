@@ -15,13 +15,31 @@ import { RootStackParamList } from '~/navigation/types';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Logo from '~/components/Logo';
 import Tooltip from 'react-native-walkthrough-tooltip';
-import { Api_Url, postFormUrlEncoded, postRequest, RegisterRequest, setAuthToken } from '~/services/serviceRequest';
+import { Api_Url, base_url, httpRequest_social_token, postFormUrlEncoded, postRequest, RegisterRequest, setAuthToken } from '~/services/serviceRequest';
 import Loader from '~/components/Loader';
-import { RegisterResponse } from '~/services/DataModals';
+import { RegisterResponse, SocialTokenResponse } from '~/services/DataModals';
 import { setItem } from 'expo-secure-store';
 import { PREF_KEYS, Temp_KEYS } from '~/utils/Prefs';
 import axios from 'axios';
 import { Applog } from '~/utils/logger';
+import SocialIcons from '~/components/SocialIcons';
+import {  GoogleSignin,  GoogleSigninButton,  isErrorWithCode,  isSuccessResponse,
+  SignInResponse,  statusCodes,} from '@react-native-google-signin/google-signin';
+ import * as Google from 'expo-auth-session/providers/google';
+import { APP_CONFIG_GOOGLE } from '~/utils/constants';
+import { useMicrosoftLogin } from '~/utils/socialAuth';
+import { Savedetailsafterlogin } from '~/utils/decodeAccessToken';
+
+
+ 
+ GoogleSignin.configure({
+     scopes: APP_CONFIG_GOOGLE.emailLoginScopes,
+       offlineAccess: true, 
+       forceCodeForRefreshToken: true,
+       webClientId: APP_CONFIG_GOOGLE.webClient, 
+       iosClientId: APP_CONFIG_GOOGLE.iosClient, 
+       profileImageSize: 120, 
+ });
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -34,6 +52,147 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  const {
+    promptAsync: microsoftPrompt,
+    response: microsoftResponse,
+    handleResponse: handleMicrosoftResponse,
+  } = useMicrosoftLogin();
+
+   const [result, setResult] = useState(null);
+    const redirectUri = 'OneCommit://redirect';
+  
+  const GooglesignOutApp = async () => {
+    try {
+      await GoogleSignin.signOut();
+     } catch (error) {
+      console.error(error);
+    }
+  };
+  
+  const GooglesignInApp = async () => {
+        // await GoogleSignin.signOut(); // Force clean login
+        try {
+        await GoogleSignin.hasPlayServices();
+        const userInfo = await GoogleSignin.signIn() as any;
+        const tokens = await GoogleSignin.getTokens(); // Get access & id token
+        //console.log('FULL userInfo:', JSON.stringify(userInfo, null, 2));
+        const serverAuthCode = userInfo.data.serverAuthCode ?? userInfo.data.user?.serverAuthCode;
+        console.log(serverAuthCode);
+        // console.log('Google SignIn success:', userInfo);
+        // console.log('Access Token:', tokens.accessToken);
+        //  console.log('ID Token:', tokens.idToken);
+  
+      // Save details
+      await setItem(PREF_KEYS.login_status, 'success');
+      await setItem(PREF_KEYS.accessToken, tokens.accessToken);
+      await setItem(PREF_KEYS.refreshToken, tokens.idToken);
+      await setItem(PREF_KEYS.userEmailID, userInfo.data?.user.email ?? '');
+      await  SocialLoginRequestVerifyTokens(serverAuthCode , Api_Url.google_token );
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'code' in error) {
+        const err = error as { code: string; message?: string };
+        switch (err.code) {
+          case statusCodes.SIGN_IN_CANCELLED:
+            console.log('User cancelled the login flow');
+            break;
+          case statusCodes.IN_PROGRESS:
+            console.log('Sign in already in progress');
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            console.log('Play services not available or outdated');
+            break;
+          default:
+            console.log('Unhandled error code:', err.code);
+            console.log('Sign-in error full:', JSON.stringify(error, null, 2));
+        }
+      } else {
+        console.log('Unknown error:', error);
+      }
+    }
+  };
+  
+  
+  useEffect(() => {
+    (async () => {
+      const microsoftData = await handleMicrosoftResponse();
+      if (microsoftData?.code) {
+        const codeVerifier = microsoftData;
+        setItem('microsoftCode', microsoftData.code);
+      await  SocialLoginRequestVerifyTokens(microsoftData.code , Api_Url.microsoft_token );
+      }
+    })();
+  }, [microsoftResponse]);
+
+    const handleSocialClick = (platform: any) => {
+      const baseurl = base_url;
+        if (platform === 'google') {
+         const loginUrl = baseurl + `/auth/google?redirectUri=${encodeURIComponent(redirectUri)}`;
+         GooglesignInApp();
+         }
+         if (platform === 'microsoft') {
+            const loginUrl = baseurl + `/auth/microsoft?redirectUri=${encodeURIComponent(redirectUri)}`;
+             //  handleLogin(loginUrl);
+            microsoftPrompt({ useProxy: false } as any); // 👈 triggers Microsoft login
+         }
+        if (platform === 'apple') {
+          // const appleData =  handleAppleLogin();
+          // if (appleData) console.log('Apple:', appleData);
+        }
+    };
+
+    const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string) => {
+      try {
+        setLoading(true);
+        const requestBody = {
+         "authCodeToken" :authCode,
+        };
+        const res = await httpRequest_social_token<SocialTokenResponse>(
+          api_url,
+          'post',
+          requestBody,
+          undefined,
+          true
+        );
+    
+         setLoading(false);
+          console.log(api_url);
+         console.log(res);
+         console.log(requestBody);
+        if (res.data?.accessToken) {
+    
+          await setItem(PREF_KEYS.login_status, 'success');
+          await setItem(PREF_KEYS.accessToken, res.data?.accessToken);
+          if (res.data.refreshToken) {
+            await setItem(PREF_KEYS.refreshToken, res.data?.refreshToken);
+          }
+            await Savedetailsafterlogin();
+            if(res.profile.complete == true){
+              setItem(PREF_KEYS.profileCompleted , 'success');
+              // navigation.navigate('UserProfile');
+              navigation.replace('Dashboard');
+            }else{
+               navigation.navigate('UserProfile' , {src : ''});
+            }
+    
+    
+    
+    
+    
+        } else {
+          Alert.alert('Error',  'Login failed');
+        }
+      } catch (err) {
+        Alert.alert('Error', 'Unexpected error occurred.');
+        console.log('Social Login Errors:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+
+  
+  
   
 
   const isPasswordValid = (text: string) => {
@@ -316,6 +475,12 @@ const getResponse = await postFormUrlEncoded<RegisterResponse>(Api_Url.register,
               disabled={!isFormValid}
             />
           </View>
+
+
+                      {/* Social Icons */}
+                      <View className="flex-row justify-center my-6">
+                        <SocialIcons onIconPress={handleSocialClick} />
+                      </View>
 
           {/* Footer */}
           <View className="flex-row justify-center mb-2">

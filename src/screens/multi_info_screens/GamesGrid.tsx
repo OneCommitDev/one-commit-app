@@ -43,6 +43,7 @@ export default function GamesGrid() {
   }, []);
 
   const SportsApiRequest = async () => {
+    
     try {
       setLoading(true);
       const accessToken = await getItem(PREF_KEYS.accessToken);

@@ -14,6 +14,18 @@ export interface RegisterOTPResponse {
 
 }
 
+export interface CheckEmailVerifyResponse {
+ status: boolean;
+  message?: string;
+  registration_status?: {
+    status: string;
+    is_verified: boolean;
+    email: string;
+  };
+}
+
+ 
+
 export interface LoginResponse {
  status: boolean;
   message?: string;
@@ -112,7 +124,8 @@ export interface AcademicResponse {
         weighted_gpa: string;
         unweighted_gpa: string;
         test_score_type: string;
-        test_score: any;
+        sat_score: any;
+        act_score : any
         intended_major: string;
         intended_major_2: string;
         intended_major_3: string;
@@ -220,6 +233,7 @@ export type GetCollegePreferencesResponse = {
   lists: {
     regions: string[];
     matters: MatterItem[];
+     divisions: string[];
   };
   message?: string;
 };
@@ -296,11 +310,17 @@ export type MatchScore = {
 };
 
 export type AcademicFit = {
-  test_type: string;
-  test_score: string | number | null;
-  test_score_avg: string | number | null;
-  test_score_min: string | number | null;
+  act_score : number;
+   sat_score : number;
+  sat_score_avg: string | number | null;
+  sat_score_min: string | number | null;
+  act_score_avg: string | number | null;
+  act_score_min: string | number | null;
+
   unweighted_gpa: string | number | null;
+
+    act_score_above_average: boolean;
+      sat_score_above_average: boolean;
   test_score_above_average: boolean;
   match_score_tier: string;
   unweighted_gpa_school_avg: string | number | null;
@@ -376,6 +396,7 @@ export type ProfileComplitionData = {
   preferred_name: string;
   phone: string;
   dob: string;
+    gender: string;
   city: string;
   state: string;
   zipcode: string;
@@ -386,7 +407,8 @@ export type ProfileComplitionData = {
   weighted_gpa: string;
   unweighted_gpa: string;
   test_score_type: string;
-  test_score: number;
+  sat_score: number;
+   act_score: number;
   intended_major: string;
   intended_major_2: string;
   intended_major_3: string;
@@ -419,6 +441,7 @@ export type SportUserFormattedData = {
 };
 
 export type SportEvent = {
+   sport_id?: string;
   event_id: string;
   eventValue: string;
   eventUnit: string;
@@ -451,7 +474,20 @@ export type HomeToDoModal = {
   todo_items : todo_items[];
   profile : todo_profile;
    connected_email : todo_connected_email;
+      communication_history : communication_history;
+
 };
+
+export type communication_history = {
+  email_info : string;
+  email_id : string;
+  email_subject : string;
+  email_to : string;
+  email_from : string;
+  email_status : string;
+  email_sent_date : string;
+  school_id : string;
+}
 
 export type todo_items ={
   id : string;
@@ -520,3 +556,13 @@ export type CommunicationHistory = {
   data : string;
   message : string;
 };
+
+
+export type Editprofilemodal ={
+ status: boolean;
+  profile: {
+    complete: boolean;
+    stage: string;
+  };
+  data: ProfileComplitionData;
+}

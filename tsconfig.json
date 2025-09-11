@@ -2,11 +2,27 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+     "noImplicitAny": true, // new checks start
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true, // // new checks end
     "jsx": "react-jsx",
-
     "baseUrl": ".",
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": [
+        "src/*"
+      ]
     }
-  }
+  },
+  // "include": ["src", "global.d.ts"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "global.d.ts",
+    "nativewind-env.d.ts"
+  ]
 }

@@ -22,6 +22,7 @@ import {  NativeSyntheticEvent,  NativeScrollEvent,  ScrollView,} from 'react-na
 import SuccessModal from '~/components/SuccessModal';
 import ExplorCards from '~/components/ExplorCards';
 import NoDataAvailable from '~/components/NoDataAvailable';
+import AnimatedCard from '~/components/AnimatedCard';
 
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -130,7 +131,8 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           accessToken ?? '',
           true
         );
-
+  console.log('dots_',url);
+        console.log('dots_', res.data);
         const newData = Array.isArray(res.data) ? res.data : [];
 
         if (newData.length === 0) {
@@ -221,7 +223,6 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           const url = Api_Url.schoolsMatchesDelete(deleteId , type);
           const res = await httpRequest2<SimpleResponse>(url, 'post', {}, accessToken ?? '', true);
 
-          console.log('save_res' , res);
           if (res.status) {
             setMatches(prev => prev.filter(item => item.school_id !== deleteId));
             setTotal(prev => Math.max(prev - 1, 0));
@@ -232,7 +233,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
             // await fetchColleges(offset, true); // safer
           }
         } catch (err) {
-          console.log('Error deleting school', err);
+         // console.log('Error deleting school', err);
           Alert.alert('Error', 'Unexpected error occurred.');
         } finally {
           setLoading(false); // Hide global loader
@@ -241,8 +242,6 @@ const [isArchiveData, setIsArchiveData] = useState(false);
  
 
       const deleteCollegesTemp = async (deleteId: string , type : string) => {
-            console.log('deleteColleges');
-
         try {
           setLoading(true);  
 
@@ -268,7 +267,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           // Optional: fetch fresh data if needed
           await fetchColleges(offset, true);
         } catch (err) {
-          console.log('Error deleting school', err);
+         // console.log('Error deleting school', err);
           Alert.alert('Error', 'Unexpected error occurred.');
         } finally {
           setLoading(false);
@@ -354,7 +353,6 @@ const handleSlideCard = () => {
 const handleSelect = (item: SearchSchoolData) => {
   setSearchText(item.name);
   setFilteredData([]); // Hide dropdown
-  console.log('Selected:', item.school_id);
     if (item.school_id) {
     searchschoolByID(item.school_id); // 🔥 Call API with selected ID
   }
@@ -373,7 +371,6 @@ const handleSelect = (item: SearchSchoolData) => {
       url,      'post',      {school_id : schoolId},      accessToken ?? '',      true    );
 
     const resultData = Array.isArray(res.data) ? res.data : [];
-      console.log('resultData' , resultData);
     if (resultData.length === 0) {
       setNoMoreData(true);
       setMatches([]);
@@ -389,12 +386,23 @@ const handleSelect = (item: SearchSchoolData) => {
 
   } catch (err) {
     Alert.alert('Error', 'Failed to fetch school by ID.');
-    console.error(err);
   } finally {
     setLoading(false);
   }
 };
+  const scaleAnim = useRef(new Animated.Value(0)).current; // start at 0 (invisible)
+ useEffect(() => {
+    if (matches[currentIndex]) {
+      scaleAnim.setValue(0); // reset before animation
 
+      Animated.spring(scaleAnim, {
+        toValue: 1,     // zoom to full size
+        friction: 6,    // controls bounce
+        tension: 50,    // controls speed
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [currentIndex]);
  
   return (
   <View className="flex-1 bg-background px-4 pb-6">
@@ -432,12 +440,29 @@ const handleSelect = (item: SearchSchoolData) => {
   </View>
 )}
 
-      
+        <AnimatedCard matches={matches} currentIndex={currentIndex}>
+
+        <View>
+            <ExplorCards
+            key={`${matches[currentIndex]?.school_id}_${currentIndex}`}  
+            item={matches[currentIndex]}
+            index={currentIndex}
+            flippingCardId={flippingCardId}
+            base_url_images={base_url_images}
+            onSwipeLeft={() => deleteColleges(matches[currentIndex].school_id, "save")}
+            onSwipeRight={() => deleteColleges(matches[currentIndex].school_id, "remove")}
+            onSkipCard={handleSlideCard}
+          />
+        </View>
+        </AnimatedCard>
 
       {!loading && matches.length > 0 && matches[currentIndex] && noMoreData == false  && (
         <Animated.View
           style={{
-            transform: [{ translateX: slideAnim }],
+            
+            transform: [
+              { scale: 0.2 }
+            ],
           }}
         >
 
@@ -449,16 +474,7 @@ const handleSelect = (item: SearchSchoolData) => {
     )}
 
 
-          <ExplorCards
-            key={`${matches[currentIndex]?.school_id}_${currentIndex}`}  
-            item={matches[currentIndex]}
-            index={currentIndex}
-            flippingCardId={flippingCardId}
-            base_url_images={base_url_images}
-            onSwipeLeft={() => deleteColleges(matches[currentIndex].school_id, "save")}
-            onSwipeRight={() => deleteColleges(matches[currentIndex].school_id, "remove")}
-            onSkipCard={handleSlideCard}
-          />
+
         </Animated.View>
       )}
 
@@ -474,6 +490,7 @@ const handleSelect = (item: SearchSchoolData) => {
         </View>
       )}
   </View>
+
 </View>
 
   );

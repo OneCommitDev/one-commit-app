@@ -30,10 +30,7 @@ export default function DeleteAccount() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            // TODO: Call delete API here
-            console.log('Account deleted');
-            
+          onPress: () => {           
               deactivateAPIRequest();
           },
         },
@@ -48,9 +45,7 @@ export default function DeleteAccount() {
           const accessToken = getItem(PREF_KEYS.accessToken);
           const url = Api_Url.deactivateAPI;
           const res = await httpRequest2<SimpleResponse>(
-            url,  'post',   {},   accessToken ?? ''  );
-
-            console.log('resres',res);
+            url,  'delete',   {},   accessToken ?? ''  );
           if (res.status) {
                 clearAllPrefs();
                 navigation.navigate('DeleteAccountSuccess');

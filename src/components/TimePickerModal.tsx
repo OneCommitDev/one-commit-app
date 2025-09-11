@@ -20,6 +20,7 @@ type TimePickerModalProps = {
   onClose: () => void;
   initialValue?: { minutes: number; seconds: number; milliseconds: number };
   onSave: (value: { minutes: number; seconds: number; milliseconds: number }) => void;
+  title? : string;
 };
 
 const generateRange = (max: number) => {
@@ -35,6 +36,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
   onClose,
   initialValue = { minutes: 0, seconds: 0, milliseconds: 0 },
   onSave,
+  title,
 }) => {
   const [minuteIndex, setMinuteIndex] = useState(initialValue.minutes);
   const [secondIndex, setSecondIndex] = useState(initialValue.seconds);
@@ -63,7 +65,9 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#111827" />
             </TouchableOpacity>
-            <AppText>Select Time</AppText>
+            <AppText>
+  {title && title.trim() !== "" ? title : "Select Time"}
+</AppText>
             <TouchableOpacity
               onPress={() => {
                 onSave({

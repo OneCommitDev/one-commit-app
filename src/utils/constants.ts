@@ -1,17 +1,21 @@
 // constants.ts
 import * as AuthSession from 'expo-auth-session';
+import Constants from 'expo-constants';
+
+const {microsoft_clinetid , google_web_clientid , google_ios_clientid} = Constants.expoConfig?.extra ?? {};
+
 const APP_SCHEME = 'OneCommit';
  export const APP_CONFIG_MICROSOFT = {
-  CLIENT_ID: 'ae251711-526a-487f-9274-d067ca936041',
+  CLIENT_ID: microsoft_clinetid,
   REDIRECT_URI: AuthSession.makeRedirectUri({
-    scheme: 'com.onecommit.app', 
+    scheme: 'us.onecommit.app', 
     path: 'oauthredirect',       
   }),
 };
 
 export const APP_CONFIG_GOOGLE = {
-  webClient: '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com',
-  iosClient: '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com',
+  webClient: google_web_clientid,
+  iosClient: google_ios_clientid,
     emailLoginScopes: [
     'profile',                              
     'email',                                  

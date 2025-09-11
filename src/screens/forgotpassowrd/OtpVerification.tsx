@@ -108,7 +108,6 @@ if (typeis === 'register_verify' || typeis === 'login_verify') {
       email: email ?? '',
       code: otp, 
     };
-       console.log('Sending data:', accessToken);
 
     const getResponse = await postFormUrlEncoded<RegisterOTPResponse>(
       Api_Url.verifyUser,
@@ -150,7 +149,6 @@ const ForgotPasswordEmailVerification = async () => {
       email: value, // 'value' should hold the email string
       code : otp
     };
-   // console.log(requestBody);
 
     const res = await httpRequest<SimpleResponse>(
       Api_Url.forgotPassverifyUser,    'post',    requestBody,    undefined,   true 
@@ -175,7 +173,6 @@ const ForgotPasswordEmailVerification = async () => {
 const ResenedOTPcall = async (resendurl: string, requestBody: any) => {
   try {
     setLoading(true);
-    console.log(requestBody);
     const res = await httpRequest2<SimpleResponse>(
       resendurl,    'post',    requestBody,    undefined,   true // 👈 for form-url-encoded
     );
@@ -196,9 +193,7 @@ const ResenedOTPcall = async (resendurl: string, requestBody: any) => {
   return (
     <View className="flex-1 bg-background px-8 pt-14">
       {/* Back Button or empty view */}
-{/* {typeis !== 'register_verify' && typeis !== 'login_verify' ? ( */}
     {!['register_verify', 'login_verify'].includes(typeis) ? (
-
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="w-16 h-16 rounded-3xl bg-[#E3E9E5] items-center justify-center mb-6"
@@ -250,7 +245,5 @@ const ResenedOTPcall = async (resendurl: string, requestBody: any) => {
     </View>
   );
 }
-function setLoading(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
+ 
 

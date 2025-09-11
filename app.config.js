@@ -1,10 +1,40 @@
+import * as dotenv from "dotenv";
+import fs from "fs";
+
 
 
 export default ({ config }) => ({
+  
   ...config,
+  // "scripts": {
+  //   "build:android": "eas build --platform android --profile production",
+  //   "build:ios": "eas build --platform ios --profile production"
+  //   },
+  //   "expo": {
+  //   "jsEngine": "hermes"
+  // },
+   extra: {
+    appEnv: process.env.EXPO_PUBLIC_APP_ENV,
+    apiUrl: process.env.EXPO_PUBLIC_API_URL,
+    baseImgUrl: process.env.EXPO_PUBLIC_BASE_IMG_URL,
+    xKey: process.env.EXPO_PUBLIC_X_KEY,
+
+    fcm_apiKey : 'AIzaSyDvPcP77wTfw2DjaiLcz9lra7HP7rGsqVI',
+    fcm_authDomain : 'onecommit.firebaseapp.com',
+    fcm_projectId : 'onecommit',
+    fcm_storageBucket : 'onecommit.firebasestorage.app',
+    fcm_messagingSenderId : '429115153068',
+    fcm_appId : '1:429115153068:web:bf3ddb7b230dce9844dd09',
+    fcm_measurementId : 'G-6PFWFC5JHC',
+
+    // microssoft clinet ID
+    microsoft_clinetid : 'ae251711-526a-487f-9274-d067ca936041',
+    google_web_clientid : '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com',
+    google_ios_clientid : '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com',
+    },
   name: 'OneCommit',
   slug: 'OneCommit',
-  scheme: "com.onecommit.app",
+  scheme: "OneCommit",
   version: '1.0.0',
   orientation: 'portrait',
   userInterfaceStyle: 'light',
@@ -23,6 +53,7 @@ export default ({ config }) => ({
   },
   assetBundlePatterns: ['**/*'],
  plugins: [
+  './withHermesDsyms.js',
    '@react-native-firebase/app',
     '@react-native-firebase/messaging',
      // 🧱 Set useFrameworks for Swift pods like Firebase
@@ -54,9 +85,10 @@ export default ({ config }) => ({
     supportsTablet: true,
     usesAppleSignIn: true,
     googleServicesFile: './fcm/GoogleService-Info.plist',
-    bundleIdentifier: 'com.onecommit.app',
+    bundleIdentifier: 'us.onecommit.app',
      entitlements: {
-      'aps-environment': 'development', // or 'production' for production builds
+      'aps-environment': 'production', // or 'production' for production builds if foe use 'development' for development
+      "com.apple.developer.applesignin": ["Default"],
     },
     infoPlist: {
      NSUserTrackingUsageDescription: 'This identifier will be used to deliver personalized ads to you.',
@@ -75,7 +107,7 @@ export default ({ config }) => ({
         {
           CFBundleURLSchemes: [
             'OneCommit',
-            'com.onecommit.app',
+            'us.onecommit.app',
             'com.googleusercontent.apps.156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31',
           ],
         },
@@ -90,24 +122,25 @@ export default ({ config }) => ({
   android: {
         googleServicesFile: './fcm/google-services.json',
         permissions: [
-             'NOTIFICATIONS', 
+             'NOTIFICATIONS', 'POST_NOTIFICATIONS',
     ],
-    package: 'com.onecommit.app',
+     allowBackup: false,
+    package: 'us.onecommit.app',
      "userInterfaceStyle": "light",
     usesCleartextTraffic: true,
       manifestPlaceholders: {
-      appAuthRedirectScheme: "com.onecommit.app",
+       appAuthRedirectScheme: "us.onecommit.app",
     },
     adaptiveIcon: {
-      foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#ffffff',
+       foregroundImage: './assets/adaptive-icon.png',
+      backgroundColor: '#F54927',
     },
     intentFilters: [
       {
         action: 'VIEW',
         data: [
           {
-            scheme: 'OneCommit',
+            scheme: 'us.onecommit.app',
             host: 'redirect',
           },
         ],
@@ -122,5 +155,6 @@ export default ({ config }) => ({
   navigationBar: {
     backgroundColor: '#007BFF',
     barStyle: 'light-content'
-  }
+  },
+    jsEngine: "hermes", 
 });

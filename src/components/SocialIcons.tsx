@@ -1,10 +1,18 @@
 import { Image, TouchableOpacity, View } from 'react-native';
+import { Platform } from 'react-native';
 
 type Props = {
   onIconPress: (platform: string) => void;
 };
 
 export default function SocialIcons({ onIconPress }: Props) {
+    if (Platform.OS === 'ios') {
+    console.log('Running on iOS');
+  } else if (Platform.OS === 'android') {
+    console.log('Running on Android');
+  } else {
+    console.log('Running on Web or other');
+  }
   return (
     <View className="flex-row justify-center mb-4 flex-wrap">
       {/* <TouchableOpacity
@@ -39,7 +47,7 @@ export default function SocialIcons({ onIconPress }: Props) {
           resizeMode="contain"
         />
       </TouchableOpacity> */}
-
+   {Platform.OS === 'ios' && (
       <TouchableOpacity
         className="p-5 rounded-2xl border border-gray-300 mr-4 mb-2"
         onPress={() => onIconPress('apple')}
@@ -50,7 +58,7 @@ export default function SocialIcons({ onIconPress }: Props) {
           resizeMode="contain"
         />
       </TouchableOpacity>
-
+)}
       <TouchableOpacity
         className="p-5 rounded-2xl border border-gray-300 mb-2"
         onPress={() => onIconPress('microsoft')}

@@ -3,55 +3,72 @@ import { getItem } from 'expo-secure-store';
 import qs from 'qs'; 
 import { getValidAccessToken } from '~/utils/decodeAccessToken';
 import { PREF_KEYS } from '~/utils/Prefs';
+import Constants from "expo-constants";
+import { parseApiError } from './parseApiError';
+import { Platform } from 'react-native';
+import * as Application from "expo-application";
 
-// ✅ Create a reusable Axios instance
- export const  base_url_images = 'https://d2b1wekz0xjax3.cloudfront.net/';
- export const  base_url = 'http://devapi.onecommit.us/v1';
-// export const  base_url = 'http://192.168.18.105:80/index.php';
+const { apiUrl, appEnv , xKey , baseImgUrl} = Constants.expoConfig?.extra ?? {};
+export const  base_url_images = baseImgUrl;
+export const base_url =  apiUrl;
 
-// export const  base_url_images = 'http://ec2-18-218-239-171.us-east-2.compute.amazonaws.com:80/'; // demo url
-// export const  base_url = 'http://ec2-18-218-239-171.us-east-2.compute.amazonaws.com:80/v1'; // // demo url
-
+console.log('apiUrl_', apiUrl);
 const api = axios.create({
-  baseURL: base_url, 
+  // baseURL: "https://devapi.onecommit.us:443/v1", 
+  baseURL: apiUrl,
   timeout: 60000,
   headers: {
-    'Content-Type': 'application/json',   
-    'x-api-key' : 'AXBpVmVyMS4wLWMzYjg3YmE3ZDY2NzdiMzI1M2I1MDc0N2U3MjFiODk3NjUwMDg1MDU2YjUzNmMyMTYwNjkxOGFjZTcxMTRhN2Qtb25lY29tbWl0'
+    'Content-Type': 'application/json',  
+    'x-api-key' : xKey,
   },
 });
 
-// ✅ Set token (optional: for auth headers)
+// 👇 Add deviceId dynamically before each request
+api.interceptors.request.use(async (config) => {
+  let deviceId;
+  if (Platform.OS === "android") {
+    deviceId = Application.getAndroidId;
+  } else {
+    deviceId = await Application.getIosIdForVendorAsync();
+  }
+    config.headers["app-device-id"] = deviceId;   
+  //  config.headers.device_ = deviceId;
+  //  console.log("➡️ Request Headers:", config.headers);
+  return config;
+});
+export default api;
+
+
 export const setAuthToken = (token: string) => {
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 };
-
-// ✅ GET request
+ 
+//  GET request
 export const getRequest = async (url: string, params?: any) => {
   const response = await api.get(url, { params });
   return response.data;
 };
 
-// ✅ POST request
+//  POST request
 export async function postRequest<T = any>(url: string, data?: any): Promise<T> {
   const response = await api.post<T>(url, data); // ✅ use `api` not `axios`
   return response.data;
 }
 
 
-// ✅ PUT request
+//  PUT request
 export const putRequest = async (url: string, data?: any) => {
   const response = await api.put(url, data);
   return response.data;
 };
 
-// ✅ DELETE request
+//  DELETE request
 export const deleteRequest = async (url: string) => {
   const response = await api.delete(url);
   return response.data;
 };
 
-// ✅ Upload file (e.g., image)
+//  Upload file (e.g., image)
 export const uploadFile = async (url: string, fileUri: string) => {
   const formData = new FormData();
 
@@ -59,7 +76,7 @@ export const uploadFile = async (url: string, fileUri: string) => {
     uri: fileUri,
     name: 'upload.jpg',
     type: 'image/jpeg',
-  } as any); // 👈 "as any" to satisfy TS if needed
+  } as any);
 
   const response = await api.post(url, formData, {
     headers: {
@@ -71,7 +88,7 @@ export const uploadFile = async (url: string, fileUri: string) => {
 };
 
 
-
+ 
 
 
 
@@ -125,54 +142,12 @@ export async function httpRequest<T>(
 
     return { status: true, data: response.data };
   } catch (error: any) {
-    const message = error?.response?.data?.message || error.message || 'Request failed';
-    return { status: false, message };
+    // const message = error?.response?.data?.message || error.message || 'Request failed';
+    // return { status: false, message };
+    const parsedError = parseApiError(error);
+    return { status: false, message: parsedError.message, redirect: parsedError.redirect };
   }
 }
-
-
-// export async function httpRequest2<T>(
-//   url: string,  method: 'post' | 'get' | 'put' | 'delete',  data?: any,  token?: string,  isFormUrlEncoded: boolean = false ): Promise<T> {
-//      const loginStatus = await getItem(PREF_KEYS.login_status);
-
-//     let finalToken = token;
-//     if (loginStatus === 'success') {
-//         finalToken = (await getValidAccessToken()) ?? undefined;
-//     }
-//         console.log(finalToken);
-
-
-//   try {
-//     const headers: any = {
-//       'Content-Type': isFormUrlEncoded
-//         ? 'application/x-www-form-urlencoded'
-//         : 'application/json',
-//     };
-
-//     if (finalToken) {
-//       headers.Authorization = `Bearer ${finalToken}`;
-//     }
-
-//    const response = await api.request<T>({
-//   url,
-//   method,
-//   ...(method === 'get'
-//     ? { params: data }
-//     : { data: isFormUrlEncoded ? qs.stringify(data) : data }),
-//   headers,
-// });
-
-
-//     return response.data;
-//   } catch (error: any) {
-//     const fallback: T = {
-//       status: false,
-//       message: error?.response?.data?.message || error.message || 'Request failed',
-//     } as T;
-
-//     return fallback;
-//   }
-// }
 
 export async function httpRequest_social_token<T>(
   url: string,
@@ -207,7 +182,7 @@ export async function httpRequest_social_token<T>(
       fullUrl += queryString;
     }
 
-    console.log(`📡 Requesting [${method.toUpperCase()}] ${fullUrl}`);
+   // console.log(`📡 Requesting [${method.toUpperCase()}] ${fullUrl}`);
 
 
     const response = await api.request<T>({
@@ -219,12 +194,12 @@ export async function httpRequest_social_token<T>(
 
     return response.data;
   } catch (error: any) {
-    console.log('❌ HTTP error', {
+     console.log(' HTTP error', {
       message: error.message,
       response: error.response,
       request: error.request,
       config: error.config,
-    });
+    }); 
 
     const fallback: T = {
       status: false,
@@ -246,6 +221,8 @@ export async function httpRequest_social_token<T>(
   token?: string,
   isFormUrlEncoded: boolean = false
 ): Promise<T> {
+  const controller = new AbortController();
+
   try {
     const loginStatus = await getItem(PREF_KEYS.login_status);
     let finalToken = token;
@@ -277,12 +254,6 @@ export async function httpRequest_social_token<T>(
         ? `${url}?${qs.stringify(data)}`
         : url;
 
-    console.log(`📡 [${method.toUpperCase()}] ${fullUrl}`);
-
- console.log('🔍 Final data payload:', data);
-// console.log('🔍 Headers:', headers);
-
-
     const response = await api.request<T>({
       url,
       method,
@@ -290,16 +261,20 @@ export async function httpRequest_social_token<T>(
         ? { params: data }
         : { data: isFormUrlEncoded ? qs.stringify(data) : data }),
       headers,
+       timeout: 30000,
+       signal: controller.signal,
     });
 
     return response.data;
+    
   } catch (error: any) {
-    console.log('❌ HTTP error', {
+  console.log('❌ HTTP error', {
   message: error.message,
   response: error.response,
   request: error.request,
   config: error.config,
-});
+  
+}); 
 
     const fallback: T = {
       status: false,
@@ -311,6 +286,7 @@ export async function httpRequest_social_token<T>(
 
     return fallback;
   }
+  
 }
 
 export async function httpSilentRequest<T>(
@@ -410,9 +386,11 @@ export async function httpGetWithToken<T>(
 
 
 export const Api_Url = {
+  check_emailid: '/auth/register/check',
   login: '/login',
   microsoft_token : '/auth/microsoft/verify',
   google_token : '/auth/google/verify',
+  apple_token : '/auth/apple/verify',
   refreshToken: '/token',
   forgotpassword: '/forgot-pass',
   forgotPassverifyUser: '/forgot-pass-verify',
@@ -421,9 +399,8 @@ export const Api_Url = {
   register: '/register',
   verifyUser: '/register-verify',
   otpResend : '/resend-otp',
- // ✅ MAKE THIS A FUNCTION
   userProfile: (userId: string | number, email: string) =>
-    `/user/profile/`,
+  `/user/profile/`,
   gamesList : '/list/sports',
   sportsEvents: (sportsid: string | number) =>
   `/list/${sportsid}/events`,
@@ -432,16 +409,13 @@ export const Api_Url = {
   collegePreferences : '/user/college-preferences', // Use for both request types
   microsoft_email_connect : '/user/connect/microsoft',
   google_email_connect : '/user/connect/google',
-    get_email_connection : '/email/connection',
-
- profileComplete : '/profile-complete', // school match saving api
-
-
-   // ✅ SCHOOL MATCHING API FUNC WITH PAGINATION
+  get_email_connection : '/email/connection',
+  profileComplete : '/profile-complete', // school match saving api
+  // SCHOOL MATCHING API FUNC WITH PAGINATION
  schoolsMatches : (start: number, limit: number) =>
     `/match/schools/${start}/${limit}`,
 
-  // ✅ SCHOOL REMOVIING FUNC SAVE AND DELETE
+  //  SCHOOL REMOVIING FUNC SAVE AND DELETE
  schoolsMatchesDelete : (schoolid: string, type : string) =>
     `/match/school/${type}/${schoolid}`,
  
@@ -452,27 +426,20 @@ export const Api_Url = {
     profileSummary : '/user/profile-summary',
     searchSchool : '/list/schools',
     searchSchoolByID : '/match/school',
-
      dashboardschools : (start: number, limit: number) =>
     `/dashboard/schools/${start}/${limit}`,
-
       dashboardDetails : (schoolid: any) =>
     `/dashboard/school/${schoolid}`,
-
-         getEmialContent : '/email/content',
-
-
-      archiveschoolsMatches : (start: number, limit: number) =>
-    `/dashboard/archived/schools/${start}/${limit}`,
-    homeToDo : '/dashboard/home/todo',
-
-        fcmTokenAPI : '/user/notification',
-        fcmTokenDeleteAPI : '/user/notification',
-        deactivateAPI : '/user/deactivate',
-        removeEmailApi : '/dashboard/remove-email',
-
-        
-
+  getEmialContent : '/email/content',
+  archiveschoolsMatches : (start: number, limit: number) =>
+  `/dashboard/archived/schools/${start}/${limit}`,
+  homeToDo : '/dashboard/home/todo',
+  fcmTokenAPI : '/user/notification',
+  fcmTokenDeleteAPI : '/user/notification',
+  deactivateAPI : '/user/deactivate',
+  removeEmailApi : '/dashboard/remove-email',
+   changePassword: '/change-pass',
+      quickEditapi: '/user/profile-quick-edit',
 
 };
 
@@ -508,7 +475,7 @@ export interface ResetPasswordRequest {
 
 export interface CreateProfileRequest {
  full_name: string;
-        preferred_name: string;
+        preferred_name?: string;
         phone: string;
         dob: string;
         city: string;
@@ -523,16 +490,17 @@ export interface CreateProfileRequest {
 }
 
 export interface AcademicRequest {
-weighted_gpa: string;
-        unweighted_gpa: string;
-        test_score_type: string;
-        test_score: string;
-        intended_major: string;
-         intended_major_2: string;
-          intended_major_3: string;
-        school_name: string;
-        school_type: string;
-        ncaa_eligibility_status: string;
+      weighted_gpa: string;
+      unweighted_gpa: string;
+      test_score_type: string;
+      sat_score: string;
+      act_score: string;
+      intended_major: string;
+      intended_major_2?: string;
+      intended_major_3?: string;
+      school_name: string;
+      school_type: string;
+      ncaa_eligibility_status: string;
 
 }
 

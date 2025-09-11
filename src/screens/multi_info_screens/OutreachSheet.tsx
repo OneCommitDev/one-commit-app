@@ -65,7 +65,7 @@ const [coachDetails, setCoachDetails] = useState<EmailOutreachCoachDetails[]>([]
   };
 
   useEffect(() => {
-  console.log('OutreachSheet isVisible =', isVisible);
+  // console.log('OutreachSheet isVisible =', isVisible);
 }, [isVisible]);
 
 useEffect(() => {
@@ -82,7 +82,6 @@ useEffect(() => {
   try {
     setLoading(true);
     const urlis = Api_Url.getOutreachemail(schoolid);
-    console.log(urlis);
     const accessToken = await getItem(PREF_KEYS.accessToken); // await required
     const res = await httpRequest2<EmailOutreach>(
      urlis,
@@ -99,8 +98,6 @@ useEffect(() => {
       });
       setCoachCount(res.data.coach_count);
         setCoachDetails(res.data.coach_details); // 👈 Save coach_details
-
-      // console.log('sfsdf', res);
     } else {
       Alert.alert('Error', res.message ?? 'Something went wrong');
     }

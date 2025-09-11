@@ -28,6 +28,7 @@ export type Step = {
   sportId: string;
 };
 
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 
 // type MultiStepSurveyRouteProp = RouteProp<RootStackParamList, 'MultiStepSurvey'>;
@@ -40,7 +41,15 @@ export type RootStackParamList = {
   MultiStepSurvey: {
     selectedGames: SelectedGame[];
     stepToEdit?: number | null;
+    currentSteps : number
   };
+   Athletic: {
+      selectedGames: SelectedGame[];
+      stepToEdit?: number | null;
+      currentSteps : number
+
+  };
+
 };
 
 
@@ -92,16 +101,14 @@ export type RootStackParamList = {
 
 
 export default function MultiStepSurvey() {
+    const navigation_other = useNavigation<Nav>(); 
+
   const route = useRoute<MultiStepSurveyRouteProp>();
   const { selectedGames , stepToEdit  } = route.params ?? {};
   const stepsData = generateStepsData(selectedGames);
   const TOTAL_STEPS = stepsData.length;
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'MultiStepSurvey'>>();
-
-  console.log(stepToEdit);
-  // const navigation = useNavigation();
-  // const [step, setStep] = useState(0);
-const [step, setStep] = useState<number>(stepToEdit ?? 0);
+  const [step, setStep] = useState<number>(stepToEdit ?? 0);
 
   const [searchText, setSearchText] = useState('');
   const [selectedItems, setSelectedItems] = useState<string[][]>(
@@ -126,15 +133,14 @@ const [step, setStep] = useState<number>(stepToEdit ?? 0);
         }).start();
       });
     } else {
-      console.log('All steps complete:', selectedItems);
+     // console.log('All steps complete:', selectedItems);
     }
   };
 
   const handleBack = () => {
-    if( stepToEdit != null || stepToEdit != undefined ){     // if user editinging tehrecords then allow them go back to teh profile summary screen
+    if( stepToEdit === 1 ){     // if user editinging tehrecords then allow them go back to teh profile summary screen
       //  navigation.setParams({ stepToEdit: null }); 
-    goToLastStep();
-
+        navigation.goBack();
     }else{
     if (step > 0) {
       Animated.timing(animation, {
@@ -192,13 +198,12 @@ const [step, setStep] = useState<number>(stepToEdit ?? 0);
         >
           <Ionicons name="chevron-back" size={24} color="#1A322E" />
         </TouchableOpacity> */}
-              {stepToEdit !== null || stepToEdit != undefined ? (
+              {stepToEdit ===1 ? (
                 <TouchableOpacity
                   onPress={handleBack}
                   className="px-1 py-2  rounded-full"
                 >
-                  <AppText className='text-blue-700 text-16'>Cancel</AppText>
-                  {/* <Ionicons name="close-sharp" size={30} color="red" /> */}
+                  <Ionicons name="close-sharp" size={30} color="red" />
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
@@ -234,7 +239,7 @@ const [step, setStep] = useState<number>(stepToEdit ?? 0);
           ],
         }}
       >
-        <View className="items-center mb-4 mt-5">
+        <View className="items-center mb-4 -mt-[6]">
           <TitleText className="text-center">
             {current.title}
           </TitleText>
@@ -243,7 +248,7 @@ const [step, setStep] = useState<number>(stepToEdit ?? 0);
           </AppText>
         </View>
 
-        <View className="flex-1 px-3">
+        <View className="flex-1">
           {renderExtraInfoForStep(
             current.type,
             current.title,
@@ -257,7 +262,8 @@ const [step, setStep] = useState<number>(stepToEdit ?? 0);
             selectedGames  ,
             goToLastStep,
             stepToEdit,
-            gotToPersonalRecordForcefully
+            gotToPersonalRecordForcefully,
+             navigation_other   // ✅ pass navigation
           )}
         </View>
       </Animated.View>
@@ -279,21 +285,21 @@ function renderExtraInfoForStep(
     goToLastStep?: () => void,
     stepToEdit?: any,
     gotToPersonalRecordForcefully?: () => void,
-
+    navigation?: NativeStackNavigationProp<RootStackParamList>  
 ) {
   switch (type) {
-    case 'PersonalRecords':
-      return <Athletic onNext={onNext} stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
-    case 'Academic':
-      return <Academic onNext={onNext} stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
-    case 'College':
-      return <CollegePreferences onNext={onNext} stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
-    case 'Accounts':
-      return <EmailConnectionUI onNext={onNext}  stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
-    case 'CollegeMatches':
-      return <CollegeMatches onNext={onNext} />;
-     case 'ProfilePreview':
-      return <ProfilePreview onNext={onNext} />;
+    // case 'PersonalRecords':
+    //   return <Athletic onNext={onNext} stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
+    // case 'Academic':
+    //   return <Academic onNext={onNext} stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
+    // case 'College':
+    //   return <CollegePreferences onNext={onNext} stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
+    // case 'Accounts':
+    //   return <EmailConnectionUI onNext={onNext}  stepToEdit={stepToEdit} goToLastStep={goToLastStep} />;
+    // case 'CollegeMatches':
+    //   return <CollegeMatches onNext={onNext} />;
+    //  case 'ProfilePreview':
+    //   return <ProfilePreview onNext={onNext} />;
     case 'games':
       return (
       
@@ -308,6 +314,7 @@ function renderExtraInfoForStep(
         selectedGames={selectedGames ?? []} 
         stepToEdit={stepToEdit}
          gotToPersonalRecordForcefully={gotToPersonalRecordForcefully}
+         navigation={navigation}
        />
       );
     default:

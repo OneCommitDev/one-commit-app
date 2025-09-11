@@ -6,7 +6,6 @@ import ArrowButton from '~/components/ArrowButton';
 import TitleText from '~/components/TitleText';
 import AppText from '~/components/AppText';
 
-// ✅ Define the route types
 type RootStackParamList = {
   ForgotPassword: undefined;
   ForgotEmailMobile: { method: 'email' | 'mobile' }; // if passing selected method

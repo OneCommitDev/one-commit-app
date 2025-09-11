@@ -1,4 +1,4 @@
-package com.onecommit.app
+package us.onecommit.app
 
 import android.os.Build
 import android.os.Bundle

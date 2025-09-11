@@ -247,7 +247,7 @@ const slideAnim = useRef(new Animated.Value(20)).current;
           <View className="flex-row justify-between items-center">
             <TitleText   className="flex-1" >{school.match_criteria.academic_fit.test_type.toUpperCase()} (optional): </TitleText>
             <AppText  className="text-right" >
-            {school.match_criteria.academic_fit.test_score} vs  {school.match_criteria.academic_fit.test_score_min} - {school.match_criteria.academic_fit.test_score_avg}
+            {school.match_criteria.academic_fit.sat_score} vs  {school.match_criteria.academic_fit.test_score_min} - {school.match_criteria.academic_fit.test_score_avg}
                </AppText>
           </View>
         </View>

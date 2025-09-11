@@ -34,6 +34,27 @@ const [sheetVisible, setSheetVisible] = useState(false);
 const [sheetData, setSheetData] = useState<{ schoolid: string }>({ schoolid: '' });
  const [showOutreach, setShowOutreach] = useState(false);
  const [showSuccess, setShowSuccess] = useState(false);
+
+ const slideAnim = useRef(new Animated.Value(50)).current; // start 50px lower
+const opacityAnim = useRef(new Animated.Value(0)).current; // start hidden
+  const [screenload, setScreenload] = useState(false);
+
+const runEnterAnimation = () => {
+  Animated.parallel([
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 500,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }),
+    Animated.timing(opacityAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }),
+  ]).start();
+};
+
   
     useEffect(() => {
       fetchColleges(0);
@@ -59,10 +80,12 @@ const [sheetData, setSheetData] = useState<{ schoolid: string }>({ schoolid: '' 
           setMatches(prev => append ? [...prev, ...res.data] : res.data);
           setOffset(offsetToLoad + limit);
           setTotal(res.pagination.total);
+          setScreenload(true);
+            runEnterAnimation();
+
         }
       } catch (err) {
-        console.log('Error fetching school matches', err);
-         Alert.alert('Error', 'Unexpected error occurred.');
+          Alert.alert('Error', 'Unexpected error occurred.');
       } finally {
          if (append) setLoadingMore(false);
         else setLoading(false);
@@ -219,10 +242,11 @@ const [sheetData, setSheetData] = useState<{ schoolid: string }>({ schoolid: '' 
       setSheetVisible(true);
     }
   } else {
-    navigation.navigate('EmailCommunication', {
+  /*  navigation.navigate('EmailCommunication', {
       id: item.school_id,
       type: item.name,
-    });
+    }); */
+      setSheetVisible(true);
   }
 }}
 
@@ -304,71 +328,96 @@ const [sheetData, setSheetData] = useState<{ schoolid: string }>({ schoolid: '' 
             <Loader show={loading} />
       
       <TitleText size="text-24">Dashboard</TitleText>
-      <AppText className="mb-3">{matches.length} Active Schools</AppText>
 
       {!loading && connectedEmail === false && (
-  <View className="bg-yellow-100 border border-yellow-400 rounded-lg p-4 flex-row items-center mb-10">
+  <View className="bg-yellow-100 border border-yellow-50 rounded-lg p-4 flex-row items-center mb-1">
     <Ionicons name="warning-outline" size={24} color="#B45309" style={{ marginRight: 8 }} />
     
     <View style={{ flex: 1 }}>
-      <AppText className="text-yellow-800 font-semibold">
+      <TitleText className="text-yellow-800  -mt-3">
         Email account not connected
-      </AppText>
-      <AppText className="text-yellow-700 text-sm">
+      </TitleText>
+      <AppText className="text-yellow-700 text-sm -mt-[10px]">
         Connect your email to send and receive emails. Go to the profile settings and connect the email account
       </AppText>
     </View>
   </View>
 )}
+      {screenload ? (
+   <> 
 
- 
-      <FlatList
-        data={matches}
-        keyExtractor={(item, index) => `${item.school_id}_${index}`}
-        renderItem={renderSchoolItem}
-        pagingEnabled
-        decelerationRate="fast"
-        onEndReachedThreshold={0.8}
-        onEndReached={() => {
-          if (!loadingMore && matches.length < total && offset < total) {
-            setLoadingMore(true);
-            fetchColleges(offset, true);
-          }
-        }}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 0,
-          paddingTop: 0,
-        }}
-        ListEmptyComponent={
-          loading ? null : (
-            <View style={{ height: 500, justifyContent: 'center', alignItems: 'center' }}>
-                <View className='flex-1 justify-center text-center items-center'> 
-                    <NoDataAvailable
-                    title="No data available"
-                    subtitle=""
-                    onRetry={() => fetchColleges(0)}
-                    showRefresh={false}
-                    useLottie={true}
-                  />
-                </View>
-            </View>
-          )
-        }
-        ListFooterComponent={
-          loadingMore ? (
-            <View style={{ height: 100, justifyContent: 'center', alignItems: 'center' }}>
-              <LottieView
-                source={require('assets/animations/loading.json')}
-                autoPlay
-                loop
-                style={{ width: 200, height: 100 }}
+       <AppText className="mb-3">{matches.length} Active Schools</AppText>
+    <Animated.View
+    style={{
+    flex: 1,
+    opacity: opacityAnim,
+    transform: [{ translateY: slideAnim }],
+    }}
+    >
+    <FlatList
+    data={matches}
+    keyExtractor={(item, index) => `${item.school_id}_${index}`}
+    renderItem={renderSchoolItem}
+    pagingEnabled
+    decelerationRate="fast"
+    onEndReachedThreshold={0.8}
+    onEndReached={() => {
+      if (!loadingMore && matches.length < total && offset < total) {
+        setLoadingMore(true);
+        fetchColleges(offset, true);
+      }
+    }}
+    showsVerticalScrollIndicator={false}
+    contentContainerStyle={{
+      paddingBottom: 0,
+      paddingTop: 0,
+    }}
+    ListEmptyComponent={
+      loading ? null : (
+        <View style={{ height: 500, justifyContent: 'center', alignItems: 'center' }}>
+            <View className='flex-1 justify-center text-center items-center'> 
+                <NoDataAvailable
+                title="No data available"
+                subtitle=""
+                onRetry={() => fetchColleges(0)}
+                showRefresh={false}
+                useLottie={true}
               />
             </View>
-          ) : null
-        }
-        scrollEnabled={matches.length > 1}
-      />
+        </View>
+      )
+    }
+    ListFooterComponent={
+      loadingMore ? (
+        <View style={{ height: 100, justifyContent: 'center', alignItems: 'center' }}>
+          <LottieView
+            source={require('assets/animations/loading.json')}
+            autoPlay
+            loop
+            style={{ width: 200, height: 100 }}
+          />
+        </View>
+      ) : null
+    }
+    scrollEnabled={matches.length > 1}
+    />
+    </Animated.View>
+
+ </>
+) : (
+       <View className="flex-1 items-center justify-center">
+       {/* <LottieView
+        source={require('../../../assets/animations/bot_loading.json')}
+        autoPlay
+        loop={true}
+        style={{ width: 200, height: 200 }} 
+      /> */}
+
+      </View>
+    )}
+
+
+
      <OutreachSheet
         isVisible={sheetVisible}
         onClose={() => setSheetVisible(false)}
@@ -379,10 +428,15 @@ const [sheetData, setSheetData] = useState<{ schoolid: string }>({ schoolid: '' 
         }}
   />
 
-        <SuccessModal
-                isVisible={showSuccess}
-                  onClose={() => setShowSuccess(false)}
-                />
+          <SuccessModal
+            isVisible={showSuccess}
+            onClose={() => {
+              setOffset(0);   // reset offset
+              setShowSuccess(false);
+              fetchColleges(0, false);
+            }}
+          />
+
           
 
     </View>

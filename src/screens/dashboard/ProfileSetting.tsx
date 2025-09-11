@@ -3,9 +3,8 @@ import {  View,  Text,  TouchableOpacity,  Switch,  ScrollView,  Image,  Alert,}
 import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
 import TitleText from '~/components/TitleText';
 import AppText from '~/components/AppText';
-import { useNavigation } from '@react-navigation/native';
+import { Route, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '~/navigation/types';
 import { clearAllPrefs, PREF_KEYS } from '~/utils/Prefs';
 import { getItem, removeItem } from '~/utils/storage';
 import Loader from '~/components/Loader';
@@ -15,6 +14,28 @@ import { SimpleResponse } from '~/services/DataModals';
 import EmailAccountPopupsModal from './EmailAccountPopupsModal';
 import { setItem } from 'expo-secure-store';
 
+ type RootStackParamList = {
+  Splash: undefined;
+  Intro: undefined;
+  Login: undefined;
+  Register: undefined;
+  Home: undefined;
+
+  EditProfileInfo: {src : string};
+  EmailConnectionUI: { selectedGames: string[]; stepToEdit: number };
+  ProfilePreview: { selectedGames: string[]; stepToEdit: number };
+  CollegePreferences: { selectedGames: string[]; stepToEdit: number };
+  Academic: { selectedGames: string[]; stepToEdit: number };
+  Athletic: { selectedGames: string[]; stepToEdit: number };
+
+  DeleteAccount: undefined;
+  ContactUs: undefined;
+  AppWebview: { url: string; title: string };
+};
+
+
+ 
+ 
 export default function ProfileSetting() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [showModal, setShowModal] = useState(false);
@@ -30,30 +51,43 @@ const [fcmToken, setFcmToken] = useState('');
       (async () => {
         const token = await getFCMToken();
         if (token) {
-          console.log("Got FCM token:", token);
           setFcmToken(token);
         } else {
-          console.log("Failed to get FCM token");
+         // console.log("Failed to get FCM token");
         }
       })();
     }, []);
 
   const handleLogout = () => {
      logoutWithFCMDeletion()
+ /*   setLoading(true)
+    clearAllPrefs();
+        resetFCMToken();
+
+    setTimeout(() => {
+        setLoading(false);
+        navigation.replace('Login');
+    }, 300);
+*/
   };
 
 
-    const logoutWithFCMDeletion = async () => {
+      const logoutWithFCMDeletion = async () => {
         setLoading(true);
       try {
       const accessToken = await getItem(PREF_KEYS.accessToken);
+      const refreshToken = await getItem(PREF_KEYS.refreshToken);
       const url = Api_Url.fcmTokenDeleteAPI;
       const res = await httpRequest2<SimpleResponse>(
-        url,   'delete',    {fcmToken : fcmToken},    accessToken ?? '',     true     );
+        url,   'delete',    {fcmToken : fcmToken , refreshToken : refreshToken},    accessToken ?? '',     true     );
         setLoading(false);
- 
+// console.log('logs_res', res);
       if (res?.status) {
         clearAllPrefs();
+        resetFCMToken();
+        navigation.replace('Login');
+    }else{
+       clearAllPrefs();
         resetFCMToken();
         navigation.replace('Login');
     }  
@@ -94,7 +128,7 @@ const handleEmailDelete = () => {
         onPress: () => {
          // setEmailAccount(false);
           disconnectEmail();
-          console.log('Email account disconnected');
+         // console.log('Email account disconnected');
         },
       },
     ]
@@ -106,9 +140,7 @@ const handleEmailDelete = () => {
          setLoading(true);
        try {
         const accessToken = await getItem(PREF_KEYS.accessToken);
-        const url = Api_Url.removeEmailApi;
-        console.log(url);
-          
+        const url = Api_Url.removeEmailApi;         
          const res = await httpRequest2<SimpleResponse>(
           url,   'post',    {remove_email : connectedEmail},    accessToken ?? '',     true     );
          setLoading(false);
@@ -128,6 +160,15 @@ const handleEmailDelete = () => {
     };
   
 
+
+// type RouteName = keyof RootStackParamList;
+
+// const tetsing = async (stepToEdit: number, screen: RouteName) => {
+//   navigation.navigate(screen, {
+//     selectedGames: [],
+//     stepToEdit,
+//   } as never);
+// };
     
 
 
@@ -267,13 +308,7 @@ const handleEmailDelete = () => {
                 <TitleText className="mb-3">Account Controls</TitleText>
 
                 <SettingItem icon="person-outline" text="Edit Profile Info"
-                  // onPress={() =>
-                  //   navigation.navigate('ProfilePreview', {
-                  //     selectedGames: [], // or the actual list of games if available
-                  //     stepToEdit: 6, // go to last step (ProfilePreview)
-                  //   })
-                  // }
-                  onPress={() => navigation.navigate('UserProfile', {src : 'profileSettings'})}
+                onPress={() => navigation.navigate("EditProfileInfo" , {src : '123'})}
 
                    />
                 <SettingItem icon="trash-outline" text="Delete Account" textClass="text-red-800" onPress={() => navigation.navigate('DeleteAccount')} />
@@ -288,11 +323,23 @@ const handleEmailDelete = () => {
               {/* Support */}
               <View>
               <TitleText className="mb-3">Support</TitleText>
-                <SettingItem icon="help-circle-outline" text="Contact Support"   onPress={() => navigation.navigate('AppWebview', { url: 'https://onecommit.us/#' , title : 'Contact Support' })}
+                <SettingItem icon="help-circle-outline" text="Contact Support"   onPress={() => navigation.navigate('ContactUs')}
  />
-                <SettingItem icon="document-text-outline" text="Terms of Service"  onPress={() => navigation.navigate('AppWebview', { url: 'https://onecommit.us/#' , title : 'Terms of Service' })} />
-                <SettingItem icon="lock-closed-outline" text="Privacy Policy"  onPress={() => navigation.navigate('AppWebview', { url: 'https://onecommit.us/#', title : 'Privacy Policy' })} />
+                <SettingItem icon="document-text-outline" text="Terms of Service"  onPress={() => navigation.navigate('AppWebview', { url: 'https://onecommit.us/terms-of-service' , title : 'Terms of Service' })} />
+                <SettingItem icon="lock-closed-outline" text="Privacy Policy"  onPress={() => navigation.navigate('AppWebview', { url: 'https://onecommit.us/privacy-policy', title : 'Privacy Policy' })} />
               </View>
+
+
+  {/* <View>
+  <TitleText className="mb-3">TESTING SECTION</TitleText>
+  <SettingItem icon="help-circle-outline" text="Personal Record"   onPress={() => tetsing(0, "Athletic")} />
+  <SettingItem icon="document-text-outline" text="Academic info"   onPress={() => tetsing(0, "Academic")} />
+  <SettingItem icon="lock-closed-outline" text="CollegePreferences"   onPress={() => tetsing(0, "CollegePreferences")} />
+  <SettingItem icon="lock-closed-outline" text="EmailConnectionUI"  onPress={() => tetsing(0, "EmailConnectionUI")} />
+  <SettingItem icon="lock-closed-outline" text="ProfilePreview"  onPress={() => tetsing(0, "ProfilePreview")}  />
+
+            
+              </View> */}
 
               {/* Footer Logo */}
               <View className="items-center mt-10">

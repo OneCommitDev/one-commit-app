@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View,  Text,  TextInput,  TouchableOpacity,  Alert,  ScrollView,  KeyboardAvoidingView,  Platform,  Button, Linking
+import { View,  Text,  TextInput,  TouchableOpacity,  Alert,  ScrollView,  KeyboardAvoidingView,  Platform,  Button, Linking, InteractionManager
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import SocialIcons from '~/components/SocialIcons';
@@ -13,12 +13,12 @@ import * as Facebook from 'expo-auth-session/providers/facebook';
 import { useEffect } from 'react';
 import * as AuthSession from 'expo-auth-session';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { handleAppleLogin,  useMicrosoftLogin } from '~/utils/socialAuth';
+import {  handleAppleLogin,  useAppleLogin,  useMicrosoftLogin } from '~/utils/socialAuth';
 import { logoutGoogle } from '~/utils/logoutAll';
-import { setItem } from '~/utils/storage';
+import { getItem, setItem } from '~/utils/storage';
 import Logo from '~/components/Logo';
-import { Api_Url, base_url, httpRequest, httpRequest2, httpRequest_social_token, LoginRequest, postFormUrlEncoded, RegisterOTPRequest } from '~/services/serviceRequest';
-import { LoginResponse, RegisterOTPResponse, SocialTokenResponse } from '~/services/DataModals';
+import { Api_Url,  httpRequest, httpRequest2, httpRequest_social_token, LoginRequest, postFormUrlEncoded, RegisterOTPRequest } from '~/services/serviceRequest';
+import { CheckEmailVerifyResponse, LoginResponse, RegisterOTPResponse, SocialTokenResponse } from '~/services/DataModals';
 import { PREF_KEYS, Temp_KEYS } from '~/utils/Prefs';
 import Loader from '~/components/Loader';
 import axios from 'axios';
@@ -30,27 +30,17 @@ import {  GoogleSignin,  GoogleSigninButton,  isErrorWithCode,  isSuccessRespons
  import { State, City } from 'country-state-city';
 import { APP_CONFIG_GOOGLE, APP_CONFIG_MICROSOFT } from '~/utils/constants';
 
- 
- 
- 
-  WebBrowser.maybeCompleteAuthSession();
+
+WebBrowser.maybeCompleteAuthSession();
 
 GoogleSignin.configure({
-  // scopes: ['profile', 'email' ],
-  // offlineAccess: true, 
-  // forceCodeForRefreshToken: true,
-  // webClientId: '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com', // client ID of type WEB for your server. Required to get the `idToken` on the user object, and for offline access.
-  // iosClientId: '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com', // [iOS] if you want to specify the client ID of type iOS (otherwise, it is taken from GoogleService-Info.plist)
-  // profileImageSize: 120,  
-   scopes: APP_CONFIG_GOOGLE.emailLoginScopes,
+    scopes: APP_CONFIG_GOOGLE.emailLoginScopes,
       offlineAccess: true, 
       forceCodeForRefreshToken: true,
       webClientId: APP_CONFIG_GOOGLE.webClient, 
       iosClientId: APP_CONFIG_GOOGLE.iosClient, 
       profileImageSize: 120, 
 });
-
-
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -60,7 +50,12 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const isEmailValid = email.trim().length > 0 && /\S+@\S+\.\S+/.test(email);
   const isPasswordValid = password.trim().length > 0;
-  const isFormValid = isEmailValid && isPasswordValid;
+  const [result, setResult] = useState(null);
+  const redirectUri = 'OneCommit://redirect';
+  const [loginButtonState, SetloginButtonState] = useState(false);
+  const isFormValid = loginButtonState
+  ? isEmailValid && isPasswordValid
+  : isEmailValid;
 
 const {
   promptAsync: microsoftPrompt,
@@ -72,8 +67,7 @@ const GooglesignOutApp = async () => {
   try {
     await GoogleSignin.signOut();
    } catch (error) {
-    console.error(error);
-  }
+   }
 };
 
 const GooglesignInApp = async () => {
@@ -84,11 +78,7 @@ const GooglesignInApp = async () => {
       const tokens = await GoogleSignin.getTokens(); // Get access & id token
       //console.log('FULL userInfo:', JSON.stringify(userInfo, null, 2));
       const serverAuthCode = userInfo.data.serverAuthCode ?? userInfo.data.user?.serverAuthCode;
-      console.log(serverAuthCode);
-      // console.log('Google SignIn success:', userInfo);
-      // console.log('Access Token:', tokens.accessToken);
-      //  console.log('ID Token:', tokens.idToken);
-
+     
     // Save details
     await setItem(PREF_KEYS.login_status, 'success');
     await setItem(PREF_KEYS.accessToken, tokens.accessToken);
@@ -100,43 +90,35 @@ const GooglesignInApp = async () => {
       const err = error as { code: string; message?: string };
       switch (err.code) {
         case statusCodes.SIGN_IN_CANCELLED:
-          console.log('User cancelled the login flow');
           break;
         case statusCodes.IN_PROGRESS:
-          console.log('Sign in already in progress');
           break;
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-          console.log('Play services not available or outdated');
           break;
         default:
-          console.log('Unhandled error code:', err.code);
           console.log('Sign-in error full:', JSON.stringify(error, null, 2));
       }
     } else {
-      console.log('Unknown error:', error);
+      //console.log('Unknown error:', error);
     }
   }
 };
-
 
 useEffect(() => {
   (async () => {
     const microsoftData = await handleMicrosoftResponse();
     if (microsoftData?.code) {
       const codeVerifier = microsoftData;
-      //  console.log("microsoftData.codee", microsoftData.code);
-      // console.log("codeVerifier", request?.codeVerifier);
-      // console.log('🪟 Microsoft Code:', microsoftData.code);
+       console.log("microsoftData.codee", microsoftData.code);
+      console.log("codeVerifier", request?.codeVerifier);
+      console.log('🪟 Microsoft Code:', microsoftData.code);
       setItem('microsoftCode', microsoftData.code);
     await  SocialLoginRequestVerifyTokens(microsoftData.code , Api_Url.microsoft_token );
     }
   })();
 }, [microsoftResponse]);
 
-
-
- const [result, setResult] = useState(null);
-  const redirectUri = 'OneCommit://redirect';
+/*
  const handleLogin = async (loginurls : string) => {
     const res = await WebBrowser.openAuthSessionAsync(loginurls, redirectUri);
         if (res.type === 'success' && 'url' in res && res.url) {
@@ -160,27 +142,106 @@ useEffect(() => {
            Alert.alert('Login Cancelled', `Type: ${res.type}`);
         }
   };
-
+*/
+  
 
   const handleSocialClick = (platform: any) => {
-    const baseurl = base_url;
+    // const baseurl = base_url;
       if (platform === 'google') {
-       const loginUrl = baseurl + `/auth/google?redirectUri=${encodeURIComponent(redirectUri)}`;
        GooglesignInApp();
        }
        if (platform === 'microsoft') {
-          const loginUrl = baseurl + `/auth/microsoft?redirectUri=${encodeURIComponent(redirectUri)}`;
-           //  handleLogin(loginUrl);
-          microsoftPrompt({ useProxy: false } as any); // 👈 triggers Microsoft login
+          microsoftPrompt({ useProxy: false } as any); 
        }
       if (platform === 'apple') {
-        // const appleData =  handleAppleLogin();
-        // if (appleData) console.log('Apple:', appleData);
+        signInWithApple();
       }
   };
+
+ const signInWithApple = async () => {
+  if (Platform.OS === "ios") {
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      // Extract useful fields
+      const userInfo = {
+        user: credential.user,                  
+        email: credential.email ?? null,        
+        fullName: credential.fullName
+          ? `${credential.fullName.givenName ?? ""} ${credential.fullName.familyName ?? ""}`.trim()
+          : null,
+        identityToken: credential.identityToken ?? null, // JWT (id_token)
+        authorizationCode: credential.authorizationCode ?? null, // Short-lived code
+      };
+     // console.log('userInfo_',userInfo);
+       if (userInfo.fullName) {
+           await  setItem(PREF_KEYS.apple_display_name , userInfo.fullName ?? "")
+       }
+      const Displayname_get = await getItem(PREF_KEYS.apple_display_name)
+
+       if (userInfo.authorizationCode) {
+    InteractionManager.runAfterInteractions(async () => {
+          await SocialLoginRequestVerifyTokens(
+            userInfo.authorizationCode!,
+            Api_Url.apple_token,
+            Displayname_get ?? ""
+          );
+        });
+     }
+
+      return userInfo;
+    } catch (e: any) {
+      if (e.code === "ERR_CANCELED") {
+         Alert.alert("Cancelled", "User cancelled Apple sign in.");
+      } else {
+         Alert.alert("Error", e?.message ?? JSON.stringify(e));
+      }
+      return null;
+    }
+  } 
+};
+
   const handleSubmit = () => {
+    if (loginButtonState === false){
+        ValidateUserEmailFirstAPI();
+    }else{
      LoginRequestViaAPI();  
+    }
   };
+
+   const ValidateUserEmailFirstAPI = async () => {
+      try {
+        setLoading(true);
+        const requestBody : LoginRequest = {  email : email,   password : password   };
+        const res = await httpRequest2<CheckEmailVerifyResponse>(
+          Api_Url.check_emailid,    'post',    {email},    undefined,   true 
+        );
+
+        console.log(res);
+        if (res.status && res.registration_status) {
+           if(res.registration_status.status === 'social_registered' || res.registration_status.status === 'not_registered'){   
+               Alert.alert('Error', res.message);
+           }
+           else{
+            setLoading(false);
+            SetloginButtonState(true);
+           }
+           
+
+            } else {
+              Alert.alert('Error', res.message ?? 'Login failed');
+            }
+          } catch (err) {
+          Alert.alert('Error', 'Unexpected error occurred.');
+          } finally {
+            setLoading(false);
+          }
+    };
 
  const LoginRequestViaAPI = async () => {
   try {
@@ -190,14 +251,14 @@ useEffect(() => {
     const res = await httpRequest2<LoginResponse>(
       Api_Url.login,    'post',    requestBody,    undefined,   true 
     );
-
+// console.log(res);
 if (res.status && res.data) {
     setLoading(false);
       await setItem(PREF_KEYS.login_status, 'success');
       await setItem(PREF_KEYS.accessToken, res.data.accessToken);
       await setItem(PREF_KEYS.refreshToken, res.data.refreshToken);
        await setItem(PREF_KEYS.userEmailID, email);
-                   await Savedetailsafterlogin();
+        await Savedetailsafterlogin();
 
      
         if(res.redirect == "verify"){
@@ -209,7 +270,7 @@ if (res.status && res.data) {
         }else if(res.profile.complete == true){
           setItem(PREF_KEYS.profileCompleted , 'success');
           // navigation.navigate('UserProfile');
-           navigation.replace('Dashboard');
+           navigation.replace('Dashboard' , {onload : 'Home'});
         }else{
            navigation.replace('FillProfileInfoScreen');
         }
@@ -223,11 +284,12 @@ if (res.status && res.data) {
   }
 };
 
-const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string) => {
+const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string , fullName? : string) => {
   try {
     setLoading(true);
     const requestBody = {
      "authCodeToken" :authCode,
+     'fullName' : fullName
     };
     const res = await httpRequest_social_token<SocialTokenResponse>(
       api_url,
@@ -238,11 +300,7 @@ const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string
     );
 
      setLoading(false);
-      console.log(api_url);
-     console.log(res);
-     console.log(requestBody);
     if (res.data?.accessToken) {
-
       await setItem(PREF_KEYS.login_status, 'success');
       await setItem(PREF_KEYS.accessToken, res.data?.accessToken);
       if (res.data.refreshToken) {
@@ -252,36 +310,27 @@ const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string
         if(res.profile.complete == true){
           setItem(PREF_KEYS.profileCompleted , 'success');
           // navigation.navigate('UserProfile');
-          navigation.replace('Dashboard');
+          navigation.replace('Dashboard' , {onload : 'Home'});
         }else{
            navigation.navigate('UserProfile' , {src : ''});
         }
-
-
-
-
-
     } else {
       Alert.alert('Error',  'Login failed');
     }
   } catch (err) {
     Alert.alert('Error', 'Unexpected error occurred.');
-    console.log('Social Login Errors:', err);
-  } finally {
+   } finally {
     setLoading(false);
   }
 };
-
-
   const handleRegister = () => {
-    navigation.navigate('Register');
+    // navigation.navigate('Register');
+     navigation.navigate('NewRegister');
   };
 
    const handleForgot = () => {
     navigation.navigate('Forgotpassword');
   };
-
-
 
 useFocusEffect(
   React.useCallback(() => {
@@ -294,9 +343,7 @@ useFocusEffect(
 
  useEffect(() => {
   const handleDeepLink = ({ url }: { url: string }) => {
-    console.log('📥 Deep link received:', url);
-    // your logic here
-  };
+   };
 
   const sub = Linking.addEventListener('url', handleDeepLink);
   Linking.getInitialURL().then((url) => {
@@ -307,24 +354,41 @@ useFocusEffect(
 }, []);
 
 const [request, response, promptAsync] = Google.useAuthRequest({
-  // clientId: '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com',
-  // iosClientId: '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com',
-  // androidClientId: '156935841607-ru30t91ba7r20pkdgclu1jn6rclqi9fl.apps.googleusercontent.com',
-       clientId: APP_CONFIG_MICROSOFT.CLIENT_ID,
+        clientId: APP_CONFIG_MICROSOFT.CLIENT_ID,
 });
 
 useEffect(() => {
   if (response?.type === 'success') {
     const { authentication } = response;
-    // Use access token to get user info
-  }
+   }
 }, [response]);
  useEffect(() => {
   const states = State.getStatesOfCountry("US");
   const cities = City.getCitiesOfState("US", "CA"); // CA for California
-//console.log('states' , states);
-///console.log('cities' , cities);
+ 
 }, []);
+/*
+ const requestNotificationPermission = async () => {
+  const { status } = await checkNotifications();
+
+  if (status === "granted") {
+    Alert.alert("✅ Notifications already allowed");
+    return;
+  }
+
+  const { status: newStatus } = await requestNotifications(["alert", "sound", "badge"]);
+
+  if (newStatus === "granted") {
+    Alert.alert("✅ Notifications Enabled");
+  } else {
+ await messaging().requestPermission();
+
+  }
+};
+*/
+
+
+
 
   return (
  <KeyboardAwareScrollView
@@ -351,9 +415,10 @@ useEffect(() => {
               <Logo size={80} />
             </View>
             </View>
+      {/* <Button title="Enable Notifications" onPress={requestNotificationPermission} /> */}
 
             {/* Heading */}
-            <Text className="text-20 font-nunitoextrabold text-center text-title mb-1">Sign In</Text>
+            <Text className="text-20 font-nunitoextrabold text-center text-title mb-1">Sign In with OneCommit</Text>
             <Text className="text-light text-center mb-6 font-nunitoregular">Login to your OneCommit Account</Text>
 
             {/* Email Input */}
@@ -364,16 +429,22 @@ useEffect(() => {
                 </View>
                 <TextInput
                 className="ml-2 flex-1 text-black font-nunitosemibold text-base"
-                placeholder="example@example.com|"
+                placeholder="Enter your email id"
                 value={email}
                 style={{ letterSpacing: 1 }} 
-                onChangeText={setEmail}
+                // onChangeText={setEmail}
+                 onChangeText={(text) => {
+                  setEmail(text);
+                  SetloginButtonState(false);   // 👈 reset to hide password if email changes
+                }}
                  autoCapitalize="none"
                 keyboardType="email-address"
                 />
               </View>
 
             {/* Password Input */}
+            {loginButtonState && (
+  <>
             <Text className="text-14 font-nunitoextrabold  text-title mb-3">Password</Text>
                 <View className="flex-row items-center border border-gray-300 rounded-xl px-3 h-14 mb-4 bg-white">
                  <View className="pl-2 pr-3">
@@ -398,43 +469,35 @@ useEffect(() => {
                 />
               </TouchableOpacity>
             </View>
-
+</>
+)}
             {/* Submit Button */}
             <View className="my-4">
-              <ArrowButton text="Continue" onPress={handleSubmit} fullWidth disabled={!isFormValid} />
+              <ArrowButton text="Proceed" onPress={handleSubmit} fullWidth disabled={!isFormValid} />
             </View>
-
+                                  <View className="items-center justify-center">
+                                             <Text className="text-light text-center mb-2 mt-3 font-nunitoregular text-14">
+                                                or Continue with
+            </Text>
+                                  </View>
             {/* Social Icons */}
             <View className="flex-row justify-center my-6">
               <SocialIcons onIconPress={handleSocialClick} />
             </View>
-
             {/* Footer Links */}
             <View className="flex-row justify-center mb-2">
               <Text className="text-gray-500">Don't have an account? </Text>
               <TouchableOpacity onPress={handleRegister}>
               <Text className="text-[#124D3A] font-semibold">Sign Up</Text>
               </TouchableOpacity>
-
             </View>
             <TouchableOpacity onPress={handleForgot}>
               <Text className="text-center text-[#124D3A] underline">Forgot your password?</Text>
             </TouchableOpacity>
-        <Loader show={loading} />
-
           </View>
         </View>
-        
+                <Loader show={loading} />
+
     </KeyboardAwareScrollView>
   );
 }
- 
-
- 
-
- 
-
-function setUserInfo(user: SignInResponse) {
-  throw new Error('Function not implemented.');
-}
-

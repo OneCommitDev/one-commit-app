@@ -22,7 +22,7 @@ import WeightRuler from '~/components/WeightRuler';
 import WhiteCustomButton from '~/components/WhiteCustomButton';
 import HeightRuler from '~/components/HeightRuler';
  import WheelPickerExpo from 'react-native-wheel-picker-expo';
-import { autoformatUSPhoneNumber, cleanPhoneNumber, formatInchesToFeetAndInches, formatUSPhoneNumber, getFCMToken, isAtLeast13YearsOld, parseHeightToInches } from '~/utils/AppFunctions';
+import { autoformatUSPhoneNumber, cleanPhoneNumber, formatInchesToFeetAndInches, formatUSPhoneNumber, getFCMToken,  isAtLeast13YearsOld, parseHeightToInches } from '~/utils/AppFunctions';
 import CustomDualPicker, { weightValues_kg, weightValues_lb } from '~/components/CustomDualPicker';
 import { CustomDualPickerModal } from '~/components/CustomDualPickerModal';
 import { HeightPickerModal2 } from '~/components/HeightPickerModal2';
@@ -80,7 +80,7 @@ type CityState = { city: string; state: string } | null;
 
    const isFormValid =
   (form.fullName || '').trim() !== '' &&
-  (form.preferredName || '').trim() !== '' &&
+  // (form.preferredName || '').trim() !== '' &&
   (form.email || '').trim() !== '' &&
   (form.phone || '').trim() !== '' &&
   form.dob !== null &&
@@ -117,7 +117,6 @@ type CityState = { city: string; state: string } | null;
           accessToken ?? '',
         );
 
-      console.log('resresresresres', res);
       if (res.status) {
         const genderFromAPI = res.data?.gender?.toLowerCase() === 'female' ? 'Female' : 'Male';
           setForm((form) => ({
@@ -162,7 +161,7 @@ type CityState = { city: string; state: string } | null;
 
     const requestBody: CreateProfileRequest = {
         full_name: form.fullName,
-        preferred_name: form.preferredName,
+        // preferred_name: form.preferredName,
         phone: cleanPhoneNumber(form.phone),
          dob: form.dob ? format(form.dob, 'yyyy-MM-dd') : '', // ✅ ISO format
         city: form.city,
@@ -173,7 +172,12 @@ type CityState = { city: string; state: string } | null;
         weight_unit: form.weight_unit ?? '',
         height: form.heightis ? parseHeightToInches(form.heightis).toString() : '',  // 👈
         height_unit: form.height_unit ?? '',
+          // ...(form.preferredName ? { preferred_name: form.preferredName } : {}),  
+
       };
+        if (form.preferredName) {
+         requestBody.preferred_name = form.preferredName;
+        }
 
      await setItem(PREF_KEYS.displayName , form.preferredName);
 
@@ -188,7 +192,6 @@ type CityState = { city: string; state: string } | null;
         true
       );
 
-      console.log('resresresresres', res);
       if (res.status) {
             if(src == ''){
                 navigation.navigate('GamesGrid');
@@ -208,6 +211,11 @@ type CityState = { city: string; state: string } | null;
       setLoading(false);
     }
   };
+
+
+ 
+
+
 
 useEffect(() => {
   const fillFormDefaults = async () => {
@@ -234,7 +242,7 @@ const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
 
     if (!place) throw new Error('No location data found');
 
-    console.log('ZIP API Result:', place);
+    // console.log('ZIP API Result:', place);
 
     const city = place['place name'] || place['city'] || '';
     // const state = place['state'] || place['abbreviation'] || '';
@@ -250,41 +258,6 @@ const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
 };
 
 const screenWidth = Dimensions.get('window').width;
-/*
-const weightValues_kg = Array.from({ length: 2001 }, (_, i) => ({
-  label: (i * 0.1).toFixed(1), // '0.0', '0.1', ..., '200.0'
-  value: i * 0.1,
-}));
-
-const weightValues_lb = Array.from({ length: 401 }, (_, i) => ({
-  label: `${i}`,
-  value: i,
-}));
-
-const units: ('kg' | 'lb')[] = ['kg', 'lb'];
-const [selectedUnit, setSelectedUnit] = useState<'kg' | 'lb'>('lb');
-
-// ⬇️ default indexes
-const defaultKgValue = 50;   // in kg
-const defaultLbValue = 90;   // in lb
-
-const defaultKgIndex = weightValues_kg.findIndex(
-  (item) => item.value === defaultKgValue
-);
-
-const defaultLbIndex = weightValues_lb.findIndex(
-  (item) => item.value === defaultLbValue
-);
- const [tempIndex, setTempIndex] = useState(
-  selectedUnit === 'kg' ? defaultKgIndex : defaultLbIndex
-);
-
-// If unit changes, reset temporary index
-useEffect(() => {
-  setTempIndex(selectedUnit === 'kg' ? defaultKgIndex : defaultLbIndex);
-}, [selectedUnit]);
-
-*/
 
  const [selectedUnit, setSelectedUnit] = useState<'kg' | 'lbs'>('lbs');
   const [highlightedKgIndex, setHighlightedKgIndex] = useState(50);
@@ -301,12 +274,23 @@ const [tempWeightUnit, setTempWeightUnit] = useState<'kg' | 'lbs'>('lbs');
 
   const [pickerVisible, setPickerVisible] = useState(false);
 const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
-
+const [fcmToken, setFcmToken] = useState('');
+  useEffect(() => {
+      (async () => {
+        const token = await getFCMToken();
+        if (token) {
+          console.log("Got FCM token:", token);
+          setFcmToken(token);
+        } else {
+          console.log("Failed to get FCM token");
+        }
+      })();
+    }, []);
 
   const fcmTokenSavingAPi = async () => {
     try {
       const accessToken = await getItem(PREF_KEYS.accessToken);
-      const fcm = await getItem(PREF_KEYS.fcmToken);
+     // const fcm = await getItem(PREF_KEYS.fcmToken);
       const url = Api_Url.fcmTokenAPI;
 
       await getFCMToken();
@@ -314,12 +298,11 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
       const res = await httpRequest2<SimpleResponse>(
         url,
         'post',
-        { fcmToken: fcm },
+        { fcmToken: fcmToken },
         accessToken ?? '',
         true
       );
 
-      console.log('FCM token saved:', fcm);
     } catch (err) {
       Alert.alert('Error', 'Unexpected error occurred.');
     }
@@ -350,10 +333,9 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
         enableOnAndroid={true}
         extraScrollHeight={100}
       >
-        <Loader show={loading} />
  
         <View className="bg-background ml-5 mr-5">
-          <TitleText text="Full Name"  />
+          <TitleText text="Full Name *"  />
           <AppInput
             value={form.fullName}
             leftIcon={<Ionicons name="person-outline" size={20} color="#6B7280" />}
@@ -369,7 +351,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
             placeholder="Enter preferred name"
           />
 
-          <TitleText text="Email"  />
+          <TitleText text="Email *"  />
           <AppInput
             value={form.email}
             editable={false}
@@ -380,7 +362,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
             keyboardType="email-address"
           />
 
-          <TitleText text="Phone Number"  />
+          <TitleText text="Phone Number *"  />
           <AppInput
             value={form.phone}
             leftIcon={<Ionicons name="phone-portrait-sharp" size={20} color="#6B7280" />}
@@ -393,10 +375,11 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
             }}
           />
 
-          <TitleText text="Date of Birth"  />
+          <TitleText text="Date of Birth *"  />
           <View className="bg-white px-1 py-1 rounded-full mt-2 mb-2">
             <TouchableOpacity
              onPress={() => {
+               Keyboard.dismiss();
                 if (Platform.OS === 'ios') {
                   setDobTemp(form.dob || new Date(2000, 0, 1)); // fallback if null
                   setShowDatePickerModal(true);
@@ -416,7 +399,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
           <View>
             <View className="flex-row space-x-4">
               <View className="flex-1">
-                <TitleText text="ZipCode"  />
+                <TitleText text="ZipCode *"  />
                 <AppInput
                   value={form.zip}
                   keyboardType="number-pad"
@@ -456,7 +439,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
               </View>
 
               <View className="flex-1 ml-5">
-                <TitleText text="State"  />
+                <TitleText text="State *"  />
                 <AppInput
                   value={form.states}
                     editable={false}
@@ -475,7 +458,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
                 />
           </View>
 
-          <TitleText text="Gender"  />
+          <TitleText text="Gender *"  />
           <View className="mb-2">
             <TestTypeToggle
               options={['Male', 'Female']}
@@ -490,7 +473,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
           <View className="flex-row space-x-4">
             <View className="flex-1">
 
-              <TitleText text="Weight"  />
+              <TitleText text="Weight *"  />
             <TouchableOpacity onPress={() => setShowWeightModal(true)} activeOpacity={1}>
             <AppInput
               value={form.weightis}
@@ -507,7 +490,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
 
 
             <View className="flex-1 ml-5">
-              <TitleText text="Height"  />
+              <TitleText text="Height *"  />
               
               {/* <AppInput
               onPress={() => setShowHeightModal(true)}
@@ -537,6 +520,8 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
             <ArrowButton
               text="Save Changes"
               onPress={() => {
+               // throw new Error("Test Sentry crash");
+
                 SaveProfileRequest();
               }}
               fullWidth
@@ -545,6 +530,7 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
           </View>
         </View>
       </KeyboardAwareScrollView>
+        <Loader show={loading} />
 
       {/* iOS Date Picker Modal */}
       {Platform.OS === 'ios' && (
@@ -618,37 +604,55 @@ const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
               }}
               onSave={(main, decimal, unit) => {
                 const selectedWeight = `${main}.${decimal} ${unit}`;
-
                 handleChange('weightis', selectedWeight);
                 handleChange('weight_unit', unit);
-
                 setForm((prev) => ({
                   ...prev,
                   weightis: selectedWeight,
                   weight_unit: unit,
                 }));
-
                 setShowWeightModal(false); // close after save
               }}
-            />
+              // initialMainValue={unit === 'kg' ? 72 : 150}  
+             initialMainValue={
+              parseInt(form.weightis?.split('.')[0] || (unit === 'kg' ? "70" : "150"), 10)
+            }
+            initialDecimalValue={
+              parseInt(form.weightis?.split('.')[1] || "0", 10)
+            }
 
-          <HeightPickerModal2
+             />
+
+          {/* <HeightPickerModal2
             visible={showHeightModal}
             onClose={() => setShowHeightModal(false)}
             onSave={(feet, inches) => {
               const formatted = `${feet}'${inches}"`;
-
-              // Save height as formatted string (e.g., 5'6") and unit as "inch"
               setForm((prev) => ({
                 ...prev,
                 heightis: formatted,
                 height_unit: 'feet_inches',
               }));
-
-              // Close modal after a small delay to ensure state is applied
               setTimeout(() => setShowHeightModal(false), 50);
             }}
-          />
+          /> */}
+
+          <HeightPickerModal2
+          visible={showHeightModal}
+          onClose={() => setShowHeightModal(false)}
+          initialFeet={parseInt(form.heightis?.split("'")[0] || "5", 10)}
+          initialInches={parseInt(form.heightis?.split("'")[1]?.replace('"', '') || "6", 10)}
+          onSave={(feet, inches) => {
+            const formatted = `${feet}'${inches}"`;
+            setForm((prev) => ({
+              ...prev,
+              heightis: formatted,
+              height_unit: 'feet_inches',
+            }));
+            setTimeout(() => setShowHeightModal(false), 50);
+          }}
+        />
+
 
 
 

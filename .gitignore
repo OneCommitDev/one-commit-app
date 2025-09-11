@@ -36,3 +36,5 @@ metro-cache/
 # macOS
 *.swp
 .idea/
+
+.env.local
