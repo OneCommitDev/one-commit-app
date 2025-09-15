@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {  View,  Text,  TouchableOpacity,  ScrollView,  Image, Dimensions, Alert, InteractionManager,} from "react-native";
+import {  View,  Text,  TouchableOpacity,  ScrollView,  Image, Dimensions, Alert, InteractionManager, } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import TitleText from "~/components/TitleText";
 import AppText from "~/components/AppText";
@@ -24,6 +24,8 @@ import { TimePickerModal } from "~/components/TimePickerModal";
 import { HeightPickerModal } from "~/components/HeightPickerModal";
 import { FeetMeterPickerModal } from "~/components/FeetMetterPickerModal";
 import { stopProfiling } from "@sentry/react-native/dist/js/profiling/integration";
+import Animated, { FadeInDown , FadeOutUp} from "react-native-reanimated";
+import CheckboxModal from "./CheckboxModal";
 
  type RootStackParamList = {
   EmailConnectionUI: { selectedGames: string[]; stepToEdit: number };
@@ -88,6 +90,11 @@ const [schoolSizeSelected, setSchoolSizeSelected] = useState<string[]>(["small"]
    const [sporteventdata, setSportsdata] = useState<SportEvent>();
    const [modalVisible, setModalVisible] = useState(false);
  const [disunit, setdisUnit] = useState<"feet" | "meters">("feet");
+
+   const [sportmodalVisible, setSportModalVisible] = useState(false);
+   const [sporteventdatasection, setSportsdataSection] = useState<SportUserFormattedData>();
+
+ 
 
    // Handlers
    /*
@@ -344,6 +351,7 @@ useEffect(() => {
   }
 }, [modalVisible, sporteventdata]);
 
+ const [selectedsportid, setSelectedsportid] = useState<string>('');
 
   return (
     
@@ -419,7 +427,16 @@ useEffect(() => {
 
     {sportsdata.map((section, sectionIndex) => (
   <View key={sectionIndex} className="w-full">
-    <SectionTitle title={section.display_name} />
+          <SectionTitle 
+            title={section.display_name} 
+            showAddButton 
+            onAddPress={() => {
+              setSportModalVisible(true);
+              setSportsdataSection(section);
+            }} 
+          />
+
+ 
 
     <View className="flex-row flex-wrap">
  {section.events.map((item, index) => (
@@ -790,7 +807,13 @@ useEffect(() => {
         />
 
 
-
+  <CheckboxModal
+      visible={sportmodalVisible}
+      onClose={() => setSportModalVisible(false)}
+      onSelect={(ids) => setSelectedsportid(sporteventdatasection?.sport_id.toString() ?? '')}
+      sportName= {sporteventdatasection?.sport_name.toString().replace('_', " ") ?? ''}
+      sportId = {sporteventdatasection?.sport_id.toString() ?? ''}
+    />
           
 
     </View>
@@ -828,7 +851,11 @@ function SectionTitle({ title, showAddButton = false, onAddPress }: SectionTitle
   className?: string;
 }) {
   return (
-    <View className={`w-[48%] bg-white rounded-2xl p-3 mb-3 border border-gray-200 ${className}`}>
+      <Animated.View
+      entering={FadeInDown.duration(400).springify().damping(12)}
+      exiting={FadeOutUp.duration(300)}
+      className={`w-[48%] bg-white rounded-2xl p-3 mb-3 border border-gray-200 ${className}`}
+    >
       <View className="flex-row items-center -mt-[12px]">
         <Ionicons name="walk-outline" size={24} color="#6B7280" />
         <View className="mt-1 w-[80%] ml-[5px]">
@@ -844,7 +871,7 @@ function SectionTitle({ title, showAddButton = false, onAddPress }: SectionTitle
       >
         <Ionicons name="pencil-outline" size={16} color="black" />
       </TouchableOpacity>
-    </View>
+    </Animated.View>
   );
 }
 
