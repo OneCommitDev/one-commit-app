@@ -1,5 +1,5 @@
 import { NavigationProp, useFocusEffect, useNavigation } from "@react-navigation/native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, TouchableOpacity, Text, FlatList, Platform, AppState, Alert, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import TitleText from "~/components/TitleText";
@@ -8,13 +8,13 @@ import SimpleListSheet from "~/components/SimpleListSheet";
 import ListviewShhet from "~/components/ListviewShhet";
 import { checkNotifications, requestNotifications } from "react-native-permissions";
 import { getItem } from "expo-secure-store";
-import { clearAllPrefs, PREF_KEYS } from "~/utils/Prefs";
+import {  PREF_KEYS } from "~/utils/Prefs";
 import { Api_Url, httpRequest2 } from "~/services/serviceRequest";
 import { SimpleResponse } from "~/services/DataModals";
 import { resetFCMToken } from "~/utils/AppFunctions";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { decodeAccessToken } from "~/utils/decodeAccessToken";
-import { removeItem } from "~/utils/storage";
+import { clearAllPrefss, removeItem } from "~/utils/storage";
 import Loader from "~/components/Loader";
 import EmailAccountPopupsModal from "./EmailAccountPopupsModal";
 
@@ -44,7 +44,25 @@ export default function AppSystemSettings() {
   const [connectedEmail, setConnectedEmail] = useState('');
   const [showModal, setShowModal] = useState(false);
 
+ const loadConnectedEmail = async () => {
+  const provider = await getItem(PREF_KEYS.connected_id_provider);
+  const email = await getItem(PREF_KEYS.connected_id);
 
+  if (provider) {
+    setConnectedProvider(provider ?? "");
+    setConnectedEmail(email ?? "");
+    setEmailAccount(true);
+   } else {
+    setConnectedProvider("");
+    setConnectedEmail("");
+    setEmailAccount(false);
+   }
+};
+
+
+useEffect(() => {
+  loadConnectedEmail();
+}, []);
 
 
   const handleBack = () => {
@@ -59,12 +77,12 @@ useFocusEffect(
 
     return () => {
       
-      console.log("Screen is unfocused");
+      //console.log("Screen is unfocused");
     };
   }, [])
 );
 
-  const settings = [
+ const settings = useMemo(() => [
     {
       key: "account",
       title: "Account",
@@ -77,12 +95,16 @@ useFocusEffect(
     : ["Personal info"],  
     },
     {
-      key: "integrations",
-      title: "Integrations",
-      subtitle: "Gmail/Outlook connections",
-      route: "Integrations",
-       dataIs : emailAccount === true  ? ["View connections" , "Remove Connections"] : [],
-    },
+    key: "integrations",
+    title: "Integrations",
+    subtitle: emailAccount
+      ? "Connected"
+      : "Gmail/Outlook connections",
+    route: "Integrations",
+    dataIs: emailAccount
+      ? ["View connections", "Remove Connections"]
+      : [],
+  },
     {
       key: "notifications",
       title: "Notifications",
@@ -105,9 +127,10 @@ useFocusEffect(
       danger: true,
        dataIs : ["Delete account" , "Log out"],
     },
-  ];
+], [provider, emailAccount, connectedEmail, connectedProvider]);
 
     const handlePress = (item: typeof settings[0]) => {
+      console.log(emailAccount);
         if(item.title === 'Notifications'){
                 if (Platform.OS === "ios") { 
                      Linking.openURL("app-settings:");
@@ -115,9 +138,10 @@ useFocusEffect(
                      Linking.openSettings();
                 }
         }
-        else  if(item.title === 'Integrations' && emailAccount == false){  
-              setShowModal(true)
-        }
+      else if (item.title === 'Integrations' && !connectedEmail && !connectedProvider) {
+  setShowModal(true);
+}
+
         else{
             setSelectedData(item.dataIs);  
             setSelectedtitleData(item.title);
@@ -144,10 +168,6 @@ useFocusEffect(
       <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
     </TouchableOpacity>
   );
-
-
-
- 
  
 
     const logoutWithFCMDeletion = async () => {
@@ -161,13 +181,13 @@ useFocusEffect(
         
          
         if (res?.status) {
-          clearAllPrefs();
+          clearAllPrefss();
           resetFCMToken();
           setTimeout(() => {
             navigation.replace('Login');
           }, 100);
      }else{
-        clearAllPrefs();
+        clearAllPrefss();
         resetFCMToken();
         setTimeout(() => {
           navigation.replace('Login');
@@ -180,21 +200,7 @@ useFocusEffect(
       }
    };
 
- const loadConnectedEmail = async () => {
-  const connected_id_provider = await getItem(PREF_KEYS.connected_id_provider);
-  const email = await getItem(PREF_KEYS.connected_id);
-  setConnectedProvider(connected_id_provider ?? '');
-  setConnectedEmail(email ?? '');
-  if (connected_id_provider) {
-    setEmailAccount(true);
-  } else {
-    setEmailAccount(false);
-  }
-};
-
-useEffect(() => {
-  loadConnectedEmail();
-}, []);
+ 
 
 const handleEmailDelete = () => {
 
@@ -229,14 +235,15 @@ const handleEmailDelete = () => {
        if (res?.status) {
           removeItem(PREF_KEYS.connected_id);
           removeItem(PREF_KEYS.connected_id_provider);
+        setTimeout(() => {
+          loadConnectedEmail();  
+         }, 100);
            Alert.alert('Disconnected', 'Your account has been successfully disconnected.');
        }  
       } catch (err) {
-       
       } finally {
            setLoading(false);
-            loadConnectedEmail();
-      }
+       }
     };
 
 
@@ -310,13 +317,19 @@ const handleEmailDelete = () => {
         }}
         />
         <Loader show={loading} />
-    <EmailAccountPopupsModal
-      visible={showModal}
-      onClose={() => {
-        loadConnectedEmail();
-        setShowModal(false);
-      }}
-    />
+      <EmailAccountPopupsModal
+        visible={showModal}
+          onClose={() => {
+          setShowModal(false);
+          loadConnectedEmail();
+        }}
+        onDone={() => {
+          setShowModal(false);
+          loadConnectedEmail();
+        }}
+      />
+
+
     </View>
   );
 }

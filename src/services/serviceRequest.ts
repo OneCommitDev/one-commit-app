@@ -1,21 +1,22 @@
 import axios from 'axios';
 import { getItem } from 'expo-secure-store';
 import qs from 'qs'; 
-import { getValidAccessToken } from '~/utils/decodeAccessToken';
+//import { getValidAccessToken } from '~/utils/decodeAccessToken';
 import { PREF_KEYS } from '~/utils/Prefs';
 import Constants from "expo-constants";
 import { parseApiError } from './parseApiError';
 import { Platform } from 'react-native';
 import * as Application from "expo-application";
+import { getValidAccessToken } from './authService';
 
 const { apiUrl, appEnv , xKey , baseImgUrl} = Constants.expoConfig?.extra ?? {};
 export const  base_url_images = baseImgUrl;
 export const base_url =  apiUrl;
 
-console.log('apiUrl_', apiUrl);
+ 
 const api = axios.create({
-  // baseURL: "https://devapi.onecommit.us:443/v1", 
-  baseURL: apiUrl,
+  baseURL: "https://devapi.onecommit.us:443/v1", 
+    // baseURL: apiUrl,
   timeout: 60000,
   headers: {
     'Content-Type': 'application/json',  
@@ -123,7 +124,7 @@ export async function httpRequest<T>(
         finalToken = (await getValidAccessToken()) ?? undefined;
     }
   try {
-    const headers: any = {
+    const headers: any = { 
       'Content-Type': isFormUrlEncoded
         ? 'application/x-www-form-urlencoded'
         : 'application/json',

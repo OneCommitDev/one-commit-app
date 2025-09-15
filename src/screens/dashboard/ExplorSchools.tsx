@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {  View,  Text,  FlatList,  TouchableOpacity,  Image,  Alert,  ActivityIndicator,  Animated,  Easing,  Dimensions, InteractionManager, TextInput,
+import {  View,  Text,  FlatList,  TouchableOpacity,  Image,  Alert,  ActivityIndicator,  Animated,  Easing,  Dimensions, InteractionManager, TextInput, Platform, UIManager, LayoutAnimation,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -131,8 +131,8 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           accessToken ?? '',
           true
         );
-  console.log('dots_',url);
-        console.log('dots_', res.data);
+   
+         
         const newData = Array.isArray(res.data) ? res.data : [];
 
         if (newData.length === 0) {
@@ -403,29 +403,73 @@ const handleSelect = (item: SearchSchoolData) => {
       }).start();
     }
   }, [currentIndex]);
+  const [showSearch, setShowSearch] = useState(false);
+  if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+const toggleSearch = () => {
+  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  setShowSearch(!showSearch);
+};
+   return (
+  <View className="flex-1 bg-background px-4 pb-6 pt-2">
+ <View className="mt-14 flex-row items-center justify-between px-4">
+  {!showSearch ? (
+    <>
+      <TitleText size="text-24">Explore</TitleText>
+      <TouchableOpacity onPress={toggleSearch}>
+        <Ionicons name="search" size={24} color="#333" />
+      </TouchableOpacity>
+    </>
+  ) : (
+    <View className="flex-row items-center bg-gray-200 rounded-full h-[45px] px-4 flex-1">
+      <Ionicons name="search" size={20} color="#888" className="mr-2" />
+      <TextInput
+        value={searchText}
+        onChangeText={setSearchText}
+        placeholder="Search schools..."
+        placeholderTextColor="#888"
+        className="flex-1 text-base text-gray-800"
+        autoFocus
+      />
+      {searchText.length > 0 && (
+        <TouchableOpacity onPress={() => setSearchText("")}>
+          <Ionicons name="close-circle" size={20} color="#888" />
+        </TouchableOpacity>
+      )}
+      <TouchableOpacity onPress={toggleSearch}>
+        <Ionicons name="close" size={22} color="#333" />
+      </TouchableOpacity>
+    </View>
+  )}
+</View>
+
  
-  return (
-  <View className="flex-1 bg-background px-4 pb-6">
-  <View className="mt-14">
-    <TitleText size="text-24">Explore</TitleText>
-  </View>
 
   <Loader show={loading} />
 
   <View className="bg-white w-full flex-1 mt-4 rounded-[6]">
-          <View className="flex-row items-center bg-gray-200 rounded-full mb-2 h-[45px] px-5">
-          <Ionicons name="search" size={20} color="#888" className="mr-2" />
-          <TextInput
-           value={searchText}
-          onChangeText={handleSearch}
-            placeholder='Search schools...'
-            placeholderTextColor="#888"
-            className="flex-1 text-base text-gray-800"
-          />
-        </View>
+         {/* <View className="flex-row items-center bg-gray-200 rounded-full mb-2 h-[45px] px-5">
+  <Ionicons name="search" size={20} color="#888" className="mr-2" />
+
+  <TextInput
+    value={searchText}
+    onChangeText={handleSearch}
+    placeholder="Search schools..."
+    placeholderTextColor="#888"
+    className="flex-1 text-base text-gray-800"
+  />
+
+  {searchText?.length > 0 && (
+    <TouchableOpacity onPress={() => handleSearch("")}>
+      <Ionicons name="close-circle" size={20} color="#888" />
+    </TouchableOpacity>
+  )}
+</View> */}
+
 {searchText.trim().length > 0 && filteredData.length > 0 && (
   <View
-    className="absolute left-4 right-4 top-[50px] bg-white rounded-lg shadow-lg max-h-60 z-50"
+    className="absolute left-4 right-4 top-[0px] bg-white rounded-lg shadow-lg max-h-60 z-50"
     style={{ elevation: 10 }} // For Android shadow
   >
     <FlatList

@@ -1,4 +1,6 @@
 // App.tsx
+globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
+
 import './global.css';
 import React, { useContext, useEffect, useState } from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
@@ -79,7 +81,7 @@ async function setupNotifications() {
     authStatus === AuthorizationStatus.PROVISIONAL
   ) {
     const token = await getToken(messagingInstance);
-    console.log(token);
+   // console.log(token);
     await setItem(PREF_KEYS.fcmToken, token);
   }
 }
@@ -113,6 +115,7 @@ const allowedScreens: Record<string, (params: Record<string, any>) => boolean> =
 
 // ✅ App entry point
 export default Sentry.wrap(function App() {
+ 
   if (__DEV__) {
     // dev logging allowed
   } else {

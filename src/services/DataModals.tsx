@@ -66,6 +66,7 @@ export  interface TokenResponse {
 export interface SocialTokenResponse {
  status: boolean;
   message?: string;
+  account_status : string;
   redirect?: string;
     profile : profileLogin;
 

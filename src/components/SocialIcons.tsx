@@ -7,11 +7,11 @@ type Props = {
 
 export default function SocialIcons({ onIconPress }: Props) {
     if (Platform.OS === 'ios') {
-    console.log('Running on iOS');
+   // console.log('Running on iOS');
   } else if (Platform.OS === 'android') {
-    console.log('Running on Android');
+   // console.log('Running on Android');
   } else {
-    console.log('Running on Web or other');
+   // console.log('Running on Web or other');
   }
   return (
     <View className="flex-row justify-center mb-4 flex-wrap">
@@ -51,9 +51,9 @@ export default function SocialIcons({ onIconPress }: Props) {
       <TouchableOpacity
         className="p-5 rounded-2xl border border-gray-300 mr-4 mb-2"
         onPress={() => onIconPress('apple')}
-      >
+      > 
         <Image
-          source={{ uri: 'https://cdn-icons-png.flaticon.com/512/179/179309.png' }}
+        source={require("../../assets/images/Apple_Logo_1.png")} // 👈 use require for local assets
           style={{ width: 24, height: 24 }}
           resizeMode="contain"
         />

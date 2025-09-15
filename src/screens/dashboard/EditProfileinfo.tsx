@@ -269,8 +269,6 @@ const fetchProfileData = async () => {
       {},
       accessToken ?? ''
     );
-console.log('accccc__' , accessToken);
-
     if (res.status && res.data) {
       setProfile(res.data);
       setsportsdata(res.data.sportUserFormattedData ?? []);
@@ -546,7 +544,7 @@ useEffect(() => {
                               const payload = {
                                   preferred_region: asString ,
                                 };
-                                console.log('payload_', payload);
+                               // console.log('payload_', payload);
                             SaveRequest(payload);
                           
                           }}
@@ -671,7 +669,7 @@ useEffect(() => {
                           "weight": selectedWeight.toString().replace(/[^0-9.]/g, '') ?? '',  
                           "weight_unit" : unit  
                           };
-                          console.log('payload_', payload);
+                          //console.log('payload_', payload);
                            SaveRequest(payload);
 
 
@@ -694,7 +692,7 @@ useEffect(() => {
                           "height": parseHeightToInches(formatted).toString(),  
                           "feet_inches" : "feet_inches"  
                         };
-                        console.log('payload_', payload);
+                       // console.log('payload_', payload);
                       SaveRequest(payload);
               }}
             />
@@ -787,7 +785,7 @@ useEffect(() => {
                       SaveRequest(payload);
 
 
-          console.log('payload_',payload);      
+         // console.log('payload_',payload);      
           }}
         />
 

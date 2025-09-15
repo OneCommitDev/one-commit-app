@@ -18,9 +18,11 @@ import { setItem } from '~/utils/storage';
  export default function EmailAccountPopupsModal({
   visible,
   onClose,
+   onDone,   
 }: {
   visible: boolean;
   onClose: () => void;
+  onDone?: () => void;
 }) {
   const [selected, setSelected] = useState<'gmail' | 'outlook' | null>(null);
   const [selectedTemp, setSelectedTemp] = useState<'gmail' | 'outlook' | null>(null);
@@ -55,9 +57,12 @@ import { setItem } from '~/utils/storage';
           }
         };
 
-    useEffect(() => {
-      loadConnectedEmail();
-    }, []);
+useEffect(() => {
+  if (visible) {
+    loadConnectedEmail();
+  }
+}, [visible]);
+
 
   const { promptAsync: microsoftPrompt, response: microsoftResponse, handleResponse: handleMicrosoftResponse } =
     useMicrosoftEmailConnect([
@@ -162,19 +167,22 @@ import { setItem } from '~/utils/storage';
            accessToken ?? '',
          );
            setLoading(false);
-            setTimeout(() => {
+          
                   if (res.status ) {
             if(res.data.provider === 'Gmail'){
-              setItem(PREF_KEYS.connected_id , res.data.email)
-              setItem(PREF_KEYS.connected_id_provider , "Gmail")
+            await  setItem(PREF_KEYS.connected_id , res.data.email)
+            await  setItem(PREF_KEYS.connected_id_provider , "Gmail")
             }
            else if(res.data.provider === 'Microsoft'){
-                setItem(PREF_KEYS.connected_id , res.data.email)
-              setItem(PREF_KEYS.connected_id_provider , "Outlook")
+             await   setItem(PREF_KEYS.connected_id , res.data.email)
+             await setItem(PREF_KEYS.connected_id_provider , "Outlook")
             } 
-             onClose(); 
+            
          } 
-            } , 100);
+            
+
+             onDone?.();
+             onClose(); 
 
        } catch (err) {
          Alert.alert('Error', 'Unexpected error occurred.');
