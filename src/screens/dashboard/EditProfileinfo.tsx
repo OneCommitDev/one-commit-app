@@ -508,7 +508,8 @@ useEffect(() => {
           /> */}
           <SectionTitle
             title="Academics"
-            showAddButton={!!profile && !(profile.sat_score && profile.act_score)}
+            // showAddButton={!!profile && !(profile.sat_score && profile.act_score)}
+            showAddButton={!!profile && (profile.sat_score != 0 || profile.act_score != 0)}
             onAddPress={() => {
               if (!profile) return; 
 
@@ -703,7 +704,6 @@ useEffect(() => {
                      />
 
             <HeightPickerModal2
-            
               visible={showHeightModal}
               onClose={() => setShowHeightModal(false)}
               initialFeet={parseInt(heightStr.split("'")[0].trim(), 10) || 5}
