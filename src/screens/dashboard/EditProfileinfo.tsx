@@ -26,6 +26,7 @@ import { FeetMeterPickerModal } from "~/components/FeetMetterPickerModal";
 import { stopProfiling } from "@sentry/react-native/dist/js/profiling/integration";
 import Animated, { FadeInDown , FadeOutUp} from "react-native-reanimated";
 import CheckboxModal from "./CheckboxModal";
+import { clearAllPrefss } from "~/utils/storage";
 
  type RootStackParamList = {
   EmailConnectionUI: { selectedGames: string[]; stepToEdit: number };
@@ -94,7 +95,8 @@ const [schoolSizeSelected, setSchoolSizeSelected] = useState<string[]>(["small"]
    const [sportmodalVisible, setSportModalVisible] = useState(false);
    const [sporteventdatasection, setSportsdataSection] = useState<SportUserFormattedData>();
 
- 
+ const heightStr = String(profile?.height || "5'6\"");
+
 
    // Handlers
    /*
@@ -276,6 +278,7 @@ const fetchProfileData = async () => {
       {},
       accessToken ?? ''
     );
+    console.log(res);
     if (res.status && res.data) {
       setProfile(res.data);
       setsportsdata(res.data.sportUserFormattedData ?? []);
@@ -340,6 +343,7 @@ const SaveRequest = async (payload: Record<string, any>) => {
 
 
 useEffect(() => {
+  //clearAllPrefss();
   if (modalVisible) {
     if (!sporteventdata?.eventUnit) {
       setdisUnit("meters"); // default
@@ -402,7 +406,8 @@ useEffect(() => {
         <View className="flex-row flex-wrap justify-between">
         <InfoCard
           label="Height"
-          value={formatInchesToFeetAndInches(Number(profile?.height)) || ''}
+          // value={formatInchesToFeetAndInches(Number(profile?.height)) || ''}
+          value={profile?.height.toString() ?? ''}
           onPressEdit={() => setShowHeightModal(true)}  
         />
 
@@ -698,15 +703,20 @@ useEffect(() => {
                      />
 
             <HeightPickerModal2
+            
               visible={showHeightModal}
               onClose={() => setShowHeightModal(false)}
-              initialFeet={parseInt(formatInchesToFeetAndInches(Number(profile?.height)).toString()?.split("'")[0] || "5", 10)}
-              initialInches={parseInt(formatInchesToFeetAndInches(Number(profile?.height)).toString()?.split("'")[1]?.replace('"', '') || "6", 10)}
+              initialFeet={parseInt(heightStr.split("'")[0].trim(), 10) || 5}
+              initialInches={parseInt((heightStr.split("'")[1] || "6").replace(/"/g, "").trim(), 10) || 6}
+              // initialFeet={parseInt(formatInchesToFeetAndInches(Number(profile?.height)).toString()?.split("'")[0] || "5", 10)}
+              // initialInches={parseInt(formatInchesToFeetAndInches(Number(profile?.height)).toString()?.split("'")[1]?.replace('"', '') || "6", 10)}
               onSave={(feet, inches) => {
                 const formatted = `${feet}'${inches}"`;
+                console.log(formatted);
                 setTimeout(() => setShowHeightModal(false), 50);
                         const payload = {
-                          "height": parseHeightToInches(formatted).toString(),  
+                          // "height": parseHeightToInches(formatted).toString(),  
+                           "height": formatted,  
                           "feet_inches" : "feet_inches"  
                         };
                        // console.log('payload_', payload);

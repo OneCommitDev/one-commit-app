@@ -5,10 +5,11 @@ import qs from 'qs';
 import { PREF_KEYS } from '~/utils/Prefs';
 import Constants from "expo-constants";
 import { parseApiError } from './parseApiError';
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as Application from "expo-application";
 import { getValidAccessToken } from './authService';
-
+import { resetToLogin } from '~/navigation/NavigationService';
+ 
 const { apiUrl, appEnv , xKey , baseImgUrl} = Constants.expoConfig?.extra ?? {};
 export const  base_url_images = baseImgUrl;
 export const base_url =  apiUrl;
@@ -24,17 +25,17 @@ const api = axios.create({
   },
 });
 
-// 👇 Add deviceId dynamically before each request
+//  Add deviceId dynamically before each request
 api.interceptors.request.use(async (config) => {
   let deviceId;
   if (Platform.OS === "android") {
-    deviceId = Application.getAndroidId;
+    deviceId = Application.getAndroidId();
   } else {
     deviceId = await Application.getIosIdForVendorAsync();
   }
     config.headers["app-device-id"] = deviceId;   
   //  config.headers.device_ = deviceId;
-  //  console.log("➡️ Request Headers:", config.headers);
+  //  console.log(" Request Headers:", config.headers);
   return config;
 });
 export default api;
@@ -269,13 +270,26 @@ export async function httpRequest_social_token<T>(
     return response.data;
     
   } catch (error: any) {
-  console.log('❌ HTTP error', {
-  message: error.message,
-  response: error.response,
-  request: error.request,
-  config: error.config,
-  
-}); 
+    console.log('❌ HTTP error', {
+    message: error.message,
+    response: error.response,
+    request: error.request,
+    config: error.config,
+    
+  }); 
+    // Handle invalid/expired token
+    if (
+      error?.response?.status === 401 &&
+       error?.response?.data?.message === "Invalid token" ||
+    error?.response?.data?.message === "Access token missing or invalid"
+    ) {
+      // Alert.alert("Session expired", "Please login again.", [
+      //   {
+      //     text: "OK",
+      //   onPress: () => resetToLogin(),
+      //   },
+      // ]);
+    }
 
     const fallback: T = {
       status: false,

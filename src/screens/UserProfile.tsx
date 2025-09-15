@@ -141,7 +141,8 @@ type CityState = { city: string; state: string } | null;
     ? `${parseFloat(res.data.weight).toFixed(1)} ${res.data.weight_unit}`
     : '',
 
-            heightis: res.data?.height  ? formatInchesToFeetAndInches(Number(res.data.height)) : '',
+            // heightis: res.data?.height  ? formatInchesToFeetAndInches(Number(res.data.height)) : '',
+             heightis: res.data?.height,
             height_unit: res.data?.height_unit ?? 'inch',
             weight_unit: res.data?.weight_unit ?? 'lbs',
           }));
@@ -176,7 +177,8 @@ type CityState = { city: string; state: string } | null;
         gender: form.gender.toLowerCase(),
         weight: form.weightis?.toString().replace(/[^0-9.]/g, '') ?? '',
         weight_unit: form.weight_unit ?? '',
-        height: form.heightis ? parseHeightToInches(form.heightis).toString() : '',  // 👈
+        // height: form.heightis ? parseHeightToInches(form.heightis).toString() : '', 
+         height: form.heightis, 
         height_unit: form.height_unit ?? '',
           // ...(form.preferredName ? { preferred_name: form.preferredName } : {}),  
 
@@ -627,7 +629,7 @@ const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
           visible={showHeightModal}
           onClose={() => setShowHeightModal(false)}
           initialFeet={parseInt(form.heightis?.split("'")[0] || "5", 10)}
-          initialInches={parseInt(form.heightis?.split("'")[1]?.replace('"', '') || "6", 10)}
+          initialInches={parseInt(form.heightis?.split("'")[1]?.replace('"', '') || "5", 10)}
           onSave={(feet, inches) => {
             const formatted = `${feet}'${inches}"`;
             setForm((prev) => ({

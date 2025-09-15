@@ -95,13 +95,11 @@ if (typeis === 'register_verify' || typeis === 'login_verify') {
   };
 
 
-
+/*
  const OTP_Verification = async () => {
   try {
     setLoading(true);
-   // logAllPrefs();
-
-    const email = await getItem(PREF_KEYS.registerEmail); // ✅ get actual value
+    const email = await getItem(PREF_KEYS.registerEmail);  
     const accessToken = await getItem(PREF_KEYS.accessToken);
     
     const requestBody: RegisterOTPRequest = {
@@ -123,7 +121,6 @@ if (typeis === 'register_verify' || typeis === 'login_verify') {
         navigation.navigate('UserProfile');
       } 
      else if (typeis === 'register_verify' || typeis === 'login_verify') {
-       // navigation.navigate('Login');
         navigation.navigate('Success', {
           message: 'User Verified Successfully!',
         });
@@ -140,7 +137,47 @@ if (typeis === 'register_verify' || typeis === 'login_verify') {
     setLoading(false);
   }
 };
+*/
 
+
+  const OTP_Verification = async () => {
+    try {
+      setLoading(true);
+    const email = await getItem(PREF_KEYS.registerEmail);  
+      const accessToken = await getItem(PREF_KEYS.accessToken);
+        const requestBody: RegisterOTPRequest = {
+        email: email ?? '',
+        code: otp, 
+      };
+
+      const res = await httpRequest2<RegisterOTPResponse>(
+        Api_Url.verifyUser,    'post',    requestBody,    accessToken ?? '' 
+      );
+  if (res.status) {
+      setLoading(false);
+        await removeItem(PREF_KEYS.register_redirect);
+        await setItem(PREF_KEYS.userVerification, 'success');
+          if (typeis === 'login_verify') {
+          navigation.navigate('UserProfile');
+        } 
+      else if (typeis === 'register_verify' || typeis === 'login_verify') {
+          navigation.navigate('Success', {
+            message: 'User Verified Successfully!',
+          });
+        } else {
+          navigation.navigate('ResetPasswordScreen', { userid: '' });
+        }
+
+
+      } else {
+        Alert.alert('Error', res.message ?? 'Login failed');
+      }
+    } catch (err) {
+    Alert.alert('Error', 'Unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
  
 const ForgotPasswordEmailVerification = async () => {
   try {
@@ -174,7 +211,7 @@ const ResenedOTPcall = async (resendurl: string, requestBody: any) => {
   try {
     setLoading(true);
     const res = await httpRequest2<SimpleResponse>(
-      resendurl,    'post',    requestBody,    undefined,   true // 👈 for form-url-encoded
+      resendurl,    'post',    requestBody,    undefined,   true // for form-url-encoded
     );
 
     if (res.status ) {
