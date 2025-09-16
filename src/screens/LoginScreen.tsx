@@ -31,7 +31,7 @@ import {  GoogleSignin,  GoogleSigninButton,  isErrorWithCode,  isSuccessRespons
 import { APP_CONFIG_GOOGLE, APP_CONFIG_MICROSOFT } from '~/utils/constants';
 
 
-WebBrowser.maybeCompleteAuthSession();
+// WebBrowser.maybeCompleteAuthSession();
 
 GoogleSignin.configure({
     scopes: APP_CONFIG_GOOGLE.emailLoginScopes,
@@ -96,7 +96,7 @@ const GooglesignInApp = async () => {
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
           break;
         default:
-          console.log('Sign-in error full:', JSON.stringify(error, null, 2));
+         // console.log('Sign-in error full:', JSON.stringify(error, null, 2));
       }
     } else {
       //console.log('Unknown error:', error);
@@ -106,12 +106,12 @@ const GooglesignInApp = async () => {
 
 useEffect(() => {
   (async () => {
-    const microsoftData = await handleMicrosoftResponse();
+    const microsoftData = await handleMicrosoftResponse(); 
     if (microsoftData?.code) {
       const codeVerifier = microsoftData;
-       console.log("microsoftData.codee", microsoftData.code);
-      console.log("codeVerifier", request?.codeVerifier);
-      console.log('🪟 Microsoft Code:', microsoftData.code);
+     //  console.log("microsoftData.codee", microsoftData.code);
+    //  console.log("codeVerifier", request?.codeVerifier);
+     // console.log('🪟 Microsoft Code:', microsoftData.code);
       setItem('microsoftCode', microsoftData.code);
     await  SocialLoginRequestVerifyTokens(microsoftData.code , Api_Url.microsoft_token );
     }
@@ -222,9 +222,8 @@ useEffect(() => {
           Api_Url.check_emailid,    'post',    {email},    undefined,   true 
         );
 
-        console.log(res);
         if (res.status && res.registration_status) {
-           if(res.registration_status.status === 'social_registered' || res.registration_status.status === 'not_registered'){   
+           if(res.registration_status.status === 'social_registered' || res.registration_status.status === 'not_registered' || res.registration_status.status === 'inactive'){   
                Alert.alert('Error', res.message);
            }
            else{
@@ -298,7 +297,6 @@ const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string
       undefined,
       true
     );
-
      setLoading(false);
     if (res.data?.accessToken) {
       await setItem(PREF_KEYS.login_status, 'success');
@@ -315,7 +313,7 @@ const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string
            navigation.navigate('UserProfile' , {src : ''});
         }
     } else {
-      Alert.alert('Error',  'Login failed');
+      Alert.alert('Login failed',  res.message);
     }
   } catch (err) {
     Alert.alert('Error', 'Unexpected error occurred.');

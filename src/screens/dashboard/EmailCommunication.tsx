@@ -66,6 +66,8 @@ const opacityAnim = useRef(new Animated.Value(0)).current; // hidden at start
         {},
         accessToken ?? ''
       );
+
+      console.log(res);
       if (res.status && res.data) {
         setschooldetails(res.data.school_details);
         setemails(res.data.communication_history);

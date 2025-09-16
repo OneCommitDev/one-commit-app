@@ -350,31 +350,31 @@ export async function resetFCMToken() {
 
         // Delete token
         await deleteToken(messaging);
-    console.log('🗑️ FCM token deleted');
+   // console.log('🗑️ FCM token deleted');
 
     // 2. Re-generate new token
 const newToken = await getToken(messaging);
-    console.log('🔁 New FCM token:', newToken);
+   // console.log('🔁 New FCM token:', newToken);
     setItem(PREF_KEYS.fcmToken , newToken);
 
     // (Optional) Save newToken to your server or local storage
     return newToken;
   } catch (error) {
-    console.error('❌ Error resetting FCM token:', error);
+    //console.error('❌ Error resetting FCM token:', error);
   }
 }
 
 
 export async function getFCMToken() {
   try {
-    const token = await messaging().getToken();
-    console.log('FCM Token:', token);
+    const token = await messaging().getToken(); 
+   // console.log('FCM Token:', token);
 
     await setItem(PREF_KEYS.fcmToken, token); // ensure async storage is awaited
-    return token; // ✅ Return token on success
+    return token; //  
   } catch (error) {
-    console.error('Error getting FCM token:', error);
-    return null; // ✅ Return null on failure
+   // console.error('Error getting FCM token:', error);
+    return null; // 
   }
 }
 

@@ -1,6 +1,5 @@
 // storage.ts (new)
 import * as SecureStore from 'expo-secure-store';
-import { clearAllPrefs } from './Prefs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PREF_KEYS } from '~/utils/Prefs';
 
@@ -8,7 +7,7 @@ import { PREF_KEYS } from '~/utils/Prefs';
 export const setItem = async (key: string, value: string | number | boolean | object) => {
   const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
   await SecureStore.setItemAsync(key, stringValue);
-};
+}; 
 
 
 export const getItem = async (key: string): Promise<string | null> => {
@@ -39,12 +38,12 @@ export async function clearKeychainOnFirstRun() {
     const firstRun = await AsyncStorage.getItem(FIRST_RUN_FLAG);
 
     if (!firstRun) {
-      console.log('🆕 Fresh install detected → clearing SecureStore');
+     // console.log('🆕 Fresh install detected → clearing SecureStore');
        await clearAllPrefss();
 
       await AsyncStorage.setItem(FIRST_RUN_FLAG, 'true');
     }
   } catch (error) {
-    console.error('❌ Error in clearKeychainOnFirstRun:', error);
+   // console.error('❌ Error in clearKeychainOnFirstRun:', error);
   }
 }

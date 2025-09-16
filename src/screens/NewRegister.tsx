@@ -210,7 +210,7 @@ const SocialLoginRequestVerifyTokens = async (authCode: string, api_url : string
                navigation.navigate('UserProfile' , {src : ''});
             }
         } else {
-          Alert.alert('Error',  'Login failed');
+          Alert.alert('Login failed',  res.message);
         }
       } catch (err) {
          setLoading(false);

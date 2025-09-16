@@ -12,7 +12,7 @@ import { NavigationProp, RouteProp, useNavigation, useRoute } from '@react-navig
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '~/navigation/types';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { clearAllPrefs, PREF_KEYS } from '~/utils/Prefs';
+import {  PREF_KEYS } from '~/utils/Prefs';
 import { Api_Url, CreateProfileRequest, httpRequest2 } from '~/services/serviceRequest';
 import { ProfileResponse, ProfileSaveResponse, SimpleResponse } from '~/services/DataModals';
 import Loader from '~/components/Loader';
@@ -27,34 +27,32 @@ import CustomDualPicker, { weightValues_kg, weightValues_lb } from '~/components
 import { CustomDualPickerModal } from '~/components/CustomDualPickerModal';
 import { HeightPickerModal2 } from '~/components/HeightPickerModal2';
 import TitleText from '~/components/TitleText';
-import { setItem } from '~/utils/storage';
+import { clearAllPrefss, setItem } from '~/utils/storage';
 
  
 type ProfileScreenRouteProp = RouteProp<RootStackParamList, 'UserProfile'>;
 
 export default function ProfileScreen() {
- const navigation_0 = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
+const navigation_0 = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 const route = useRoute<ProfileScreenRouteProp>();
-  const { src } = route.params;
-
+const { src } = route.params;
 const [showAndroidPicker, setShowAndroidPicker] = useState(false);
 const [genderType, setGenderType] = useState<'Male' | 'Female'>('Male');
 const [loading, setLoading] = useState(false);
 const [showWeightModal, setShowWeightModal] = useState(false);
 const [showHeightModal, setShowHeightModal] = useState(false);
+const [selectedUnit, setSelectedUnit] = useState<'kg' | 'lbs'>('lbs');
+const [highlightedKgIndex, setHighlightedKgIndex] = useState(50);
+const [highlightedLbIndex, setHighlightedLbIndex] = useState(90);
+const [tempWeightValue, setTempWeightValue] = useState('');
+const [tempWeightUnit, setTempWeightUnit] = useState<'kg' | 'lbs'>('lbs');
+const [pickerVisible, setPickerVisible] = useState(false);
+const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs');  
+const [dobTemp, setDobTemp] = useState(new Date());
+const [showDatePickerModal, setShowDatePickerModal] = useState(false);
+const screenWidth = Dimensions.get('window').width;
 type CityState = { city: string; state: string } | null;
-
-  const handleBack = () => {
-    if(src === ''){
-      navigation_0.replace('Login');
-      clearAllPrefs();
-    }else{
-      navigation.goBack();
-    }
-  };
-
   const [form, setForm] = useState({
       fullName: '',
       preferredName: '',
@@ -71,8 +69,17 @@ type CityState = { city: string; state: string } | null;
       height_unit: '',  
   });
 
-  const [dobTemp, setDobTemp] = useState(new Date());
-  const [showDatePickerModal, setShowDatePickerModal] = useState(false);
+  const handleBack = () => {
+    if(src === ''){
+      navigation_0.replace('Login');
+      clearAllPrefss();
+    }else{
+      navigation.goBack();
+    }
+  };
+
+
+
 
   const handleChange = (key: keyof typeof form, value: any) => {
     setForm({ ...form, [key]: value });
@@ -107,9 +114,8 @@ type CityState = { city: string; state: string } | null;
         const email = await getItem(PREF_KEYS.userEmailID);
         const userId = await getItem(PREF_KEYS.userId);
         const accessToken = await getItem(PREF_KEYS.accessToken);
-
-
         const profileUrl = Api_Url.userProfile(userId ?? '', email ?? '');
+
         const res = await httpRequest2<ProfileResponse>(
           profileUrl,
           'get',
@@ -135,7 +141,8 @@ type CityState = { city: string; state: string } | null;
     ? `${parseFloat(res.data.weight).toFixed(1)} ${res.data.weight_unit}`
     : '',
 
-            heightis: res.data?.height  ? formatInchesToFeetAndInches(Number(res.data.height)) : '',
+            // heightis: res.data?.height  ? formatInchesToFeetAndInches(Number(res.data.height)) : '',
+             heightis: res.data?.height,
             height_unit: res.data?.height_unit ?? 'inch',
             weight_unit: res.data?.weight_unit ?? 'lbs',
           }));
@@ -170,7 +177,8 @@ type CityState = { city: string; state: string } | null;
         gender: form.gender.toLowerCase(),
         weight: form.weightis?.toString().replace(/[^0-9.]/g, '') ?? '',
         weight_unit: form.weight_unit ?? '',
-        height: form.heightis ? parseHeightToInches(form.heightis).toString() : '',  // 👈
+        // height: form.heightis ? parseHeightToInches(form.heightis).toString() : '', 
+         height: form.heightis, 
         height_unit: form.height_unit ?? '',
           // ...(form.preferredName ? { preferred_name: form.preferredName } : {}),  
 
@@ -220,7 +228,6 @@ type CityState = { city: string; state: string } | null;
 useEffect(() => {
   const fillFormDefaults = async () => {
     const email = await getItem(PREF_KEYS.userEmailID);
-
     setForm((prev) => ({
       ...prev,
       email: email || '',
@@ -229,7 +236,6 @@ useEffect(() => {
   };
 
   fillFormDefaults();
-  fcmTokenSavingAPi();
 }, []);
 
 const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
@@ -256,55 +262,37 @@ const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
     return null;
   }
 };
-
-const screenWidth = Dimensions.get('window').width;
-
- const [selectedUnit, setSelectedUnit] = useState<'kg' | 'lbs'>('lbs');
-  const [highlightedKgIndex, setHighlightedKgIndex] = useState(50);
-  const [highlightedLbIndex, setHighlightedLbIndex] = useState(90);
-  const [tempWeightValue, setTempWeightValue] = useState('');
-const [tempWeightUnit, setTempWeightUnit] = useState<'kg' | 'lbs'>('lbs');
-
   const getSelectedValue = () => {
     return selectedUnit === 'kg'
       ? `${weightValues_kg[highlightedKgIndex]} kg`
       : `${weightValues_lb[highlightedLbIndex]} lbs`;
   };
-
-
-  const [pickerVisible, setPickerVisible] = useState(false);
-const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs'); // ✅ default is lbs
-const [fcmToken, setFcmToken] = useState('');
-  useEffect(() => {
+   useEffect(() => {
       (async () => {
         const token = await getFCMToken();
         if (token) {
-          console.log("Got FCM token:", token);
-          setFcmToken(token);
+        // console.log("Got FCM token:", token);
+          await  fcmTokenSavingAPi(token);
         } else {
-          console.log("Failed to get FCM token");
+        //  console.log("Failed to get FCM token");
         }
       })();
     }, []);
 
-  const fcmTokenSavingAPi = async () => {
+  const fcmTokenSavingAPi = async (tokenis : string) => {
     try {
       const accessToken = await getItem(PREF_KEYS.accessToken);
-     // const fcm = await getItem(PREF_KEYS.fcmToken);
-      const url = Api_Url.fcmTokenAPI;
-
-      await getFCMToken();
-
-      const res = await httpRequest2<SimpleResponse>(
-        url,
+      let payload =  { fcmToken: tokenis };
+       const res = await httpRequest2<SimpleResponse>(
+        Api_Url.fcmTokenAPI,
         'post',
-        { fcmToken: fcmToken },
+        payload,
         accessToken ?? '',
         true
       );
 
     } catch (err) {
-      Alert.alert('Error', 'Unexpected error occurred.');
+      
     }
   };
 
@@ -641,7 +629,7 @@ const [fcmToken, setFcmToken] = useState('');
           visible={showHeightModal}
           onClose={() => setShowHeightModal(false)}
           initialFeet={parseInt(form.heightis?.split("'")[0] || "5", 10)}
-          initialInches={parseInt(form.heightis?.split("'")[1]?.replace('"', '') || "6", 10)}
+          initialInches={parseInt(form.heightis?.split("'")[1]?.replace('"', '') || "5", 10)}
           onSave={(feet, inches) => {
             const formatted = `${feet}'${inches}"`;
             setForm((prev) => ({

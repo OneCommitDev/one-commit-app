@@ -34,7 +34,7 @@ export default ({ config }) => ({
     },
   name: 'OneCommit',
   slug: 'OneCommit',
-  scheme: "OneCommit",
+  scheme: "us.onecommit.app",
   version: '1.0.0',
   orientation: 'portrait',
   userInterfaceStyle: 'light',
@@ -93,13 +93,13 @@ export default ({ config }) => ({
     infoPlist: {
      NSUserTrackingUsageDescription: 'This identifier will be used to deliver personalized ads to you.',
       NSAppTransportSecurity: {
-      NSAllowsArbitraryLoads: true,
-      NSExceptionDomains: {
-      'ec2-18-218-15-226.us-east-2.compute.amazonaws.com': {
-        NSExceptionAllowsInsecureHTTPLoads: true,
-        NSIncludesSubdomains: true,
-      },
-    },
+      NSAllowsArbitraryLoads: false,
+    //   NSExceptionDomains: {
+    //   'ec2-18-218-15-226.us-east-2.compute.amazonaws.com': {
+    //     NSExceptionAllowsInsecureHTTPLoads: true,
+    //     NSIncludesSubdomains: true,
+    //   },
+    // },
     },
         NSPushNotificationUsageDescription: 'This app uses notifications to keep you updated.',
         UIBackgroundModes: ['fetch', 'remote-notification'],

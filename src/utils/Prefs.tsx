@@ -1,5 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-import { getItem, removeItem, setItem } from './storage';
+// import { getItem, removeItem, setItem } from './storage';
 import { Alert } from 'react-native';
 
 export const PREF_KEYS = {
@@ -28,12 +28,12 @@ export const logAllPrefs = async () => {
   const keys = Object.values(PREF_KEYS);
   for (const key of keys) {
     const value = await SecureStore.getItemAsync(key);
-    console.log(`${key}:`, value);
+   // console.log(`${key}:`, value);
   }
 };
 
 // below func are for development purpose only
-
+/*
 export const clearAllPrefs = async () => {
   const fcmToken = getItem(PREF_KEYS.fcmToken);
   const keys = Object.values(PREF_KEYS); 
@@ -46,7 +46,7 @@ export const clearAllPrefs = async () => {
   }
   // Alert.alert("All PREF_KEYS cleared"); 
 };
-
+*/
 
 export const MessagesText ={
   School_Size_MSG :     '• Small: 100 – 20,000 students\n• Medium: 20,001 – 40,000 students\n• Large: 40,001 – 60,000+ students',

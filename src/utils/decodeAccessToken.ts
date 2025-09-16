@@ -4,8 +4,10 @@ import { Api_Url,  httpRequest2, TokenRequest } from "~/services/serviceRequest"
 import { Applog, Applogerror } from "./logger";
 import { LoginResponse, TokenResponse } from "~/services/DataModals";
 import Constants from "expo-constants";
+import {  resetToLogin } from "~/navigation/NavigationService";
+import { clearAllPrefss } from "./storage";
 const { apiUrl, appEnv , xKey , baseImgUrl} = Constants.expoConfig?.extra ?? {};
-
+ 
 export const decodeAccessToken = (token: string) => {
   try {
     const [, payloadBase64] = token.split('.');
@@ -15,7 +17,7 @@ export const decodeAccessToken = (token: string) => {
     const decodedPayload = atob(payloadBase64);
     return JSON.parse(decodedPayload);
   } catch (error) {
-    Applogerror('Failed to decode access token:', error)
+   // Applogerror('Failed to decode access token:', error)
     return null;
   }
 };
@@ -59,6 +61,9 @@ export const isTokenExpiringSoon = (token: string, bufferSeconds = 86400): boole
       await setItem(PREF_KEYS.accessToken, result.data.accessToken);
       await setItem(PREF_KEYS.refreshToken, result.data.refreshToken);
       return result.data.accessToken;
+    }else{
+      clearAllPrefss();
+        resetToLogin();  
     }
 
     return null;
@@ -78,7 +83,7 @@ export const getValidAccessToken = async (): Promise<string | null> => {
   let accessToken = await getItem(PREF_KEYS.accessToken);
   if (isTokenExpiringSoon(accessToken!)) {
      accessToken = await refreshAccessToken();
-        Applog("Access token expired or about to expire. Refreshing...");
+         Applog("Access token expired or about to expire. Refreshing...");
   }
   return accessToken;
 };
