@@ -56,7 +56,7 @@ export default function EmailDetails({
         'post',
         {
           message_id: emaildata.email_id,
-          provider: 'Gmail',
+          provider: emaildata.provider,
         },
         accessToken ?? ''
       );
