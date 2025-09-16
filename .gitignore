@@ -33,6 +33,8 @@ metro-cache/
 # VSCode
 .vscode/
 
+__tests__/
+
 # macOS
 *.swp
 .idea/
