@@ -7,12 +7,17 @@ import {
   Modal,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getItem } from "~/utils/storage";
 import { PREF_KEYS } from "~/utils/Prefs";
 import { Api_Url, httpRequest2 } from "~/services/serviceRequest";
-import { EventsResponse, HoldSportsdata, SavedSportResponse } from "~/services/DataModals";
+import {
+  EventsResponse,
+  HoldSportsdata,
+  SavedSportResponse,
+} from "~/services/DataModals";
 import AppText from "~/components/AppText";
 import { capitalizeWords } from "~/utils/AppFunctions";
 import TitleText from "~/components/TitleText";
@@ -27,7 +32,7 @@ export default function CheckboxModal({
 }: {
   visible: boolean;
   onClose: () => void;
-  onSelect: (selectedData: any[]) => void; // send full mapped data
+  onSelect: (selectedData: any[]) => void;
   sportName?: string;
   sportId: string;
 }) {
@@ -56,6 +61,7 @@ export default function CheckboxModal({
             ...event,
             sport_id: sportId,
             selected: event.user_selected === "1",
+            disabled: event.user_selected === "1",
           }));
 
           setEvents(parsedEvents);
@@ -76,7 +82,11 @@ export default function CheckboxModal({
   const toggleItem = (id: string) => {
     setEvents((prev) =>
       prev.map((e) =>
-        e.event_id === id ? { ...e, selected: !e.selected } : e
+        e.event_id === id
+          ? e.disabled
+            ? e
+            : { ...e, selected: !e.selected }
+          : e
       )
     );
   };
@@ -99,9 +109,7 @@ export default function CheckboxModal({
 
     console.log("✅ Final selected events:", mappedData);
 
-    // Pass mapped data to parent
     handleSubmit(mappedData);
-   
   };
 
   // Search filter
@@ -109,50 +117,43 @@ export default function CheckboxModal({
     item.display_name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-
   const handleSubmit = async (allData: any[]) => {
     try {
       setLoading(true);
       const accessToken = await getItem(PREF_KEYS.accessToken);
 
-            if (allData.length === 0) {
-                Alert.alert('Error', 'No valid events selected.');
-                return;
-            }
+      if (allData.length === 0) {
+        Alert.alert("Error", "No valid events selected.");
+        return;
+      }
 
-            const payload = {
-                    sports_profile: JSON.stringify(allData),
-            };
-  
-            const res = await httpRequest2<SavedSportResponse>(
-                Api_Url.save_sports,
-                'post',
-                payload,
-                accessToken ?? '',
-                true
-            );
-            console.log(res);
-            if (res.status) {
-                    setLoading(false);
-                setTimeout(() => {
-                     onSelect(allData);
-    onClose();
-                }, 500);
-        
-            } else {
-                Alert.alert('Error', res.message ?? 'Failed to submit.');
-            }
-            } catch (err) {
-            Alert.alert('Error', 'Unexpected error occurred.');
-            } finally {
-            setLoading(false);
-            }
+      const payload = {
+        sports_profile: JSON.stringify(allData),
+      };
+
+      const res = await httpRequest2<SavedSportResponse>(
+        Api_Url.save_sports,
+        "post",
+        payload,
+        accessToken ?? "",
+        true
+      );
+      console.log(res);
+      if (res.status) {
+        setLoading(false);
+        setTimeout(() => {
+          onSelect(allData);
+          onClose();
+        }, 100);
+      } else {
+        Alert.alert("Error", res.message ?? "Failed to submit.");
+      }
+    } catch (err) {
+      Alert.alert("Error", "Unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
   };
-
-
-
-
-
 
   return (
     <Modal
@@ -172,27 +173,32 @@ export default function CheckboxModal({
           </View>
 
           {/* Search Bar */}
-          <View className="flex-row items-center bg-gray-200 rounded-lg px-3 py-2 mb-3 mt-5">
-            <Ionicons name="search" size={20} color="#999" className="mr-2" />
-            <TextInput
-              placeholder="Search..."
-              value={searchText}
-              onChangeText={setSearchText}
-              className="flex-1 text-base text-gray-800"
-              placeholderTextColor="#999"
-            />
-            {searchText.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchText("")}>
-                <Ionicons name="close-circle" size={20} color="#999" />
-              </TouchableOpacity>
-            )}
-          </View>
+          {!loading && (
+            <View className="flex-row items-center bg-gray-200 rounded-lg px-3 py-2 mb-3 mt-5">
+              <Ionicons name="search" size={20} color="#999" />
+              <TextInput
+                placeholder="Search..."
+                value={searchText}
+                onChangeText={setSearchText}
+                className="flex-1 text-base text-gray-800 ml-2"
+                placeholderTextColor="#999"
+              />
+              {searchText.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchText("")}>
+                  <Ionicons name="close-circle" size={20} color="#999" />
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
 
-          {/* List */}
+          {/* List or Loader */}
           <View className="flex-1 min-h-[200px]">
             {loading ? (
-              <View className="h-[200px] justify-center items-center">
-                <Text className="text-gray-400 text-base">Loading...</Text>
+              <View className="flex-1 justify-center items-center">
+                <ActivityIndicator size="large" color="#235D48" />
+                <Text className="text-gray-400 text-base mt-3">
+                  Loading...
+                </Text>
               </View>
             ) : (
               <FlatList
@@ -205,41 +211,45 @@ export default function CheckboxModal({
                     </Text>
                   </View>
                 }
-                renderItem={({ item }) => {
-                  return (
-                    <TouchableOpacity
-                      className="flex-row justify-between items-center py-3 border-b border-gray-200"
-                      onPress={() => toggleItem(item.event_id)}
-                    >
-                      <View className="flex-1 mr-3">
-                        <AppText>{item.display_name}</AppText>
-                      </View>
-                      <View className="mr-4">
-                        {item.selected ? (
-                          <Ionicons
-                            name="checkbox"
-                            size={24}
-                            color="#235D48"
-                          />
-                        ) : (
-                          <Ionicons
-                            name="checkbox-outline"
-                            size={24}
-                            color="#DBDBDB"
-                          />
-                        )}
-                      </View>
-                    </TouchableOpacity>
-                  );
-                }}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    disabled={item.disabled}
+                    className="flex-row justify-between items-center py-3 border-b border-gray-200"
+                    onPress={() => toggleItem(item.event_id)}
+                  >
+                    <View className="flex-1 mr-3">
+                      <AppText>
+                        {item.display_name}{" "}
+                        {item.disabled ? "(Locked)" : ""}
+                      </AppText>
+                    </View>
+                    <View className="mr-4">
+                      {item.selected ? (
+                        <Ionicons
+                          name={item.disabled ? "checkbox" : "checkbox"}
+                          size={24}
+                          color={item.disabled ? "#999" : "#235D48"}
+                        />
+                      ) : (
+                        <Ionicons
+                          name="checkbox-outline"
+                          size={24}
+                          color="#DBDBDB"
+                        />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                )}
               />
             )}
           </View>
 
           {/* Footer Buttons */}
-          <View className="w-full justify-end mt-6 mb-10">
-            <ArrowButton text={"Proceed"} fullWidth onPress={handleDone} />
-          </View>
+          {!loading && (
+            <View className="w-full justify-end mt-6 mb-10">
+              <ArrowButton text={"Proceed"} fullWidth onPress={handleDone} />
+            </View>
+          )}
         </View>
       </View>
     </Modal>

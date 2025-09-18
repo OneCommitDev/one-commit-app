@@ -112,7 +112,7 @@ export default function PasswordScreen() {
         if (getResponse.status == true) {
           navigation.navigate('OtpVerification', {
                     method: 'email',
-                    value: '',
+                    value: email,
                     typeis: 'register_verify',
                   });
         } 

@@ -20,6 +20,7 @@ import { PREF_KEYS } from '~/utils/Prefs';
 import { Api_Url, httpRequest2 } from '~/services/serviceRequest';
 import {
   CommunicationHistory,
+  email_conn_data,
   Emaildatamodal,
   school_details,
 } from '~/services/DataModals';
@@ -47,6 +48,7 @@ const EmailCommunication = () => {
   const [sheetData, setSheetData] = useState({ reply_type: '' });
   const [showSuccess, setShowSuccess] = useState(false);
   const [selectedEmailId, setSelectedEmailId] = useState<CommunicationHistory | null>(null);
+ 
   const [sheetemilVisible, setemailSheetVisible] = useState(false);
 
   const slideAnim = useRef(new Animated.Value(100)).current; // start lower (off-screen)
@@ -60,6 +62,7 @@ const opacityAnim = useRef(new Animated.Value(0)).current; // hidden at start
       setLoading(true);
       const accessToken = await getItem(PREF_KEYS.accessToken);
       const url = Api_Url.dashboardDetails(id);
+      console.log(url);
       const res = await httpRequest2<Emaildatamodal>(
         url,
         'get',
@@ -67,10 +70,20 @@ const opacityAnim = useRef(new Animated.Value(0)).current; // hidden at start
         accessToken ?? ''
       );
 
-      console.log(res);
+      
       if (res.status && res.data) {
         setschooldetails(res.data.school_details);
-        setemails(res.data.communication_history);
+       // setemails(res.data.communication_history);
+       const provider = res.email_conn_data?.provider ?? "";
+       const updatedHistory = res.data.communication_history.map(
+        (item: CommunicationHistory) => ({
+          ...item,
+          provider, // add provider field manually
+        })
+      );
+      setemails(updatedHistory);
+ 
+
           Animated.parallel([
     Animated.spring(slideAnim, {
       toValue: 0,

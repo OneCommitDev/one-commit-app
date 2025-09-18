@@ -20,9 +20,10 @@ import { clearKeychainOnFirstRun, getItem } from '~/utils/storage';
 import NetworkProvider, { NetworkContext } from '~/utils/NetworkProvider';
 import OfflineScreen from '~/components/OfflineScreen';
 import { GlobalErrorBoundary } from '~/services/GlobalErrorBoundary';
+import { navigationRef } from "~/navigation/NavigationService";
 
 // ✅ Global navigation ref (use only once)
-export const navigationRef = createNavigationContainerRef<RootStackParamList>();
+// export const navigationRef = createNavigationContainerRef<RootStackParamList>(); // if got issue then remove thsi line comment and remove the import { navigationRef } from "~/navigation/NavigationService";
 
 // ✅ Sentry setup
 Sentry.init({
@@ -71,20 +72,40 @@ export function initFirebase() {
 // ✅ Background handler
 messaging().setBackgroundMessageHandler(async () => {});
 
-async function setupNotifications() {
+ async function setupNotifications() {
   const app = getApp();
   const messagingInstance = getMessaging(app);
+
+  // 1. Request permission
   const authStatus = await requestPermission(messagingInstance);
 
-  if (
+  const enabled =
     authStatus === AuthorizationStatus.AUTHORIZED ||
-    authStatus === AuthorizationStatus.PROVISIONAL
-  ) {
-    const token = await getToken(messagingInstance);
-   // console.log(token);
-    await setItem(PREF_KEYS.fcmToken, token);
+    authStatus === AuthorizationStatus.PROVISIONAL;
+
+  if (!enabled) {
+    console.warn("⚠️ Push notification permission not granted");
+    return;
   }
+
+  // 2. Try to fetch token (Android will succeed, iOS might fail initially)
+  try {
+    const token = await getToken(messagingInstance);
+    if (token) {
+      console.log("📲 Got FCM token immediately:", token);
+      await setItem(PREF_KEYS.fcmToken, token);
+    }
+  } catch (err) {
+    console.warn("⚠️ Could not get FCM token immediately, waiting for refresh...", err);
+  }
+
+  // 3. Listen for token refresh (this works reliably on iOS after APNs is ready)
+  messaging().onTokenRefresh(async (newToken) => {
+    console.log("🔄 FCM token refreshed:", newToken);
+    await setItem(PREF_KEYS.fcmToken, newToken);
+  });
 }
+
 
 async function handleNotificationNavigation(remoteMessage: any) {
   if (!remoteMessage?.data?.screen) return;
@@ -128,9 +149,9 @@ export default Sentry.wrap(function App() {
   const handleRetry = () => setReloadKey((prev) => prev + 1);
 
   useEffect(() => {
-    clearKeychainOnFirstRun();
+       setupNotifications();
+
     initFirebase();
-    setupNotifications();
 
     const unsubscribe = onMessage(getMessaging(getApp()), async () => {});
 

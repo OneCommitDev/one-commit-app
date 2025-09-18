@@ -76,7 +76,7 @@ const GooglesignInApp = async () => {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn() as any;
       const tokens = await GoogleSignin.getTokens(); // Get access & id token
-      //console.log('FULL userInfo:', JSON.stringify(userInfo, null, 2));
+      console.log('FULL userInfo:', JSON.stringify(userInfo, null, 2));
       const serverAuthCode = userInfo.data.serverAuthCode ?? userInfo.data.user?.serverAuthCode;
      
     // Save details
@@ -274,7 +274,7 @@ if (res.status && res.data) {
            navigation.replace('FillProfileInfoScreen');
         }
     } else {
-      Alert.alert('Error', res.message ?? 'Login failed');
+     // Alert.alert('Error', res.message ?? 'Login failed');
     }
   } catch (err) {
    Alert.alert('Error', 'Unexpected error occurred.');

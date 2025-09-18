@@ -11,7 +11,7 @@ export const decodeAccessToken = (token: string) => {
     return null;
   }
 };
-
+// 86400
 export const isTokenExpiringSoon = (token: string, bufferSeconds = 86400): boolean => {
   const decoded = decodeAccessToken(token);
   if (!decoded?.exp) return true;

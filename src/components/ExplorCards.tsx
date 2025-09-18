@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { SchoolMatchItem } from '~/services/DataModals';
@@ -114,48 +114,64 @@ const ExplorCards: React.FC<Props> = ({
                 </View>
               )}
 
-              {selectedTab === 0 && item.match_criteria?.academic_fit && (
-                <View className="px-2 space-y-2">
-                  <PerformanceBar
-                    title="GPA:"
-                    score={Number(item.match_criteria.academic_fit.unweighted_gpa) || 0}
-                    show_min={Number(item.match_criteria.academic_fit.unweighted_gpa_school_min) || 0}
-                    min={Number(item.match_criteria.academic_fit.unweighted_gpa_school_min) || 0}
-                    max={Number(item.match_criteria.academic_fit.unweighted_gpa_school_avg) || 4.5}
-                  />
-                     
-                  {item.match_criteria.academic_fit.sat_score &&(
-                      <>
-                        
-                        <PerformanceBar
-                          title="SAT:"
-                          score={Number(item.match_criteria.academic_fit.sat_score) || 0}
-                          // min={Number(item.match_criteria.academic_fit.sat_score_min) || 0}
-                           min={Number(0) || 0}
-                           show_min={Number(item.match_criteria.academic_fit.sat_score_min) || 0}
-                          max={Number(item.match_criteria.academic_fit.sat_score_avg) || 1600}
-                        />
-                      </>
-                    )}
+            {selectedTab === 0 && item.match_criteria?.academic_fit && (
+  <View className="px-2 space-y-2">
+    {item.match_criteria.academic_fit.unweighted_gpa !== null && (
+      <PerformanceBar
+        title="GPA:"
+        score={Number(item.match_criteria.academic_fit.unweighted_gpa)}
+        show_min={Number(item.match_criteria.academic_fit.unweighted_gpa_school_min)}
+        min={Number(item.match_criteria.academic_fit.unweighted_gpa_school_min)}
+        max={Number(item.match_criteria.academic_fit.unweighted_gpa_school_avg)}
+      />
+    )}
 
-                {item.match_criteria.academic_fit.act_score &&
-                  item.match_criteria.academic_fit.act_score > 0 && (
-                    <>
+    {item.match_criteria.academic_fit.sat_score !== null && (
+      <PerformanceBar
+        title="SAT:"
+        score={Number(item.match_criteria.academic_fit.sat_score)}
+        min={0}
+        show_min={Number(item.match_criteria.academic_fit.sat_score_min)}
+        max={Number(item.match_criteria.academic_fit.sat_score_avg)}
+      />
+    )}
 
-                      <PerformanceBar
-                        title="ACT:"
-                        score={Number(item.match_criteria.academic_fit.act_score) || 0}
-                        min={Number(0) || 0}
-                        show_min={Number(item.match_criteria.academic_fit.act_score) || 0}
-                        max={Number(item.match_criteria.academic_fit.act_score_avg) || 36}
-                      />
-                    </>
-                  )}
+    {item.match_criteria.academic_fit.act_score !== null &&
+      item.match_criteria.academic_fit.act_score > 0 && (
+        <PerformanceBar
+          title="ACT:"
+          score={Number(item.match_criteria.academic_fit.act_score)}
+          min={0}
+          show_min={Number(item.match_criteria.academic_fit.act_score)}
+          max={Number(item.match_criteria.academic_fit.act_score_avg)}
+        />
+      )}
+  </View>
+)}
 
-                </View>
-              )}
+ 
+{selectedTab === 1 && item.match_criteria?.athlietic_fit && (
+  <View style={{ maxHeight: 310, paddingHorizontal: 8 }}>
+    <ScrollView
+      contentContainerStyle={{ paddingVertical: 8 }}
+      showsVerticalScrollIndicator={true}
+    >
+      {item.match_criteria.athlietic_fit.map((fit, index) => (
+        <PerformanceBar
+          key={index}
+          show_min={parseFloat(fit?.event_school_bm_min)}
+          title={fit.event_name?.replace('_', ' ')}
+          score={Number(fit?.event_performance) || 0}
+          min={0}
+          max={parseFloat(fit?.event_school_bm_max)}
+        />
+      ))}
+    </ScrollView>
+  </View>
+)}
 
-              {selectedTab === 1 && item.match_criteria?.athlietic_fit && (
+
+              {/* {selectedTab === 1 && item.match_criteria?.athlietic_fit && (
                 <View className="px-2 space-y-2">
                   {item.match_criteria.athlietic_fit.map((fit, index) => (
                     <PerformanceBar
@@ -169,7 +185,7 @@ const ExplorCards: React.FC<Props> = ({
                     />
                   ))}
                 </View>
-              )}
+              )} */}
             </View>
           </View>
 

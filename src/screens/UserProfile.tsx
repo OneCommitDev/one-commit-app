@@ -115,6 +115,7 @@ type CityState = { city: string; state: string } | null;
         const userId = await getItem(PREF_KEYS.userId);
         const accessToken = await getItem(PREF_KEYS.accessToken);
         const profileUrl = Api_Url.userProfile(userId ?? '', email ?? '');
+        console.log(accessToken)
 
         const res = await httpRequest2<ProfileResponse>(
           profileUrl,
@@ -149,10 +150,10 @@ type CityState = { city: string; state: string } | null;
           
           setGenderType(genderFromAPI);
       } else {
-        Alert.alert('Error', res.message ?? 'Something went wrong');
+       Alert.alert('Error', res.message ?? 'Something went wrong');
       }
     } catch (err) {
-      Alert.alert('Error', 'Unexpected error occurred.');
+     // Alert.alert('Error', 'Unexpected error occurred.');
     } finally {
       setLoading(false);
     }

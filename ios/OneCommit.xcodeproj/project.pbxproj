@@ -7,31 +7,31 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		06DA194822B08CB9EB19BAE6 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB473DAFA643D36BD749252D /* ExpoModulesProvider.swift */; };
-		12C3C73519C14F2F983A0FA9 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7FFF8170AFAA4E20A0B87F76 /* GoogleService-Info.plist */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		7FD9BDA88F0719706DBFD08B /* Pods_OneCommit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 390162293011027AEE3D994E /* Pods_OneCommit.framework */; };
-		9E9B38D6D857AB5BA7A84C84 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 841E729D3F40B5595AE27C31 /* PrivacyInfo.xcprivacy */; };
+		53ECF26491D58D8A0DD9B923 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20F9833443BD7A684793C089 /* ExpoModulesProvider.swift */; };
+		A4785CDDD78B6D2338E4B111 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BE1430F71E7AF194ED707EF9 /* PrivacyInfo.xcprivacy */; };
+		AD3255770295D897BEC833BF /* Pods_OneCommit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E09ABD62B57770F58CD881E /* Pods_OneCommit.framework */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		DDF686D7249B4456A01593FE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A6C486DC5D76403383FDDB87 /* GoogleService-Info.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		10DE6FC04529CE523093B2E2 /* Pods-OneCommit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneCommit.debug.xcconfig"; path = "Target Support Files/Pods-OneCommit/Pods-OneCommit.debug.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* OneCommit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OneCommit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = OneCommit/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = OneCommit/Info.plist; sourceTree = "<group>"; };
-		1EB9FB29F303D77C96C6F369 /* Pods-OneCommit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneCommit.debug.xcconfig"; path = "Target Support Files/Pods-OneCommit/Pods-OneCommit.debug.xcconfig"; sourceTree = "<group>"; };
-		2D7DAF94C535A66632057D28 /* Pods-OneCommit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneCommit.release.xcconfig"; path = "Target Support Files/Pods-OneCommit/Pods-OneCommit.release.xcconfig"; sourceTree = "<group>"; };
-		390162293011027AEE3D994E /* Pods_OneCommit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OneCommit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		7FFF8170AFAA4E20A0B87F76 /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "OneCommit/GoogleService-Info.plist"; sourceTree = "<group>"; };
-		841E729D3F40B5595AE27C31 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = OneCommit/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		1E09ABD62B57770F58CD881E /* Pods_OneCommit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OneCommit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		20F9833443BD7A684793C089 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-OneCommit/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		A6C486DC5D76403383FDDB87 /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "OneCommit/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = OneCommit/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		CB473DAFA643D36BD749252D /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-OneCommit/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		BE1430F71E7AF194ED707EF9 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = OneCommit/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = OneCommit/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* OneCommit-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "OneCommit-Bridging-Header.h"; path = "OneCommit/OneCommit-Bridging-Header.h"; sourceTree = "<group>"; };
+		FDA6373CF4D9247352AED66F /* Pods-OneCommit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneCommit.release.xcconfig"; path = "Target Support Files/Pods-OneCommit/Pods-OneCommit.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,7 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7FD9BDA88F0719706DBFD08B /* Pods_OneCommit.framework in Frameworks */,
+				AD3255770295D897BEC833BF /* Pods_OneCommit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,8 +55,8 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				7FFF8170AFAA4E20A0B87F76 /* GoogleService-Info.plist */,
-				841E729D3F40B5595AE27C31 /* PrivacyInfo.xcprivacy */,
+				A6C486DC5D76403383FDDB87 /* GoogleService-Info.plist */,
+				BE1430F71E7AF194ED707EF9 /* PrivacyInfo.xcprivacy */,
 			);
 			name = OneCommit;
 			sourceTree = "<group>";
@@ -65,17 +65,9 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				390162293011027AEE3D994E /* Pods_OneCommit.framework */,
+				1E09ABD62B57770F58CD881E /* Pods_OneCommit.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		69C64D2514FCDC80D55DF7A6 /* OneCommit */ = {
-			isa = PBXGroup;
-			children = (
-				CB473DAFA643D36BD749252D /* ExpoModulesProvider.swift */,
-			);
-			name = OneCommit;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -92,8 +84,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				B153A41A5DF27173283FA1E2 /* Pods */,
-				D962CDCBE5A45E5B2E552363 /* ExpoModulesProviders */,
+				A486101966113CF828618847 /* Pods */,
+				EAA56873037C80A0543F8C5A /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -108,11 +100,11 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B153A41A5DF27173283FA1E2 /* Pods */ = {
+		A486101966113CF828618847 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				1EB9FB29F303D77C96C6F369 /* Pods-OneCommit.debug.xcconfig */,
-				2D7DAF94C535A66632057D28 /* Pods-OneCommit.release.xcconfig */,
+				10DE6FC04529CE523093B2E2 /* Pods-OneCommit.debug.xcconfig */,
+				FDA6373CF4D9247352AED66F /* Pods-OneCommit.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -126,10 +118,18 @@
 			path = OneCommit/Supporting;
 			sourceTree = "<group>";
 		};
-		D962CDCBE5A45E5B2E552363 /* ExpoModulesProviders */ = {
+		D46041FE145252001E2CEB0B /* OneCommit */ = {
 			isa = PBXGroup;
 			children = (
-				69C64D2514FCDC80D55DF7A6 /* OneCommit */,
+				20F9833443BD7A684793C089 /* ExpoModulesProvider.swift */,
+			);
+			name = OneCommit;
+			sourceTree = "<group>";
+		};
+		EAA56873037C80A0543F8C5A /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				D46041FE145252001E2CEB0B /* OneCommit */,
 			);
 			name = ExpoModulesProviders;
 			sourceTree = "<group>";
@@ -142,14 +142,14 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "OneCommit" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				3064400CB594EF79416CFF54 /* [Expo] Configure project */,
+				4B9365D8B6B3A72D9A784D96 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				263F42E140635133A6E7DF3A /* [CP] Embed Pods Frameworks */,
-				A3C78994264B328F4CB929FE /* [CP-User] [RNFB] Core Configuration */,
+				B64A5A9EB9329F7FD0860A56 /* [CP] Embed Pods Frameworks */,
+				DF7F89BE311752675AAFCA48 /* [CP-User] [RNFB] Core Configuration */,
 			);
 			buildRules = (
 			);
@@ -169,9 +169,7 @@
 				LastUpgradeCheck = 1130;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						DevelopmentTeam = 53V92J9G4A;
 						LastSwiftMigration = 1250;
-						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -201,8 +199,8 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				12C3C73519C14F2F983A0FA9 /* GoogleService-Info.plist in Resources */,
-				9E9B38D6D857AB5BA7A84C84 /* PrivacyInfo.xcprivacy in Resources */,
+				DDF686D7249B4456A01593FE /* GoogleService-Info.plist in Resources */,
+				A4785CDDD78B6D2338E4B111 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,25 +244,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		263F42E140635133A6E7DF3A /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-OneCommit/Pods-OneCommit-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-OneCommit/Pods-OneCommit-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		3064400CB594EF79416CFF54 /* [Expo] Configure project */ = {
+		4B9365D8B6B3A72D9A784D96 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -395,7 +375,25 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-OneCommit/Pods-OneCommit-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A3C78994264B328F4CB929FE /* [CP-User] [RNFB] Core Configuration */ = {
+		B64A5A9EB9329F7FD0860A56 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-OneCommit/Pods-OneCommit-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-OneCommit/Pods-OneCommit-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		DF7F89BE311752675AAFCA48 /* [CP-User] [RNFB] Core Configuration */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -418,7 +416,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				06DA194822B08CB9EB19BAE6 /* ExpoModulesProvider.swift in Sources */,
+				53ECF26491D58D8A0DD9B923 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -427,14 +425,12 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1EB9FB29F303D77C96C6F369 /* Pods-OneCommit.debug.xcconfig */;
+			baseConfigurationReference = 10DE6FC04529CE523093B2E2 /* Pods-OneCommit.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = OneCommit/OneCommit.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 53V92J9G4A;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -466,14 +462,12 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2D7DAF94C535A66632057D28 /* Pods-OneCommit.release.xcconfig */;
+			baseConfigurationReference = FDA6373CF4D9247352AED66F /* Pods-OneCommit.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = OneCommit/OneCommit.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 53V92J9G4A;
 				INFOPLIST_FILE = OneCommit/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;

@@ -12,12 +12,15 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import WheelPickerExpo from 'react-native-wheel-picker-expo';
 import AppText from './AppText';
+import TitleText from './TitleText';
 
 const screenWidth = Dimensions.get('window').width;
 
 type TimePickerModalProps = {
   visible: boolean;
   onClose: () => void;
+    onDelete?: () => void;
+  
   initialValue?: { minutes: number; seconds: number; milliseconds: number };
   onSave: (value: { minutes: number; seconds: number; milliseconds: number }) => void;
   title? : string;
@@ -34,6 +37,7 @@ const generateRange = (max: number) => {
 export const TimePickerModal: React.FC<TimePickerModalProps> = ({
   visible,
   onClose,
+  onDelete,
   initialValue = { minutes: 0, seconds: 0, milliseconds: 0 },
   onSave,
   title,
@@ -65,9 +69,25 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#111827" />
             </TouchableOpacity>
-            <AppText>
+            <TitleText>
   {title && title.trim() !== "" ? title : "Select Time"}
-</AppText>
+</TitleText>
+
+  <View style={{ flexDirection: "row", alignItems: "center" }}>
+
+    {onDelete && (
+      <TouchableOpacity
+        style={{ marginRight: 12 }}
+        onPress={() => {
+          onDelete();
+          onClose();
+        }}
+      >
+        <Ionicons name="trash" size={26} color="#235D48" />
+      </TouchableOpacity>
+    )}
+
+
             <TouchableOpacity
               onPress={() => {
                 onSave({
@@ -80,6 +100,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
             >
               <Ionicons name="checkmark" size={26} color="#235D48" />
             </TouchableOpacity>
+             </View>
           </View>
 <View className="flex-row justify-between px-4 mt-4 mb-1">
   <Text className="w-1/3 text-center text-sm font-medium text-gray-500">MIN</Text>

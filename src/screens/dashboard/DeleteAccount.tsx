@@ -12,10 +12,11 @@ import TitleText from '~/components/TitleText';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AppText from '~/components/AppText';
 import { getItem } from 'expo-secure-store';
-import { clearAllPrefs, PREF_KEYS } from '~/utils/Prefs';
+import {  PREF_KEYS } from '~/utils/Prefs';
 import { Api_Url, httpRequest2 } from '~/services/serviceRequest';
 import { SimpleResponse } from '~/services/DataModals';
 import Loader from '~/components/Loader';
+import { clearAllPrefss } from '~/utils/storage';
 
 export default function DeleteAccount() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -47,7 +48,7 @@ export default function DeleteAccount() {
           const res = await httpRequest2<SimpleResponse>(
             url,  'delete',   {},   accessToken ?? ''  );
           if (res.status) {
-                clearAllPrefs();
+                clearAllPrefss();
                 navigation.navigate('DeleteAccountSuccess');
           }
         } catch (err) {

@@ -9,6 +9,7 @@ import { Alert, Platform } from 'react-native';
 import * as Application from "expo-application";
 import { getValidAccessToken } from './authService';
 import { resetToLogin } from '~/navigation/NavigationService';
+import { clearAllPrefss } from '~/utils/storage';
  
 const { apiUrl, appEnv , xKey , baseImgUrl} = Constants.expoConfig?.extra ?? {};
 export const  base_url_images = baseImgUrl;
@@ -16,8 +17,8 @@ export const base_url =  apiUrl;
 
  
 const api = axios.create({
-  baseURL: "https://devapi.onecommit.us:443/v1", 
-    // baseURL: apiUrl,
+  // baseURL: "https://devapi.onecommit.us:443/v1", 
+      baseURL: apiUrl,
   timeout: 60000,
   headers: {
     'Content-Type': 'application/json',  
@@ -232,8 +233,7 @@ export async function httpRequest_social_token<T>(
     // If logged in, get a valid access token once
     if (loginStatus === 'success') {
       finalToken = await getValidAccessToken() ?? '';
-
-      if (!finalToken) {
+       if (!finalToken) {
         return {
           status: false,
           message: 'Unable to retrieve valid access token.',
@@ -277,18 +277,18 @@ export async function httpRequest_social_token<T>(
     config: error.config,
     
   }); 
-    // Handle invalid/expired token
+     // Handle invalid/expired token
     if (
       error?.response?.status === 401 &&
        error?.response?.data?.message === "Invalid token" ||
     error?.response?.data?.message === "Access token missing or invalid"
     ) {
-      // Alert.alert("Session expired", "Please login again.", [
-      //   {
-      //     text: "OK",
-      //   onPress: () => resetToLogin(),
-      //   },
-      // ]);
+      Alert.alert("Session expired", "Please login again.", [
+        {
+          text: "OK",
+        onPress: () => resetToLogin(),
+        },
+      ]);
     }
 
     const fallback: T = {
@@ -455,7 +455,10 @@ export const Api_Url = {
   removeEmailApi : '/dashboard/remove-email',
    changePassword: '/change-pass',
       quickEditapi: '/user/profile-quick-edit',
-
+ 
+  quickProfileEventDelete : (sport_id: string, event_id: string) =>
+    `/user/profile/sports/${sport_id}/${event_id}`,
+   logout: '/logout',
 };
 
 

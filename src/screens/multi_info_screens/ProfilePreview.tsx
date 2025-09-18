@@ -15,6 +15,7 @@ import { ProfileComplition, SimpleResponse } from '~/services/DataModals';
 import TitleText from '~/components/TitleText';
 import { setItem } from '~/utils/storage';
 import AppText from '~/components/AppText';
+import { capitalizeWords } from '~/utils/AppFunctions';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MultiStepSurvey'>;
 
@@ -173,6 +174,7 @@ useFocusEffect(
           {},
           accessToken ?? ''
         );
+       // console.log(res);
         if (mounted && res.status && res.data) {
           const d = res.data;
 
@@ -193,9 +195,9 @@ useFocusEffect(
             {
               title: 'Profile Details',
               data: [
-                { title: 'Full Name', value: d.full_name || '' },
-                { title: 'Preferred Name', value: d.preferred_name || '' },
-                { title: 'Email Address', value: d.email_connect_address || '' },
+                { title: 'Full Name', value: capitalizeWords(d.full_name) || '' },
+                { title: 'Preferred Name', value: capitalizeWords(d.preferred_name) || 'N/A' },
+                { title: 'Email Address', value: d.email_connect_address || 'N/A' },
                 { title: 'Phone Number', value: d.phone || '' },
                 { title: 'Date of Birth', value: d.dob || '' },
                 { title: 'ZipCode', value: d.zipcode || '' },
@@ -264,11 +266,13 @@ useFocusEffect(
                 },
                 {
                   title: 'Email Provider',
-                  value: d.email_connect_provider ? 'N/A' : 'N/A',
+                  value: d.email_connect_provider,
                 },
               ],
             },
+            
           ];
+         
             setProfileSections(updatedSampleData);
              setLoading(false);
         }else{

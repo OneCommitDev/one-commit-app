@@ -185,7 +185,8 @@ export interface GamesResponse {
     user_selected: string;
     event_value: string;
     event_unit: string;
-      selected: boolean;
+      selected?: boolean;
+      disabled?: boolean;
 };
 
 export interface SavedSportResponse {
@@ -312,13 +313,13 @@ export type MatchScore = {
 
 export type AcademicFit = {
   act_score : number;
-   sat_score : number;
-  sat_score_avg: string | number | null;
-  sat_score_min: string | number | null;
-  act_score_avg: string | number | null;
-  act_score_min: string | number | null;
+   sat_score : number | null;
+  sat_score_avg:  number | null;
+  sat_score_min:  number | null;
+  act_score_avg:  number | null;
+  act_score_min:  number | null;
 
-  unweighted_gpa: string | number | null;
+  unweighted_gpa:  number | null;
 
     act_score_above_average: boolean;
       sat_score_above_average: boolean;
@@ -513,6 +514,8 @@ email : string;
     school_details: school_details[];
     communication_history: CommunicationHistory[];
   };
+       email_conn_data: email_conn_data;
+
 };
 
  
@@ -549,6 +552,7 @@ export type CommunicationHistory = {
   email_from: string;
   email_sent_date: string;
   email_status: string;
+  provideris? : string; // this is not the part of api call
 };
 
 

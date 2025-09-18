@@ -9,7 +9,7 @@ import USRegionsMap from "~/components/USRegionsMap";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ProfileField, ProfileSection } from "../multi_info_screens/ProfilePreview";
-import { getItem } from "expo-secure-store";
+import { getItem, setItem } from "expo-secure-store";
 import { Api_Url, httpRequest2 } from "~/services/serviceRequest";
 import { AcademicResponse, Editprofilemodal, ProfileComplition, ProfileComplitionData, SimpleResponse, SportEvent, SportUserFormattedData } from "~/services/DataModals";
 import { PREF_KEYS } from "~/utils/Prefs";
@@ -94,6 +94,7 @@ const [schoolSizeSelected, setSchoolSizeSelected] = useState<string[]>(["small"]
 
    const [sportmodalVisible, setSportModalVisible] = useState(false);
    const [sporteventdatasection, setSportsdataSection] = useState<SportUserFormattedData>();
+ 
 
  const heightStr = String(profile?.height || "5'6\"");
 
@@ -268,7 +269,7 @@ useFocusEffect(
   }, [])
 );
 
-const fetchProfileData = async () => {
+const fetchProfileData = async (showAlert = false) => {
   try {
     setLoading(true);
     const accessToken = getItem(PREF_KEYS.accessToken);
@@ -278,7 +279,6 @@ const fetchProfileData = async () => {
       {},
       accessToken ?? ''
     );
-    console.log(res);
     if (res.status && res.data) {
       setProfile(res.data);
       setsportsdata(res.data.sportUserFormattedData ?? []);
@@ -297,8 +297,13 @@ const fetchProfileData = async () => {
         setSelectedCampus(campusArray);
       }
 
+    await  setItem(PREF_KEYS.connected_id, String(res.data?.email_connect_address ?? ""));
+    await    setItem(PREF_KEYS.connected_id_provider, String(res.data?.email_connect_provider ?? ""));
 
       setScreenload(true);
+        if (showAlert === true) {
+           Alert.alert("Profile Updated", "New school matches will be evaluated.");
+        }
     } else {
       // Alert.alert("Error", res.message ?? "Request failed");
     }
@@ -329,13 +334,42 @@ const SaveRequest = async (payload: Record<string, any>) => {
     );
 
     if (res.status) {
-      await  fetchProfileData();
+      await  fetchProfileData(true);
+      //  Alert.alert("Profile Updated", "New school matches will be evaluated.");
+
+    } else {
+       await  fetchProfileData();
+      // Alert.alert("Error", res.message ?? "Request failed");
+    }
+  } catch (err) {
+     console.error("SaveProfileRequest error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+const DeleteApiRequest = async (sportid : string , eventid : string) => {
+  try {
+     const token = await getItem(PREF_KEYS.accessToken);
+     const url = Api_Url.quickProfileEventDelete(sportid , eventid);
+    const res = await httpRequest2<SimpleResponse>(
+      url,
+      "delete",
+      {},  
+      token ?? "",
+      true
+    );
+
+    if (res.status) {
+      await  fetchProfileData(true);
     } else {
        await  fetchProfileData();
        Alert.alert("Error", res.message ?? "Request failed");
     }
   } catch (err) {
-     console.error("SaveProfileRequest error:", err);
+   //  console.error("SaveProfileRequest error:", err);
   } finally {
     setLoading(false);
   }
@@ -448,10 +482,10 @@ useEffect(() => {
   <InfoCard
     key={index}
     label={capitalizeWords(item.event_name).replaceAll('_', ' ')}
-    value={item.eventValue?.toString() || ''}
+    value={item.eventValue?.toString() || '0'}
     onPressEdit={() => {
         item.sport_id = section.sport_id;
-     console.log('itemitemitemitem ' , item);
+    //  console.log('itemitemitemitem ' , item);
       setSportsdata(item);  
       if(item.measurement_type === 'time' ){
           setShowTimePicker(true);
@@ -509,13 +543,17 @@ useEffect(() => {
           <SectionTitle
             title="Academics"
             // showAddButton={!!profile && !(profile.sat_score && profile.act_score)}
-            showAddButton={!!profile && (profile.sat_score != 0 || profile.act_score != 0)}
+            showAddButton={ profile?.sat_score == 0 || profile?.act_score == 0}
             onAddPress={() => {
               if (!profile) return; 
 
-              if (!profile.sat_score) {
+              if (profile.sat_score == 0 && profile.act_score ==0 ) {
+                setSelectedData(["SAT" , "ACT"]);
+              } 
+               else if (profile.sat_score == 0) {
                 setSelectedData(["SAT"]);
-              } else if (!profile.act_score) {
+              }
+              else if (profile.act_score == 0) {
                 setSelectedData(["ACT"]);
               }
               setShowSheet(true);
@@ -529,14 +567,14 @@ useEffect(() => {
                 openBoxModal("Academics Info", "GPA (UWW)", "gpa" , profile?.unweighted_gpa.toString() ?? '' , "unweighted_gpa", (val) => console.log("Saved Name:", val))
            } />
 
-           {profile?.sat_score != null && (
+           {profile?.sat_score != null && profile?.sat_score != 0 && (
           <InfoCard label="SAT" value={profile?.sat_score != null ? profile.sat_score.toString() : ''}
            onPressEdit={() => 
                 openBoxModal("Academics Info", "SAT", "sat", profile.sat_score.toString(), "sat_score",  (val) => console.log("Saved Name:", val))
            }
           />
           )}
-           {profile?.sat_score != null && (
+           {profile?.act_score != null && profile?.act_score != 0 && (
           <InfoCard label="ACT" value={profile?.act_score != null ? profile.act_score.toString() : ''} 
              onPressEdit={() => 
                 openBoxModal("Academics Info", "ACT", "act", profile.act_score.toString() , "act_score" , (val) => console.log("Saved Name:", val))
@@ -731,6 +769,7 @@ useEffect(() => {
             value={modalConfig.value}
             params={modalConfig.params}
             onClose={() => setShowModal(false)}
+           
             onSave={async (val , params) => {
               if(modalConfig?.params === "sports"){
               const payload = {
@@ -761,6 +800,23 @@ useEffect(() => {
           milliseconds: Number(sporteventdata?.eventValue?.split(":")[2] ?? 0),
                 }}
                 onClose={() => setShowTimePicker(false)}
+                  onDelete={() =>
+              Alert.alert(
+                "Confirm Delete",
+                 "Are you sure you want to delete " + capitalizeWords(sporteventdata?.event_name).replace('_', ' ') + " event?",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () => {
+                      setModalVisible(false);
+                        DeleteApiRequest(sporteventdata?.sport_id ?? '' , sporteventdata?.event_id ?? '');
+                    },
+                  },
+                ]
+              )
+            }
                 onSave={(selected) => {
                   const formatted = `${selected.minutes
                     .toString()
@@ -792,6 +848,24 @@ useEffect(() => {
             title={sporteventdata?.display_name ?? ''}
             visible={modalVisible}
             onClose={() => setModalVisible(false)}
+           onDelete={() =>
+              Alert.alert(
+                "Confirm Delete",
+                 "Are you sure you want to delete " + capitalizeWords(sporteventdata?.event_name).replace('_', ' ') + " event?",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () => {
+                      setModalVisible(false);
+                        
+                        DeleteApiRequest(sporteventdata?.sport_id ?? '' , sporteventdata?.event_id ?? '');
+                    },
+                  },
+                ]
+              )
+            }
             selectedUnit={disunit}
             onUnitChange={(u) => setdisUnit(u)}
             // onUnitChange={(u) => setdisUnit(u)}
@@ -817,14 +891,19 @@ useEffect(() => {
         />
 
 
-  <CheckboxModal
-      visible={sportmodalVisible}
-      onClose={() => setSportModalVisible(false)}
-      onSelect={(ids) => setSelectedsportid(sporteventdatasection?.sport_id.toString() ?? '')}
-      sportName= {sporteventdatasection?.sport_name.toString().replace('_', " ") ?? ''}
-      sportId = {sporteventdatasection?.sport_id.toString() ?? ''}
-    />
-          
+ <CheckboxModal
+  visible={sportmodalVisible}
+  onClose={async () => {
+    setSportModalVisible(false);
+    await fetchProfileData(true);
+  }}
+  onSelect={(ids) =>
+    setSelectedsportid(sporteventdatasection?.sport_id?.toString() ?? '')
+  }
+  sportName={sporteventdatasection?.sport_name?.toString().replace('_', ' ') ?? ''}
+  sportId={sporteventdatasection?.sport_id?.toString() ?? ''}
+/>
+ 
 
     </View>
   );
