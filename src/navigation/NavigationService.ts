@@ -19,6 +19,19 @@ export function resetToLogin() {
   }
 }
 
+export function resetToIntro() {
+  if (navigationRef.isReady()) {
+    navigationRef.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: "Intro" }], 
+      })
+    );
+  } else {
+    console.warn("Navigation not ready yet (resetToLogin)");
+  }
+}
+
 // Generic navigate helper
 export function navigate(name: keyof RootStackParamList, params?: any) {
   if (navigationRef.isReady()) {

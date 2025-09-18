@@ -46,17 +46,33 @@ export default function HomeScreen({ onRedirect }: { onRedirect: (tab: "Explore"
   const animRefs = useRef<Record<string, { animated: Animated.Value; measuredHeight: number | null }>>({});
 const slideAnim = useRef(new Animated.Value(50)).current; // start 50px lower
 const opacityAnim = useRef(new Animated.Value(0)).current; // start hidden
+ const [fcmToken, setFCMToken] = useState<string>("");
 
   useEffect(() => {
     // fetchTODO();
     checkPermissionOnLoad();
   }, []);
 
-  useFocusEffect(
+ useFocusEffect(
   useCallback(() => {
-    fetchTODO();
+    const fetchTokenAndData = async () => {
+      const token = await getFCMToken();  // now string | null
+
+      if (token) {
+        setFCMToken(token);
+        console.log("Got FCM token:", token);
+        // await fcmTokenSavingAPi(token);
+      } else {
+        console.log("Failed to get FCM token");
+      }
+
+      fetchTODO();
+    };
+
+    fetchTokenAndData();
   }, [])
 );
+
 
 
 const runEnterAnimation = () => {
@@ -113,16 +129,17 @@ setScreenload(true);
       } else {
        // Alert.alert("Notice", "No To-Do items found.");
       }
-      if(res.status == true){
-              await     fcmTokenSavingAPi();
-      }
+        if(res.status == true){
+          //console.log('fcmToken', fcmToken);
+          await  fcmTokenSavingAPi(fcmToken);
+        }
     } catch (err) {
       // console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
+/*
   const fcmTokenSavingAPi = async () => {
     try {
       const accessToken = await getItem(PREF_KEYS.accessToken);
@@ -136,6 +153,31 @@ setScreenload(true);
       // console.error(err);
     }
   };
+  */
+
+  
+
+ const fcmTokenSavingAPi = async (fcm : string) => {
+  try {
+    const accessToken = await getItem(PREF_KEYS.accessToken);
+    const url = Api_Url.fcmTokenAPI;
+    if (!fcm) {
+      console.warn("⚠️ No FCM token available, skipping API call");
+      return;
+    }
+    await httpRequest2<SimpleResponse>(
+      url,
+      "post",
+      { fcmToken: fcm },
+      accessToken ?? "",
+      true
+    );
+    console.log("✅ FCM token sent to API");
+  } catch (err) {
+   // console.error("❌ Failed to save FCM token:", err);
+  }
+};
+
 
   const buildCardData = (): CardItem[] => [
     {
