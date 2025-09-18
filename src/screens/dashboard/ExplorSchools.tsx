@@ -102,7 +102,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
       setFilteredData([]);
     }
     } catch (err) {
-      Alert.alert('Error', 'Unexpected error occurred.');
+     // Alert.alert('Error', 'Unexpected error occurred.');
     } finally {
        
     }
@@ -153,7 +153,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
             });
 
       } catch (err) {
-        Alert.alert('Error', 'Unexpected error occurred.');
+       // Alert.alert('Error', 'Unexpected error occurred.');
       } finally {
         if (append) setLoadingMore(false);
         else setLoading(false);
@@ -207,7 +207,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
             });
 
         } catch (err) {
-          Alert.alert('Error', 'Unexpected error occurred.');
+         // Alert.alert('Error', 'Unexpected error occurred.');
         } finally {
           if (append) setLoadingMore(false);
           else setLoading(false);
@@ -234,7 +234,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           }
         } catch (err) {
          // console.log('Error deleting school', err);
-          Alert.alert('Error', 'Unexpected error occurred.');
+         // Alert.alert('Error', 'Unexpected error occurred.');
         } finally {
           setLoading(false); // Hide global loader
         }
@@ -385,7 +385,7 @@ const handleSelect = (item: SearchSchoolData) => {
 
 
   } catch (err) {
-    Alert.alert('Error', 'Failed to fetch school by ID.');
+   // Alert.alert('Error', 'Failed to fetch school by ID.');
   } finally {
     setLoading(false);
   }

@@ -20,9 +20,10 @@ import { clearKeychainOnFirstRun, getItem } from '~/utils/storage';
 import NetworkProvider, { NetworkContext } from '~/utils/NetworkProvider';
 import OfflineScreen from '~/components/OfflineScreen';
 import { GlobalErrorBoundary } from '~/services/GlobalErrorBoundary';
+import { navigationRef } from "~/navigation/NavigationService";
 
 // ✅ Global navigation ref (use only once)
-export const navigationRef = createNavigationContainerRef<RootStackParamList>();
+// export const navigationRef = createNavigationContainerRef<RootStackParamList>(); // if got issue then remove thsi line comment and remove the import { navigationRef } from "~/navigation/NavigationService";
 
 // ✅ Sentry setup
 Sentry.init({

@@ -63,9 +63,15 @@ const isDisabled = !inputValue || hasError;
             <View className="bg-white rounded-t-2xl p-5 shadow-lg px-5 py-5 min-h-[300px]">
               {/* Header */}
               <View className="flex-row items-center justify-center">
-               <AppText className="text-base font-semibold text-black">
+               <TitleText>
                   {title}
-                </AppText>
+                </TitleText>
+                 {/* <TouchableOpacity
+                  onPress={onClose}
+                  className="absolute right-10 p-2"
+                >
+                  <Ionicons name="trash" size={22} color="black" />
+                </TouchableOpacity> */}
                 <TouchableOpacity
                   onPress={onClose}
                   className="absolute right-0 p-2"

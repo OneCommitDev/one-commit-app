@@ -173,11 +173,13 @@ useFocusEffect(
     const logoutWithFCMDeletion = async () => {
       setLoading(true);
         try {
-       const accessToken = await getItem(PREF_KEYS.accessToken);
-       const refreshToken = await getItem(PREF_KEYS.refreshToken);
-       const url = Api_Url.fcmTokenDeleteAPI;
+    const accessToken = await getItem(PREF_KEYS.accessToken);
+    const refreshToken = await getItem(PREF_KEYS.refreshToken);
+    const userEmailID = await getItem(PREF_KEYS.userEmailID);
+
+       const url = Api_Url.logout;
        const res = await httpRequest2<SimpleResponse>(
-         url,   'delete',    {fcmToken : fcmToken , refreshToken : refreshToken},    accessToken ?? '',     true     );
+         url,   'post',    {email : userEmailID},    accessToken ?? '',     true     );
         
          
         if (res?.status) {

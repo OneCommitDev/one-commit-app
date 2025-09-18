@@ -93,7 +93,8 @@ const isFormValid = () => {
     selectedDivisions.length > 0 &&
     form.school_size &&
     form.academic_rigor &&
-    form.preferred_region
+    form.preferred_region &&
+    form.campus_type
     );
 };
 
@@ -143,7 +144,10 @@ const capitalize = (value: string | null | undefined): string => {
     .join(", ");
 };
 
-
+const safeCapitalize = (val?: string, fallback: string = ''): string => {
+  if (!val || typeof val !== 'string') return fallback;
+  return capitalize(val);
+};
 
 
   useEffect(() => {
@@ -158,8 +162,7 @@ const capitalize = (value: string | null | undefined): string => {
           {},
           accessToken ?? ''
         );
-         console.log('res_res_', res);
-        console.log('res_res_', Api_Url.collegePreferences);
+   
 
         if (mounted && res.status) {
           const mattersObject: MatterItem[] = res.lists.matters;
@@ -176,7 +179,11 @@ const capitalize = (value: string | null | undefined): string => {
               ncaa_division: prefData.ncaa_division ?? '',
               preferred_region: prefData.preferred_region ?? '',
               school_size: capitalize(prefData.school_size) ?? 'Small',
-              academic_rigor: capitalize(prefData.academic_rigor) ?? 'Low',
+              // academic_rigor: capitalize(prefData.academic_rigor) ?? 'Low',
+              academic_rigor: prefData?.academic_rigor
+              ? capitalize(prefData.academic_rigor)
+              : 'Low',
+
               campus_type: capitalize(prefData.campus_type) ?? '',
               need_financial_aid: prefData.need_financial_aid ?? '0',
               early_decision_willingness: prefData.early_decision_willingness ?? 'Yes',
@@ -184,6 +191,8 @@ const capitalize = (value: string | null | undefined): string => {
               // required_financial_aid : prefData.required_financial_aid ?? 0
                required_financial_aid : formatNumber(prefData.required_financial_aid) ?? 0
             });
+
+
 
             const matchedOption = mattersObject.find(opt => opt.key === prefData.what_matter_most);
             if (matchedOption) setSelectedOption(matchedOption.key);
@@ -204,17 +213,17 @@ const capitalize = (value: string | null | undefined): string => {
                 setSchoolType(capitalize(prefData.school_size));
 
 
-        setActRigorType(
-          (capitalize(prefData.academic_rigor) ?? 'Low') as 'Low' | 'Medium' | 'High'
-        );
-
-        // setCampusType(
-        //   (capitalize(prefData.campus_type) ?? 'Urban') as 'Urban' | 'Suburban' | 'Rural'
+        // setActRigorType(
+        //   (capitalize(prefData.academic_rigor) ?? 'Low') as 'Low' | 'Medium' | 'High'
         // );
+             setActRigorType(
+            (safeCapitalize(prefData.academic_rigor, 'Low') as 'Low' | 'Medium' | 'High')
+          );   
+
+       
           setCampusType(capitalize(prefData.campus_type));
 
-          console.log('campus_type_',form.campus_type);
-
+ 
         setDecisionType(
           (capitalize(prefData.early_decision_willingness) ?? 'Yes') as 'Yes' | 'No' | 'Maybe'
         );

@@ -146,9 +146,10 @@ if (typeis === 'register_verify' || typeis === 'login_verify') {
     const email = await getItem(PREF_KEYS.registerEmail);  
       const accessToken = await getItem(PREF_KEYS.accessToken);
         const requestBody: RegisterOTPRequest = {
-        email: email ?? '',
+        email: email ?? value,
         code: otp, 
       };
+      console.log(requestBody);
 
       const res = await httpRequest2<RegisterOTPResponse>(
         Api_Url.verifyUser,    'post',    requestBody,    accessToken ?? '' 

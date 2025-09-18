@@ -23,15 +23,19 @@ type DashboardRouteProp = RouteProp<RootStackParamList, 'Dashboard'>;
 export default function Dashboard() {
   const route = useRoute<DashboardRouteProp>();
   const { onload } = route.params ?? {};   
-  const [activeTab, setActiveTab] = useState<TabType>('Explore');
+  const initialTab: TabType = route.params?.onload ?? 'Explore';
+
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const notificationCount = 8;
   const animation = useRef(new Animated.Value(1)).current;
 
+  /*
     useEffect(() => {
     if (onload) {
       setActiveTab(onload as TabType);
     }
   }, [onload]);
+  */
 
   const tabTitles: Record<TabType, string> = {
     Home: 'Hi, Hugh 👋',

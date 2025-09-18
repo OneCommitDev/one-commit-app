@@ -17,6 +17,8 @@ import { capitalizeWords, getFCMToken } from "~/utils/AppFunctions";
 import messaging from "@react-native-firebase/messaging";
 import { checkNotifications, requestNotifications } from "react-native-permissions";
 import LottieView from "lottie-react-native";
+import { resetToLogin } from "~/navigation/NavigationService";
+import { clearAllPrefss } from "~/utils/storage";
 
 // enable LayoutAnimation on Android (keeps it for small layout tweaks)
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -47,7 +49,6 @@ const opacityAnim = useRef(new Animated.Value(0)).current; // start hidden
 
   useEffect(() => {
     // fetchTODO();
-    fcmTokenSavingAPi();
     checkPermissionOnLoad();
   }, []);
 
@@ -82,6 +83,7 @@ const runEnterAnimation = () => {
       const url = Api_Url.homeToDo;
 
       const res = await httpRequest2<HomeToDo>(url, "get", {}, accessToken ?? "");
+      
 setScreenload(true);
       if (res.status) {
       /*  let updatedRes = { ...res };
@@ -107,9 +109,12 @@ setScreenload(true);
         setItem(PREF_KEYS.displayName, String(res.data?.profile?.name ?? ""));
         setItem(PREF_KEYS.connected_id, String(res.data?.connected_email?.email ?? ""));
         setItem(PREF_KEYS.connected_id_provider, String(res.data?.connected_email?.provider ?? ""));
-  runEnterAnimation();
+           runEnterAnimation();
       } else {
        // Alert.alert("Notice", "No To-Do items found.");
+      }
+      if(res.status == true){
+              await     fcmTokenSavingAPi();
       }
     } catch (err) {
       // console.error(err);

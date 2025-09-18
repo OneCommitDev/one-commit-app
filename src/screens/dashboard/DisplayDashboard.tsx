@@ -232,7 +232,7 @@ const runEnterAnimation = () => {
 
   const interactionDetail = item?.last_interaction_detail?.toLowerCase() ?? '';
 
-  if (interactionDetail === 'start outreach') {
+  if (interactionDetail.toLowerCase() === 'start outreach') {
     if (!connectedEmail) {
       Alert.alert(
         'Your email account is not connected.',
@@ -242,11 +242,11 @@ const runEnterAnimation = () => {
       setSheetVisible(true);
     }
   } else {
-  /*  navigation.navigate('EmailCommunication', {
+    navigation.navigate('EmailCommunication', {
       id: item.school_id,
       type: item.name,
-    }); */
-      setSheetVisible(true);
+    });  
+     // setSheetVisible(true);
   }
 }}
 

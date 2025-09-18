@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import WheelPickerExpo from "react-native-wheel-picker-expo";
+import TitleText from "./TitleText";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -17,22 +18,24 @@ type FeetMeterPickerModalProps = {
   title : string;
   visible: boolean;
   onClose: () => void;
+  onDelete?: () => void;
   selectedUnit: "feet" | "meters";
   onUnitChange: (unit: "feet" | "meters") => void;
   onSave: (
-    mainValue: number,
-    decimalValue: number,
-    unit: "feet" | "meters"
+  mainValue: number,
+  decimalValue: number,
+  unit: "feet" | "meters"
   ) => void;
 
   initialMainValue?: number;
   initialDecimalValue?: number;
-};
+  };
 
 export const FeetMeterPickerModal: React.FC<FeetMeterPickerModalProps> = ({
   title,
   visible,
   onClose,
+  onDelete,
   selectedUnit,
   onUnitChange,
   onSave,
@@ -94,7 +97,7 @@ export const FeetMeterPickerModal: React.FC<FeetMeterPickerModalProps> = ({
           }}
         >
           {/* Header */}
-          <View
+          {/* <View
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -108,22 +111,85 @@ export const FeetMeterPickerModal: React.FC<FeetMeterPickerModalProps> = ({
             </TouchableOpacity>
 
             <Text style={{ fontSize: 16, fontWeight: "600", color: "#000" }}>
-              {/* Select Height */}
-              {title}
+               {title}
             </Text>
 
-          <TouchableOpacity
-  onPress={() => {
-    const mainValue = mainItems[mainIndex]?.value ?? 0;
-    const decimalValue = decimalItems[decimalIndex]?.value ?? 0;
+               {onDelete && (
+                  <TouchableOpacity
+                    style={{ marginRight: 8 }}
+                    onPress={() => {
+                      const mainValue = mainItems[mainIndex]?.value ?? 0;
+                      const decimalValue = decimalItems[decimalIndex]?.value ?? 0;
 
-    onSave(mainValue, decimalValue, selectedUnit); // 👈 send individually
-    onClose();
+                      onDelete(); 
+                      onClose();
+                    }}
+                  >
+                    <Ionicons name="trash" size={26} color="#235D48" />
+                  </TouchableOpacity>
+                )}
+
+
+          <TouchableOpacity
+        onPress={() => {
+          const mainValue = mainItems[mainIndex]?.value ?? 0;
+          const decimalValue = decimalItems[decimalIndex]?.value ?? 0;
+
+          onSave(mainValue, decimalValue, selectedUnit);  
+          onClose();
+        }}
+      >
+                    <Ionicons name="checkmark" size={26} color="#235D48" />
+                  </TouchableOpacity>
+          </View> */}
+          {/* Header */}
+<View
+  style={{
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    paddingHorizontal: 16,
   }}
 >
-              <Ionicons name="checkmark" size={26} color="#235D48" />
-            </TouchableOpacity>
-          </View>
+  {/* Close button on the left */}
+  <TouchableOpacity onPress={onClose}>
+    <Ionicons name="close" size={24} color="#111827" />
+  </TouchableOpacity>
+
+  {/* Title in the center */}
+  <TitleText>
+    {title}
+  </TitleText>
+
+  {/* Right-side actions: trash (if exists) + checkmark */}
+  <View style={{ flexDirection: "row", alignItems: "center" }}>
+    {onDelete && (
+      <TouchableOpacity
+        style={{ marginRight: 12 }}
+        onPress={() => {
+          onDelete();
+          onClose();
+        }}
+      >
+        <Ionicons name="trash" size={26} color="#235D48" />
+      </TouchableOpacity>
+    )}
+
+    <TouchableOpacity
+      onPress={() => {
+        const mainValue = mainItems[mainIndex]?.value ?? 0;
+        const decimalValue = decimalItems[decimalIndex]?.value ?? 0;
+
+        onSave(mainValue, decimalValue, selectedUnit);
+        onClose();
+      }}
+    >
+      <Ionicons name="checkmark" size={26} color="#235D48" />
+    </TouchableOpacity>
+  </View>
+</View>
+
 
           {/* Unit Toggle */}
           <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 16 }}>
