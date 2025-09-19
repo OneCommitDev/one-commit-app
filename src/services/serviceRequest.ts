@@ -17,7 +17,7 @@ export const base_url =  apiUrl;
 
  
 const api = axios.create({
-  // baseURL: "https://devapi.onecommit.us:443/v1", 
+ // baseURL: "https://devapi.onecommit.us:443/v1", 
       baseURL: apiUrl,
   timeout: 60000,
   headers: {
@@ -455,13 +455,13 @@ export const Api_Url = {
   removeEmailApi : '/dashboard/remove-email',
    changePassword: '/change-pass',
       quickEditapi: '/user/profile-quick-edit',
+       checkOuyreachRecorsExist: '/dashboard/schools',
  
   quickProfileEventDelete : (sport_id: string, event_id: string) =>
     `/user/profile/sports/${sport_id}/${event_id}`,
    logout: '/logout',
 };
-
-
+ 
 
 export interface RegisterRequest {
   email: string;

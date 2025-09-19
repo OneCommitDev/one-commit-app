@@ -118,7 +118,7 @@ const isFormValid = () => {
 
   return !hasErrors && !isEmpty && hasTestScore;
   */
-  return !hasErrors && !isEmpty;
+  return  !isEmpty;
 };
 
 

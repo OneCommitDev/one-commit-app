@@ -37,6 +37,7 @@ type InputItem = {
   placeholder: string;
   type: string;
   value : string;
+  event_unit : string;
 };
 
 type Section = {
@@ -234,8 +235,9 @@ const navigation = useNavigation<Nav>();
       const accessToken = await getItem(PREF_KEYS.accessToken);
       const res = await httpRequest2<GetSportsAlldata>(
         Api_Url.save_sports,   'get',      {},    accessToken ?? ''    );
-
+ // console.log(res.data);
       if (res.status && res.data.sportUserFormattedData) {
+
         InteractionManager.runAfterInteractions(() => {
           // setRawSportData(res.data.sportUserFormattedData);
           processSportsDataInChunks(res.data.sportUserFormattedData);
@@ -258,18 +260,20 @@ const navigation = useNavigation<Nav>();
           }));
 */
           const initialForm: typeof form = {};
+        
           res.data.sportUserFormattedData.forEach((sport) => {
             sport.events?.forEach((event) => {
               const key = event.event_name;
               const type = event.measurement_type;
               const eventValue = event.eventValue;
+               const eventUnit = event.eventUnit;
 
               initialForm[key] = {
                 input: eventValue,
                 selected: '',
-                selectedUnit: (type === 'height' || type === 'distance') ? undefined : undefined,
-                feet: '',
-                meters: '',
+                selectedUnit: (type === 'height' || type === 'distance') ? eventUnit : eventUnit,
+                feet: eventUnit,
+                meters: eventUnit,
               };
             });
           });
@@ -334,6 +338,7 @@ const navigation = useNavigation<Nav>();
           placeholder: `Enter value in ${event.measurement_unit || ''}`,
           type: event.measurement_type || '',
           value: event.eventValue || '',
+          event_unit : event.eventUnit,
         })),
       })),
     ]);
@@ -423,6 +428,8 @@ console.log(payload);
         accessToken ?? '',
         true
       );
+
+      console.log(res);
       if (res.status) {
          setLoading(false);
          setTimeout(() => {
@@ -525,6 +532,7 @@ console.log(payload);
                 input: formatted,
                 feet: `${feet}'${inches}"`,
                 selectedUnit: 'feet_inches'
+              
               },
             }));
           }
@@ -662,7 +670,7 @@ console.log(payload);
             </View>
             <View className="border-t border-gray-300 mx-2 mb-4" />
 
-            {section.inputs.map(({ key, label, placeholder, type , value }, idx) => (
+            {section.inputs.map(({ key, label, placeholder, type , value , event_unit }, idx) => (
               <View key={key}>
                 <View className="mb-4 px-2">
                   <View className="flex-row items-center justify-between mb-2">
@@ -671,20 +679,12 @@ console.log(payload);
 
                       </View>
 
-                    {type === 'distance' || type === 'height' ? (
+                    {/* {type === 'distance' || type === 'height' ? ( */}
+                     {event_unit === "feet_inches" || event_unit === 'metres' || type === 'distance' || type === 'height' ? (
                       <View className="flex-row mt-2 w-[50%] border border-gray-300 rounded-full overflow-hidden">
                         <TouchableOpacity
                           onPress={() => {
-                        /*    setForm((prev) => ({
-                              ...prev,
-                              [key]: {
-                                ...prev[key],
-                                selectedUnit: 'feet_inches',
-                                // input: '',     // clear old value
-                                // feet: '',      // reset feet
-                                // meters: '',    // reset meters
-                              },
-                            }));*/
+
                             setHeightInputKey(key);
                             setShowHeightModal(true);
                           }}
@@ -695,7 +695,7 @@ console.log(payload);
                             borderColor: '#ccc',
                           }}
                         >
-                          <AppText>Feet</AppText>
+                          <AppText className="text-center">Feet</AppText>
                         </TouchableOpacity>
 
                       <TouchableOpacity

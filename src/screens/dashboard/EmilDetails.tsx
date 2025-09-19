@@ -47,9 +47,12 @@ export default function EmailDetails({
     try {
       setLoading(true);
 
-      console.log('emaildata ', emaildata);
+      // console.log('emaildata ', emaildata); 
+      //  console.log('emaildata ', emaildata.email_from); 
 
       const accessToken = await getItem(PREF_KEYS.accessToken);
+
+
 
       const res = await httpRequest2<Emaildetails>(
         Api_Url.getEmialContent,
@@ -60,12 +63,10 @@ export default function EmailDetails({
         },
         accessToken ?? ''
       );
-console.log(res);
       if (res.status) {
-        // ✅ store HTML string from API
          setEmailBody(res.data ?? '');
       } else {
-        Alert.alert('Error', res.message ?? 'Something went wrong');
+        Alert.alert('Alert', res.message ?? 'Something went wrong');
       }
     } catch (err) {
       console.log('Error fetching email content:', err);

@@ -18,8 +18,8 @@ export const refreshAccessToken = async (): Promise<string | null> => {
 
     if (!refreshToken || !email) return null;
 
-    const url = `${apiUrl.replace(/\/+$/, "")}/token`;
-    //  const url = `https://devapi.onecommit.us:443/v1/token`;
+      const url = `${apiUrl.replace(/\/+$/, "")}/token`;
+    // const url = `https://devapi.onecommit.us:443/v1/token`;
 
      let deviceId;
       if (Platform.OS === "android") {

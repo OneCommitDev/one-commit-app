@@ -97,12 +97,11 @@ export default function PasswordScreen() {
           Applog('Sending data:', requestBody);
 
     const getResponse = await postFormUrlEncoded<RegisterResponse>(Api_Url.register, requestBody , undefined);
-        setItem(PREF_KEYS.registerEmail , email);
+        setItem(PREF_KEYS.registerEmail , emailid);
 
-          Applog('Sending email:', email);
-          
+           
           if (getResponse.data?.accessToken) {
-            setItem(PREF_KEYS.registerEmail , email);
+            setItem(PREF_KEYS.registerEmail , emailid);
             setAuthToken(getResponse.data.accessToken);
             setItem(PREF_KEYS.accessToken , getResponse.data.accessToken);
             setItem(PREF_KEYS.refreshToken , getResponse.data.refreshToken);  
@@ -110,9 +109,10 @@ export default function PasswordScreen() {
       
 
         if (getResponse.status == true) {
+          // console.log(emailid);
           navigation.navigate('OtpVerification', {
                     method: 'email',
-                    value: email,
+                    value: emailid,
                     typeis: 'register_verify',
                   });
         } 

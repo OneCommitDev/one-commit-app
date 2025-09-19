@@ -197,7 +197,7 @@ useFocusEffect(
               data: [
                 { title: 'Full Name', value: capitalizeWords(d.full_name) || '' },
                 { title: 'Preferred Name', value: capitalizeWords(d.preferred_name) || 'N/A' },
-                { title: 'Email Address', value: d.email_connect_address || 'N/A' },
+                { title: 'Email Address', value: d.email || 'N/A' },
                 { title: 'Phone Number', value: d.phone || '' },
                 { title: 'Date of Birth', value: d.dob || '' },
                 { title: 'ZipCode', value: d.zipcode || '' },
@@ -205,7 +205,8 @@ useFocusEffect(
                 { title: 'City', value: d.city || '' },
                 { title: 'Gender', value: d.gender || 'N/A' },
                 { title: 'Weight', value: `${d.weight ?? ''} ${d.weight_unit ?? ''}` },
-                { title: 'Height', value: `${d.height ?? ''} ${d.height_unit ?? ''}` },
+                // { title: 'Height', value: `${d.height ?? ''} ${d.height_unit ?? ''}` },
+                { title: 'Height', value: `${d.height ?? ''} ` },
               ],
             },
             ...sportSections,
@@ -253,7 +254,7 @@ useFocusEffect(
 
                 {
                   title: 'How much money do you estimate your family can pay in tuition per year?',
-                  value: d.required_financial_aid?.toString() + 'k' || '0',
+                  value: d.required_financial_aid?.toString() + '' || '0',
                 },
               ],
             },

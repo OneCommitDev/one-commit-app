@@ -150,10 +150,13 @@ if (typeis === 'register_verify' || typeis === 'login_verify') {
         code: otp, 
       };
       console.log(requestBody);
+      console.log('email_', email);
+      console.log('value_', value);
 
       const res = await httpRequest2<RegisterOTPResponse>(
         Api_Url.verifyUser,    'post',    requestBody,    accessToken ?? '' 
       );
+       console.log(res);
   if (res.status) {
       setLoading(false);
         await removeItem(PREF_KEYS.register_redirect);

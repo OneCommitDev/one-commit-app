@@ -27,7 +27,7 @@ export default function SuccessModal({ isVisible, onClose }: Props) {
 
       <View className="bg-background rounded-t-2xl p-6 pt-4 items-center">
 
-                        {/* 👇 Handle View */}
+                        {/*  Handle View */}
         <View className="items-center mt-3 mb-3">
           <View style={{
             width: 60,
@@ -37,12 +37,12 @@ export default function SuccessModal({ isVisible, onClose }: Props) {
           }} />
         </View>
         {/* Header */}
-            <View className="flex-row justify-between items-center mb-6 w-full">
+            {/* <View className="flex-row justify-between items-center mb-6 w-full">
           <TitleText size="text-20" className="text-left">Compose Your Email</TitleText>
           <TouchableOpacity onPress={onClose}>
             <Ionicons name="close" size={24} color="black" />
           </TouchableOpacity>
-        </View>
+        </View> */}
 
 
 
@@ -51,7 +51,7 @@ export default function SuccessModal({ isVisible, onClose }: Props) {
         </View>
         <TitleText size='text-20' className="mb-2">Email Sent Successfully!</TitleText>
         <AppText className="text-center mb-6 px-2 -mt-3">
-          Your email to Coach Johnson at Stanford University has been sent.
+          Your email is queued to be sent shortly. Once sent you can view it in School Dashboard.
         </AppText>
 
         {/* <View className="w-full mb-4 bg-gray-50 border border-border_color p-4 rounded-xl">

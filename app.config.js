@@ -39,6 +39,11 @@ export default ({ config }) => ({
   orientation: 'portrait',
   userInterfaceStyle: 'light',
   icon: './assets/icon.png',
+   "androidStatusBar": {
+      "translucent": true,
+      "backgroundColor": "transparent",
+      "barStyle": "light-content"
+    },
   splash: {
     image: './assets/splash.png',
     resizeMode: 'contain',

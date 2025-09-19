@@ -396,6 +396,7 @@ export type ProfileComplitionData = {
   email_connect_address: string;
   full_name: string;
   preferred_name: string;
+  email: string;
   phone: string;
   dob: string;
     gender: string;
@@ -552,7 +553,7 @@ export type CommunicationHistory = {
   email_from: string;
   email_sent_date: string;
   email_status: string;
-  provideris? : string; // this is not the part of api call
+  provider? : string; // this is not the part of api call
 };
 
 
@@ -571,3 +572,25 @@ export type Editprofilemodal ={
   };
   data: ProfileComplitionData;
 }
+
+
+export type DashboardStartOutreachModal = {
+  status: boolean;
+  email_content : string;
+  email_subject : string;
+  email_conn_data: {
+    email: string;
+    provider: string;
+    status: boolean;
+  };
+  data: SchoolItem[];
+};
+
+export interface SchoolItem {
+  coach_email: string;
+  coach_id: string;
+  coach_name: string;
+  name: string;       // school name
+  school_id: string;
+}
+

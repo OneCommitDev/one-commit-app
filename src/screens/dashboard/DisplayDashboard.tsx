@@ -1,7 +1,7 @@
 import { getItem } from 'expo-secure-store';
 import LottieView from 'lottie-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import {  View,  Text,  FlatList,  Image,  TouchableOpacity,  Animated,  Easing,  Alert,} from 'react-native';
+import {  View,  Text,  FlatList,  Image,  TouchableOpacity,  Animated,  Easing,  Alert, Button, Pressable,} from 'react-native';
 import AppText from '~/components/AppText';
 import ArrowButton from '~/components/ArrowButton';
 import Loader from '~/components/Loader';
@@ -9,7 +9,7 @@ import NoDataAvailable from '~/components/NoDataAvailable';
 import SchoolCard from '~/components/SchoolCard';
 import TitleText from '~/components/TitleText';
 import WhiteCustomButton from '~/components/WhiteCustomButton';
-import { SchoolMatchItem, SchoolsMatches } from '~/services/DataModals';
+import {  DashboardStartOutreachModal, Editprofilemodal, SchoolMatchItem, SchoolsMatches } from '~/services/DataModals';
 import { Api_Url, base_url_images, httpRequest2 } from '~/services/serviceRequest';
 import { PREF_KEYS } from '~/utils/Prefs';
 import OutreachSheet from '../multi_info_screens/OutreachSheet';
@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '~/navigation/types';
   import { Ionicons } from '@expo/vector-icons';
 import SuccessModal from '~/components/SuccessModal';
+import SendDashboardPopupEmail from './SendDashboardPopupEmail';
 
 export default function DisplayDashboard() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -38,6 +39,20 @@ const [sheetData, setSheetData] = useState<{ schoolid: string }>({ schoolid: '' 
  const slideAnim = useRef(new Animated.Value(50)).current; // start 50px lower
 const opacityAnim = useRef(new Animated.Value(0)).current; // start hidden
   const [screenload, setScreenload] = useState(false);
+  const [popupVisible, setPopupVisible] = useState(false);
+const [dashboardData, setDashboardData] = useState<DashboardStartOutreachModal>({
+  status: false,
+  email_content: "",
+  email_subject: "",
+  email_conn_data: {
+    email: "",
+    provider: "",
+    status: false,
+  },
+  data: [],
+});
+ 
+
 
 const runEnterAnimation = () => {
   Animated.parallel([
@@ -58,6 +73,7 @@ const runEnterAnimation = () => {
   
     useEffect(() => {
       fetchColleges(0);
+       checkOuyreachRecorsExistApiRequest();
     }, []);
   
   
@@ -93,89 +109,45 @@ const runEnterAnimation = () => {
     };
 
 
-/*
- const renderItem = ({ item, index }: { item: typeof data[0]; index: number }) => (
-  <View className="bg-white rounded-[12px] p-4 mb-4 shadow shadow-black/10">
-   
- <View className="flex-row justify-between items-start mb-3">
-  <View className="flex-1 pr-2">
-    <View className="flex-row items-start">
-      <TitleText className=" mr-3 ">#{index + 1}</TitleText>
-     <View className='flex-row justify-between'>
-    <View className='flex-1'>
-         <TitleText   numberOfLines={2}       className="flex-1 leading-tight" >
-        {item.name}
-      </TitleText>
-      <Text>jhghghghjg</Text>
-    </View>
+    const checkOuyreachRecorsExistApiRequest = async () => {
+      try {
+        setLoading(true);
+        const accessToken = getItem(PREF_KEYS.accessToken);
+        const res = await httpRequest2<DashboardStartOutreachModal>(
+          Api_Url.checkOuyreachRecorsExist,
+          'get',
+          {},
+          accessToken ?? ''
+        );
+        if (res.status) {
+          setDashboardData(res);  
 
-
- <View className='mr-8'>
-        <Image
-        source={{ uri: item.logo }}
-        className="w-[48px] h-[48px] rounded-[8px]"
-        resizeMode="contain"
-      />
-      </View>
-     </View>
-    </View>
-
-
-
-
-
-
-
-     <View className="flex-row justify-between mt-1">
-      <View className="bg-gray-100  rounded-md w-[33%] ml-1 items-center h-16 text-center justify-center">
-         <Text className='text-18 font-nunitoextrabold text-pretty'>79%</Text>
-                <Text className="text-12 text-black -mt-1 font-nunitoregular">
-                  Match Score
-                  </Text>
-
-      </View>
-      <View className="bg-gray-100  rounded-md w-[33%] ml-1 items-center h-16 text-center justify-center">
-         <Text className='text-18 font-nunitoextrabold text-pretty'>79%</Text>
-                <Text className="text-12 text-black -mt-1 font-nunitoregular">
-          Coach Interest
-          </Text>
-      </View>
-
-      <View className="bg-gray-100  rounded-md w-[33%] ml-1 items-center h-16 text-center justify-center">
-         <Text className='text-18 font-nunitoextrabold text-pretty'>79%</Text>
-                <Text className="text-12 text-black -mt-1 font-nunitoregular">
-          Progress
-          </Text>
-      </View>
-
-
-
-
-
-  
-  </View>
-
-
-  </View>
-</View>
-
-
- 
-
- 
-
-    <WhiteCustomButton height={40}  fullWidth text={item.status} onPress={function (): void {
        
-     } } />
-    
-  </View>
-);
 
-*/
+        } else {
+           
+        }
+      } catch (err) {
+        Alert.alert("Error", "Something went wrong. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
+ 
  const renderSchoolItem = ({ item, index }: { item: SchoolMatchItem; index: number }) => {
       return (
         <View className="bg-white rounded-[12px] p-4 mb-4 shadow shadow-black/10">
+    <Pressable
+  onPress={() =>
+    navigation.navigate('EmailCommunication', {
+      id: item.school_id,
+      type: item.name,
+    })
+  }
+>
+      
+
       <View className="flex-row justify-between items-start mb-3">
         <View className="flex-1 pr-2">
           <View className="flex-row items-start">
@@ -220,8 +192,6 @@ const runEnterAnimation = () => {
         </View>
         </View>
       </View>
-
-
       <View>
            <WhiteCustomButton
             height={40}
@@ -252,81 +222,27 @@ const runEnterAnimation = () => {
 
           />
       </View>  
- 
 
-{/*  
- <View className='flex-row justify-between'>
-      <TouchableOpacity
-        onPress={() => {
-              navigation.navigate('EmailCommunication' ,   {id : item.school_id , type : 'details'});
-            }}
-      className='px-2 py-2 rounded-[20px] border border-gray-200 w-[48%] text-center justify-center items-center'>
-        <Text className='font-nunitosemibold text-14'>View Detail</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => {
-              if (
-                item.last_interaction_detail &&
-                item.last_interaction_detail.toLowerCase() === 'waiting for coach reply'
-              ) {
-                navigation.navigate('EmailCommunication' ,   {id : item.school_id , type : 'email'});
-              } else {
-                setSheetVisible(true);
-              }
-            }}
-      className='px-2 py-2 rounded-[20px] border border-gray-200 w-[48%] text-center justify-center items-center'>
-        <Text className='justify-center text-center'>{item.last_interaction_detail}</Text>
-      </TouchableOpacity>
-
- </View> 
- */}
-
-
-
-
-
-{/* 
-  <View className='flex-row justify-end'>
-      <TouchableOpacity
-        onPress={() => {
-              navigation.navigate('EmailCommunication' ,   {id : item.school_id , type : 'details'});
-            }}
-      className='rounded-[4px] border border-gray-200 w-[60px] h-[40px] text-center justify-center items-center mr-2 bg-white'>
-    <Ionicons name="information-circle-outline" size={24} color="#235D48" />
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => {
-              if (
-                item.last_interaction_detail &&
-                item.last_interaction_detail.toLowerCase() === 'waiting for coach reply'
-              ) {
-                navigation.navigate('EmailCommunication' ,   {id : item.school_id , type : 'email'});
-              } else {
-                setSheetVisible(true);
-              }
-            }}
-      className='rounded-[4px] border border-gray-200 w-[60px] h-[40px] text-center justify-center items-center bg-white'>
-      <Ionicons name="mail-unread-outline" size={24} color="blue" />
-
-      </TouchableOpacity>
-
- </View>  
-    */}
-
-
-    
+</Pressable>
         </View>
     );
   };
 
- 
+  const handleSendEmail = (email: string) => {
+   // console.log("Sending dashboard report to:", email);
+    
+  };
+
+
+    const sendBulkEmails = async () => {
+      setPopupVisible(true);
+  };
 
   return (
     <View className="flex-1 bg-[#f5f5f5] pt-14 px-4">
             <Loader show={loading} />
-      
+            {/* <Button title="Send Dashboard Email" onPress={() => setPopupVisible(true)} /> */}
+
       <TitleText size="text-24">Dashboard</TitleText>
 
       {!loading && connectedEmail === false && (
@@ -343,6 +259,35 @@ const runEnterAnimation = () => {
     </View>
   </View>
 )}
+
+
+{(!dashboardData?.data || dashboardData.data.length > 0) && (
+ 
+
+
+   <View className="bg-yellow-100 border border-yellow-50 rounded-lg p-4 flex-row items-center mb-1">
+          <View className="flex-1 flex-row items-start">
+            {/* <Ionicons name="warning-outline" size={22} color="#B45309" style={{ marginTop: 2, marginRight: 8 }} /> */}
+            <View className="flex-1">
+              <TitleText className="text-yellow-800 -mt-3">Action Pending </TitleText>
+              <AppText className="text-yellow-700 text-sm -mt-3">
+       There are {dashboardData?.data.length.toString() }  schools for which communication has not been initiated. Do you want to send emails to the coaches?
+              </AppText>
+            </View>
+          </View>
+
+          <TouchableOpacity  onPress={sendBulkEmails} className="bg-yellow-500 px-4 py-2 rounded-lg">
+            <Text className="text-white font-semibold text-sm">Take Action</Text>
+          </TouchableOpacity>
+        </View>
+ 
+)}
+
+
+
+
+
+
       {screenload ? (
    <> 
 
@@ -437,7 +382,20 @@ const runEnterAnimation = () => {
             }}
           />
 
-          
+        {dashboardData && (
+                <SendDashboardPopupEmail
+          visible={popupVisible}
+          onClose={() => {
+            setPopupVisible(false);
+            setShowSuccess(true);
+          }}
+          onSend={handleSendEmail}
+          schools={dashboardData.data}
+          subject={dashboardData.email_subject}
+          contentdata={dashboardData.email_content}
+        />
+
+        )}
 
     </View>
   );

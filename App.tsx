@@ -214,7 +214,8 @@ function AppContent({ reloadKey, onRetry }: { reloadKey: number; onRetry: () => 
 
   return (
     <>
-      <StatusBar backgroundColor="#235D48" barStyle="light-content" />
+      {/* <StatusBar backgroundColor="#235D48" barStyle="light-content" /> */}
+      
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <NavigationContainer  ref={navigationRef}>

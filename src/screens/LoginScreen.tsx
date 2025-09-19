@@ -274,7 +274,7 @@ if (res.status && res.data) {
            navigation.replace('FillProfileInfoScreen');
         }
     } else {
-     // Alert.alert('Error', res.message ?? 'Login failed');
+       Alert.alert('Error', res.message ?? 'Login failed');
     }
   } catch (err) {
    Alert.alert('Error', 'Unexpected error occurred.');

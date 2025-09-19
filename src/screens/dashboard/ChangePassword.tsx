@@ -10,7 +10,7 @@ import { LoginResponse, ResetPasswordResponse, SimpleResponse } from '~/services
 import { getItem, setItem } from 'expo-secure-store';
 import { PREF_KEYS, Temp_KEYS } from '~/utils/Prefs';
 import Loader from '~/components/Loader';
-import { removeItem } from '~/utils/storage';
+import { clearAllPrefss, removeItem } from '~/utils/storage';
 import AppText from '~/components/AppText';
 import TitleText from '~/components/TitleText';
 
@@ -78,8 +78,9 @@ const OTP = await getItem(PREF_KEYS.forgot_otp);
         removeItem(PREF_KEYS.forgot_email);
         removeItem(PREF_KEYS.forgot_otp);
         // navigation.reset({ index: 0, routes: [{ name: 'Login' }], });
+        clearAllPrefss();
        navigation.navigate('Success', {
-          message: 'Password Reset successfully!',
+          message: 'Password Reset successfully! Please login again',
         });
      } else {
        Alert.alert('Error', res.message ?? 'Request failed');
