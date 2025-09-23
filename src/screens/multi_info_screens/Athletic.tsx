@@ -472,7 +472,7 @@ console.log(payload);
      //   navigation.navigate('GamesGrid');
           // navigation.replace('MultiStepSurvey', {
           //     selectedGames: selectedGames,
-          //     stepToEdit: null, // ✅ use colon, not semicolon
+          //     stepToEdit: null, //  use colon, not semicolon
           //   });
   };
 

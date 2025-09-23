@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {  View,  Text,  TouchableOpacity,  ScrollView,  Alert,  Keyboard,  TouchableWithoutFeedback, InteractionManager,} from 'react-native';
+import {  View,  Text,  TouchableOpacity,  ScrollView,  Alert,  Keyboard,  TouchableWithoutFeedback, InteractionManager, KeyboardAvoidingView, Platform,} from 'react-native';
 import TestTypeToggle from './TestTypeToggle';
 import AppText from '~/components/AppText';
 import AppInput from '~/components/AppInput';
@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { SelectedGame } from './GamesGrid';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 type Props = {
   onNext?: () => void;
@@ -356,9 +357,16 @@ const isFormValid = () => {
           </View>
 
 
-    <ScrollView keyboardShouldPersistTaps="handled" 
+    {/* <ScrollView keyboardShouldPersistTaps="handled" 
     showsVerticalScrollIndicator={false}
-    contentContainerStyle={{ paddingBottom: 100 }}>
+    contentContainerStyle={{ paddingBottom: 100 }}> */}
+  <KeyboardAwareScrollView
+  keyboardShouldPersistTaps="handled"
+  enableOnAndroid={true}
+  extraScrollHeight={Platform.OS === 'ios' ? 20 : 100} // adjust if needed
+  showsVerticalScrollIndicator={false}
+  contentContainerStyle={{ paddingBottom: 100 }}
+>
 
       {/* GPA */}
       <View className="px-2">
@@ -595,7 +603,8 @@ const isFormValid = () => {
           disabled={!isFormValid()}
         />
       </View>
-    </ScrollView>
+    {/* </ScrollView> */}
+    </KeyboardAwareScrollView>
  </>
     ) : (
       // ⏳ Loader while screenload = false

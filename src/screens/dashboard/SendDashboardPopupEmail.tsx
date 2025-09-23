@@ -1,6 +1,6 @@
 import LottieView from "lottie-react-native";
 import React, { useState } from "react";
-import {  View,  Text,  TextInput,  TouchableOpacity,  Modal,  ScrollView,} from "react-native";
+import {  View,  Text,  TextInput,  TouchableOpacity,  Modal,  ScrollView, ActivityIndicator,} from "react-native";
 import AppText from "~/components/AppText";
 import ArrowButton from "~/components/ArrowButton";
 import Logo from "~/components/Logo";
@@ -12,7 +12,7 @@ import WebView from "react-native-webview";
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSend: (email: string) => void;
+  onSend: (email: string, onProgress?: (sentCount: number) => void) => void; // added onProgress callback
   schools: SchoolItem[];  
   subject : string;
    contentdata : string;
@@ -21,12 +21,30 @@ interface Props {
 
 const SendDashboardPopupEmail: React.FC<Props> = ({ visible, onClose, onSend, schools , subject , contentdata }) => {
   const [email, setEmail] = useState("");
+   const [isSending, setIsSending] = useState(false);
+  const [sentCount, setSentCount] = useState(0);
 
-  const handleSend = () => {
-     onSend(email.trim());
-    setEmail("");
-    onClose();
-  };
+ const handleSend = () => {
+  if (schools.length === 0) return;
+
+  setIsSending(true);
+  setSentCount(0);
+
+  let currentCount = 0;
+
+  const interval = setInterval(() => {
+    currentCount += 1;
+    setSentCount(currentCount);
+
+    if (currentCount >= schools.length) {
+    //  if (currentCount >= 100) {
+      clearInterval(interval);
+      setIsSending(false);
+      onClose();
+    }
+  }, 500); // adjust 500ms per email for demo; replace with real sending logic
+};
+
 
  
   
@@ -133,10 +151,15 @@ const SendDashboardPopupEmail: React.FC<Props> = ({ visible, onClose, onSend, sc
 
           {/* Fixed bottom actions */}
           <View className="w-full">
-            
-            <ArrowButton text={"Send Emails"} fullWidth onPress={handleSend} />
+            {/* <ArrowButton text={"Send Emails"} fullWidth onPress={handleSend} /> */}
+             <ArrowButton text={isSending ? `Sending Emails (${sentCount}/${schools.length})` : "Send Emails"} fullWidth onPress={handleSend} disabled={isSending} />
+            {isSending && (
+              <View className="flex-row justify-center mt-2">
+                <ActivityIndicator size="small" color="#000" />
+              </View>
+            )}
             <Text className="font-nunitoregular mt-3">
-           Note : This action will send an email to all the selected schools and coaches.
+               Note : This action will send an email to all the selected schools and coaches.
             </Text>
           </View>
         </View>
