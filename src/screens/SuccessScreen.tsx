@@ -1,18 +1,16 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, SafeAreaView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import ArrowButton from '~/components/ArrowButton';
-import Animated, { FadeInUp } from 'react-native-reanimated';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '~/navigation/types';
+import LottieView from 'lottie-react-native';
+
+import ArrowButton from '~/components/ArrowButton';
 import TitleText from '~/components/TitleText';
 import AppText from '~/components/AppText';
+import { RootStackParamList } from '~/navigation/types';
 
 type SuccessScreenNavProp = NativeStackNavigationProp<RootStackParamList, 'Success'>;
 type SuccessScreenRouteProp = RouteProp<RootStackParamList, 'Success'>;
-
-
 
 export default function SuccessScreen() {
   const navigation = useNavigation<SuccessScreenNavProp>();
@@ -27,24 +25,31 @@ export default function SuccessScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background justify-center items-center p-5">
-      <Animated.View
-        entering={FadeInUp}
-        className=" w-full max-w-md rounded-2xl items-center p-8"
-        style={{ elevation: 6 }}
-      >
-        <Ionicons name="checkmark-circle-outline" size={80} color="#4CAF50" />
+<SafeAreaView className="flex-1 bg-background justify-center items-center px-6">
+      {/* Lottie Animation */}
+      <LottieView
+        source={require('../../assets/animations/check_success.json')}
+        autoPlay
+        loop={false}
+        style={{ width: 150, height: 150 }}
+      />
 
-        <TitleText size='text-24'>
-          {title}
-        </TitleText>
+      {/* Title */}
+      <TitleText size="text-24" >
+        {title}
+      </TitleText>
 
-        <AppText className="text-center mb-6 -mt-2">
-          {message}
-        </AppText>
+      {/* Message */}
+      <AppText className="text-center -mt-3 mb-8">
+        {message}
+      </AppText>
 
-        <ArrowButton onPress={handleContinue} text="Back To Home" fullWidth />
-      </Animated.View>
-    </View>
+      {/* Button */}
+      <View className="w-full px-5">
+        <ArrowButton onPress={handleContinue} text="Back To Login" fullWidth />
+      </View>
+    </SafeAreaView>
   );
 }
+
+

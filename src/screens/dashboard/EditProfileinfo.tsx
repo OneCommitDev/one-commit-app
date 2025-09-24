@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {  View,  Text,  TouchableOpacity,  ScrollView,  Image, Dimensions, Alert, InteractionManager, } from "react-native";
+import {  View,  Text,  TouchableOpacity,  ScrollView,  Image, Dimensions, Alert, InteractionManager, Platform, } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import TitleText from "~/components/TitleText";
 import AppText from "~/components/AppText";
@@ -305,18 +305,23 @@ useEffect(() => {
 
   return (
     
-    <View className="flex-1 bg-background px-1">
+    // <View className="flex-1 bg-background px-1">
+     <View
+              className={`flex-1 bg-background  ${
+                Platform.OS === "ios" ? "pt-14" : "pt-4"
+              }`}
+            >
       <Loader show={loading} />
 
       {/* Header */}
-      <View className="px-4 mb-6 pt-14">
+      <View className="px-4 mb-6">
         <TitleText size="text-24">Profile Settings</TitleText>
       </View>
 {screenload ? (
    <> 
       <ScrollView
         contentContainerStyle={{ paddingBottom: 40 }}
-        className="px-4"
+        className="px-5"
       >
       {/* Profile Card */}
         <View className="flex-row justify-between bg-primary py-3 rounded-2xl mb-6 shadow-sm h-[120px]">

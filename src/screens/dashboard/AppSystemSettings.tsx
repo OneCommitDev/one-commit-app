@@ -252,12 +252,17 @@ const handleEmailDelete = () => {
 
 
   return (
-    <View className="flex-1 bg-background h-full">
+    // <View className="flex-1 bg-background h-full mt-14">
+     <View
+              className={`flex-1 bg-background  ${
+                Platform.OS === "ios" ? "pt-14" : "pt-1"
+              }`}
+            >
       {/* Header */}
-      <View className="flex-row mt-14 items-center px-4 mb-2">
+      <View className="flex-row  items-center px-4 mb-2">
         <TouchableOpacity
           onPress={handleBack}
-          className="w-11 h-11 rounded-full bg-gray-200 items-center justify-center"
+          className="w-12 h-12 rounded-full bg-gray-200 items-center justify-center"
         >
           <Ionicons name="chevron-back" size={24} color="#1A322E" />
         </TouchableOpacity>

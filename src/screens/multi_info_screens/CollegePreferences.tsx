@@ -353,7 +353,7 @@ const parseShortNumber = (num: number): number => {
 
   return (
     <>
-        <View className="flex-1 bg-background px-2 pt-14"> 
+        <View className="flex-1 bg-background px-4 pt-14"> 
     
           <View className="flex-row items-center justify-between mb-1">
     

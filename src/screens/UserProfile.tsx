@@ -298,7 +298,12 @@ const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
   };
 
   return (
-    <View className="flex-1 px-2 pt-7">
+    // <View className="flex-1 px-2 pt-7">
+     <View
+          className={`flex-1 bg-background px-2 ${
+            Platform.OS === "ios" ? "pt-7" : "pt-2"
+          }`}
+        >
       <View className="flex-row mt-5">
         <TouchableOpacity
           onPress={handleBack}

@@ -1,3 +1,4 @@
+/*
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -21,7 +22,6 @@ const IntroScreen = () => {
   const fetchUsers = async () => {
     try {
       const users = await getRequest('/users');
-     // console.log(users);
     } catch (err) {
       console.error('Error fetching users:', err);
     }
@@ -58,9 +58,9 @@ const IntroScreen = () => {
 };
 
 export default IntroScreen;
+*/
 
-
-/*
+ 
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Button, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -98,10 +98,10 @@ const IntroScreen = () => {
 
   return (
     
-      // <ScrollView 
-      //     contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 }}
-      //     showsVerticalScrollIndicator={false}
-      //   >
+        <ScrollView 
+         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 }}
+         showsVerticalScrollIndicator={false}
+         >
     <View className="flex-1 bg-background justify-center items-center px-6 space-y-6">
       <View className="items-center mb-6">
       <View>
@@ -122,10 +122,8 @@ const IntroScreen = () => {
         <Text className="text-black font-semibold underline" onPress={handleSubmit_demo}>Sign In</Text>
       </Text>
     </View>
-    // </ScrollView>
+    </ScrollView>
   );
 };
 
 export default IntroScreen;
-
-*/

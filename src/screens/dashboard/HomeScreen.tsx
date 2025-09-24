@@ -550,7 +550,12 @@ setScreenload(true);
   };
 
   return (
-    <View className="flex-1 bg-background pt-14 px-4">
+    // <View className="flex-1 bg-background pt-14 px-4">
+     <View
+          className={`flex-1 bg-background px-4 ${
+            Platform.OS === "ios" ? "pt-14" : "pt-5"
+          }`}
+        >
       <View className="px-4 mb-6">
         <TitleText size="text-24">Hi, {capitalizeWords(todoList?.data?.profile?.name) ?? ""} 👋</TitleText>
         <AppText className="-mt-4">{formattedDate}</AppText>

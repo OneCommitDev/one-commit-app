@@ -38,6 +38,7 @@ module.exports = {
         26: 26,
         28 : 28,
         30: 30,
+          40: 40,
       },
       fontFamily: {
        sans: ['Inter', 'System'],

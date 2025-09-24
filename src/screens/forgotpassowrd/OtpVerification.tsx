@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Keyboard, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {  NavigationProp,  RouteProp,  useNavigation,  useRoute,} from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -19,7 +19,7 @@ type RootStackParamList = {
   ResetPasswordScreen: { userid: any };
     Login: undefined;
 UserProfile : undefined;
-  Success: { message: string; title?: string };
+  SuccessScreen: { message: string; title?: string };
 
 };
 
@@ -72,14 +72,17 @@ if (typeis === 'register_verify' || typeis === 'login_verify') {
     setTimer(120);
     setCanResend(false);
       if (typeis === 'register_verify' || typeis === 'login_verify') {
+            const emails =   getItem(PREF_KEYS.registerEmail);  
+
          const requestBody: RegisterOTPRequest = {
-              email: value, // 'value' should hold the email string
+              email: emails ?? '', // 'value' should hold the email string
               code : otp
             };
             ResenedOTPcall(Api_Url.otpResend, requestBody);
       }else{
+          const emails =   getItem(PREF_KEYS.registerEmail);  
          const requestBody: ForgotOTPVerifyRequest = {
-              email: value, // 'value' should hold the email string
+              email: emails ?? '', // 'value' should hold the email string
               code : otp
             };
           ResenedOTPcall(Api_Url.resendForgotOTP, requestBody);
@@ -164,8 +167,8 @@ if (typeis === 'register_verify' || typeis === 'login_verify') {
           if (typeis === 'login_verify') {
           navigation.navigate('UserProfile');
         } 
-      else if (typeis === 'register_verify' || typeis === 'login_verify') {
-          navigation.navigate('Success', {
+      else if (typeis === 'register_verify' || typeis === 'login_verify') { 
+          navigation.navigate('SuccessScreen', {
             message: 'User Verified Successfully!',
           });
         } else {
@@ -221,7 +224,7 @@ const ResenedOTPcall = async (resendurl: string, requestBody: any) => {
     if (res.status ) {
   
     } else {
-      Alert.alert('Error', res.message ?? 'Login failed');
+      Alert.alert('Error', res.message ?? 'Something went wrong failed');
     }
   } catch (err) {
     Alert.alert('Error', 'Unexpected error occurred.');
@@ -232,7 +235,11 @@ const ResenedOTPcall = async (resendurl: string, requestBody: any) => {
 
 
   return (
-    <View className="flex-1 bg-background px-8 pt-14">
+    <View
+            className={`flex-1 bg-background px-6 ${
+              Platform.OS === "ios" ? "pt-14" : "pt-5"
+            }`}
+          >
       {/* Back Button or empty view */}
     {!['register_verify', 'login_verify'].includes(typeis) ? (
         <TouchableOpacity
@@ -245,8 +252,13 @@ const ResenedOTPcall = async (resendurl: string, requestBody: any) => {
         <View className="w-16 h-16 mb-6" />
       )}
 
+          <ScrollView 
+                         contentContainerStyle={{ flexGrow: 1,  paddingHorizontal: 4 }}
+                         showsVerticalScrollIndicator={false}
+                         >
+
       {/* Header */}
-      <View className="items-center">
+      <View className="items-center -mt-1">
         <TitleText className="text-center" size='text-20'>
           Enter Verification Code
         </TitleText>
@@ -281,6 +293,7 @@ const ResenedOTPcall = async (resendurl: string, requestBody: any) => {
         onPress={handleVerify}
         disabled={otp.length !== 6}
       />
+      </ScrollView>
               <Loader show={loading} />
       
     </View>

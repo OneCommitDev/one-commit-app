@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {  View,  Text,  TextInput,  TouchableOpacity,  Keyboard,  Alert, SafeAreaView,} from 'react-native';
+import {  View,  Text,  TextInput,  TouchableOpacity,  Keyboard,  Alert, SafeAreaView, Platform, StatusBar,} from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import ArrowButton from '~/components/ArrowButton';
 import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -170,14 +170,20 @@ export default function PasswordScreen() {
   
 
 
-    <View className="flex-1 bg-background px-6 pt-14">
+      <View
+         className={`flex-1 bg-background  ${
+           Platform.OS === "ios" ? "pt-14" : "pt-5"
+         }`}
+       >
+         
     {/* Back Button */}
       <TouchableOpacity
         onPress={() => navigation.goBack()}
-        className="w-12 h-12 rounded-3xl bg-[#E3E9E5] items-center justify-center mb-2"
+        className="w-12 h-12 ml-5 rounded-3xl bg-[#E3E9E5] items-center justify-center mb-2"
       >
         <Ionicons name="chevron-back" size={24} color="#1A322E" />
       </TouchableOpacity>
+
      <KeyboardAwareScrollView
       className="flex-1 bg-background"
       contentContainerStyle={{ flexGrow: 1 }}
@@ -324,9 +330,10 @@ export default function PasswordScreen() {
           </View>
         </View>
       </View>
-              <Loader show={loading} />
 
     </KeyboardAwareScrollView>
+                  <Loader show={loading} />
+
 </View>
 
  

@@ -1,7 +1,7 @@
 import { getItem } from 'expo-secure-store';
 import LottieView from 'lottie-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import {  View,  Text,  FlatList,  Image,  TouchableOpacity,  Animated,  Easing,  Alert, Button, Pressable,} from 'react-native';
+import {  View,  Text,  FlatList,  Image,  TouchableOpacity,  Animated,  Easing,  Alert, Button, Pressable, Platform,} from 'react-native';
 import AppText from '~/components/AppText';
 import ArrowButton from '~/components/ArrowButton';
 import Loader from '~/components/Loader';
@@ -239,7 +239,12 @@ const runEnterAnimation = () => {
   };
 
   return (
-    <View className="flex-1 bg-[#f5f5f5] pt-14 px-4">
+    // <View className="flex-1 bg-[#f5f5f5] pt-14 px-4">
+     <View
+          className={`flex-1 bg-background px-4 ${
+            Platform.OS === "ios" ? "pt-14" : "pt-5"
+          }`}
+        >
             <Loader show={loading} />
             {/* <Button title="Send Dashboard Email" onPress={() => setPopupVisible(true)} /> */}
 
@@ -290,8 +295,11 @@ const runEnterAnimation = () => {
 
       {screenload ? (
    <> 
+      {matches.length > 0 && (
+        <AppText className="mb-3">{matches.length} Active Schools</AppText>
+       )}
 
-       <AppText className="mb-3">{matches.length} Active Schools</AppText>
+      
     <Animated.View
     style={{
     flex: 1,

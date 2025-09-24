@@ -427,8 +427,13 @@ const handleSelect = (item: SearchSchoolData) => {
   });
 
    return (
-  <View className="flex-1 bg-background px-4 pb-6 pt-2">
- <View className="mt-14 flex-row items-center justify-between px-4">
+  // <View className="flex-1 bg-background px-4 pb-6 pt-2">
+   <View
+            className={`flex-1 bg-background px-0 ${
+              Platform.OS === "ios" ? "pt-14" : "pt-4"
+            }`}
+          >
+ <View className=" flex-row items-center justify-between px-4">
   {!showSearch ? (
     <>
     
