@@ -343,7 +343,7 @@ useEffect(() => {
         {/* Right Side - Settings Icon */}
         <TouchableOpacity
         onPress={() => navigation.navigate("AppSystemSettings" as never)}
-        className="mr-4 items-center justify-center">
+        className="mr-6 items-center justify-center">
             <Ionicons name="settings-outline" size={18} color="white" />
         </TouchableOpacity>
         </View>
@@ -394,7 +394,7 @@ useEffect(() => {
 
  
 
-    <View className="flex-row flex-wrap">
+    {/* <View className="flex-row flex-wrap">
  {section.events.map((item, index) => (
   <InfoCard
     key={index}
@@ -422,24 +422,50 @@ useEffect(() => {
          else if(item.measurement_type === 'distance' || item.measurement_type === 'height'){
            sersportslentgh(section.events.length);
            setModalVisible(true);
-          // setShowHeightModal(true);
       }
-      // else if(item.measurement_type === 'meters'){
-      //     // setShowMeterModal(true);
-      // }
-      // else if(item.measurement_type === 'feet_inches'){
-      //     // setShowHeightModal(true);
-      // }
-    
-
-      
     }}
     className={index % 2 === 0 ? "mr-[14px]" : ""} // 👈 add conditional margin
   />
 ))}
 
 
-    </View>
+    </View> */}
+    <View className="flex-row flex-wrap">
+  {section.events.map((item, index) => (
+    <InfoCard
+      key={index}
+      label={capitalizeWords(item.event_name).replaceAll('_', ' ')}
+      value={item.eventValue?.toString() || '0'}
+      onPressEdit={() => {
+        item.sport_id = section.sport_id;
+        sersportslentgh(section.events.length);
+        setSportsdata(item);  
+
+        if (item.measurement_type === 'time') {
+          setShowTimePicker(true);
+        } else if (item.measurement_type === 'points') {
+          sersportslentgh(section.events.length);
+          openBoxModal(
+            section.display_name,
+            item.event_name.replaceAll("_", " "),
+            item.event_name.toLowerCase(),
+            item.eventUnit?.toString() ?? '',
+            "sports",
+            (val) => console.log("Saved Name:", val)
+          );
+        } else if (
+          item.measurement_type === 'distance' ||
+          item.measurement_type === 'height'
+        ) {
+          sersportslentgh(section.events.length);
+          setModalVisible(true);
+        }
+      }}
+      className={`w-[48%] mb-4 ${index % 2 === 0 ? "mr-[4%]" : ""}`}
+    />
+  ))}
+</View>
+
   </View>
 ))}
  

@@ -10,11 +10,13 @@ import {
   Alert,
   useWindowDimensions,
   Linking,
+  Platform,
 } from "react-native";
 import LottieView from "lottie-react-native";
 import TitleText from "~/components/TitleText";
 import AppText from "~/components/AppText";
 import ArrowButton from "~/components/ArrowButton";
+import * as Application from "expo-application";
 
 type RootStackParamList = {
   ContactUs: undefined;
@@ -47,9 +49,9 @@ export default function ContactUs() {
 
   // On small screens, stack vertically
 const isSmallScreen = width < 768;
-
+/*
   const handleEmailPress = async () => {
-    const email = "hello@onecommit.com";
+    const email = "hello@onecommit.us";
     const url = `mailto:${email}`;
     try {
       const supported = await Linking.canOpenURL(url);
@@ -62,6 +64,52 @@ const isSmallScreen = width < 768;
       Alert.alert("Error", "Unable to open email client");
     }
   };
+  */
+
+  let appVersion = "unknown";
+let buildNumber = "unknown";
+
+ const handleEmailPress = async () => {
+ const appVersion = Application.nativeApplicationVersion ?? "unknown";
+  const buildNumber = Application.nativeBuildVersion ?? "unknown";
+
+
+
+
+  const email = "hello@onecommit.us";
+  const subject = "Support Request";
+  // const body = "Hello team,";
+   const body = `
+    Hello OneCommit Support Team,
+
+
+
+
+
+    App Information
+    • Version: ${appVersion}
+    • Build: ${buildNumber}
+    • Platform: ${Platform.OS}
+`;
+
+
+  const url = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  try {
+    if (Platform.OS === "ios") {
+      const supported = await Linking.canOpenURL(url);
+      if (!supported) {
+        Alert.alert("Error", "No email client found");
+        return;
+      }
+    }
+    await Linking.openURL(url);
+  } catch (err) {
+    Alert.alert("Error", "Unable to open email client");
+  }
+};
+
+
 
   const handleWebsitePress = async () => {
     const url = "https://onecommit.us/";
@@ -77,9 +125,14 @@ const isSmallScreen = width < 768;
     }
   };
   return (
-    <View className="flex-1 bg-background">
+    // <View className="flex-1 bg-background">
+      <View
+                      className={`flex-1 bg-background px-4 ${
+                        Platform.OS === "ios" ? "pt-14" : "pt-1"
+                      }`}
+                    >
       {/* Header */}
-      <View className="flex-row mt-14 items-center px-4">
+      <View className="flex-row  items-center">
         <TouchableOpacity
           onPress={handleBack}
           className="w-11 h-11 rounded-full bg-gray-200 items-center justify-center"
@@ -94,21 +147,11 @@ const isSmallScreen = width < 768;
 
       {/* Body */}
       <ScrollView
-        className="flex-1 px-5"
+        className="flex-1"
         contentContainerStyle={{ paddingVertical: 20 }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Animation */}
-        {/*   <View className="items-center mb-6">
-        <LottieView
-            source={require("../../../assets/animations/contact.json")}
-            autoPlay
-            loop
-            style={{ width: 140, height: 140 }}
-          /> 
-        </View>*/}
-
-        {/* Container */}
+      
         <View
           className={`${
             isSmallScreen ? "flex-col" : "flex-row"
@@ -141,41 +184,6 @@ const isSmallScreen = width < 768;
               </AppText>
             </TouchableOpacity>
           </View>
-
-          {/* <View className="flex-1">
-            <TextInput
-              className="border border-gray-300 rounded-xl px-4 py-3 mb-3 bg-white text-base"
-              placeholder="Name *"
-              value={name}
-              onChangeText={setName}
-            />
-            <TextInput
-              className="border border-gray-300 rounded-xl px-4 py-3 mb-3 bg-white text-base"
-              placeholder="Email *"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-            />
-            <TextInput
-              className="border border-gray-300 rounded-xl px-4 py-3 mb-3 bg-white text-base"
-              placeholder="Subject *"
-              value={subject}
-              onChangeText={setSubject}
-            />
-            <TextInput
-              className="border border-gray-300 rounded-xl px-4 py-3 h-32 bg-white rounded-xl mb-4 text-base"
-              placeholder="Message *"
-              value={message}
-              onChangeText={setMessage}
-              multiline
-            />
-
-            <ArrowButton text={"Send Message"} fullWidth  onPress={handleSubmit} >
-              
-            </ArrowButton>
-
-        
-          </View> */}
         </View>
       </ScrollView>
     </View>
