@@ -233,6 +233,7 @@ const openBoxModal = (title: string, label: string, typeis : string , value : st
 
 
 const SaveRequest = async (payload: Record<string, any>) => {
+  setLoading(true);
   try {
      const token = await getItem(PREF_KEYS.accessToken);
 
@@ -263,6 +264,7 @@ const SaveRequest = async (payload: Record<string, any>) => {
 
 
 const DeleteApiRequest = async (sportid : string , eventid : string) => {
+   setLoading(true);
   try {
      const token = await getItem(PREF_KEYS.accessToken);
      const url = Api_Url.quickProfileEventDelete(sportid , eventid);

@@ -47,8 +47,8 @@ export default function EmailDetails({
     try {
       setLoading(true);
 
-      // console.log('emaildata ', emaildata); 
-      //  console.log('emaildata ', emaildata.email_from); 
+       console.log('emaildata ', emaildata); 
+        console.log('emaildata ', emaildata.providers); 
 
       const accessToken = await getItem(PREF_KEYS.accessToken);
 
@@ -59,7 +59,7 @@ export default function EmailDetails({
         'post',
         {
           message_id: emaildata.email_id,
-          provider: emaildata.provider,
+          provider: emaildata.providers ?? '',
         },
         accessToken ?? ''
       );

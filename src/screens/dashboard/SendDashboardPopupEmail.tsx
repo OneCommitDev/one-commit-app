@@ -60,8 +60,10 @@ const SendDashboardPopupEmail: React.FC<Props> = ({ visible, onClose, onSend, sc
 
          const payload = {
                coach_details: JSON.stringify(schools),
+                email_subject : subject,
+                  email_content : contentdata
             };
-          console.log(payload);
+        //  console.log(payload);
          const res = await httpRequest2<SimpleResponse>(
            Api_Url.send_email_outReach,
            'post',

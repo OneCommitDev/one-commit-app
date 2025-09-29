@@ -70,14 +70,17 @@ const opacityAnim = useRef(new Animated.Value(0)).current; // hidden at start
       if (res.status && res.data) {
         setschooldetails(res.data.school_details);
        // setemails(res.data.communication_history);
-       const providers = res.email_conn_data?.provider ?? "";
-       const updatedHistory = res.data.communication_history.map(
-        (item: CommunicationHistory) => ({
-          ...item,
-          providers, // add provider field manually
-        })
-      );
+    const providers = String(res.email_conn_data?.provider ?? "");
+const updatedHistory = res.data.communication_history.map(
+  (item: CommunicationHistory) => ({
+    ...item,
+    providers, // now guaranteed to be a string
+  })
+);
+setemails(updatedHistory);
+
       setemails(updatedHistory);
+      console.log(updatedHistory);
  
 
           Animated.parallel([

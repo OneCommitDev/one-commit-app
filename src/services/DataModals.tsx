@@ -554,7 +554,7 @@ export type CommunicationHistory = {
   email_from: string;
   email_sent_date: string;
   email_status: string;
-  provider? : string; // this is not the part of api call
+  providers? : string; // this is not the part of api call
 };
 
 

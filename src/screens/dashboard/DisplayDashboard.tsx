@@ -37,18 +37,19 @@ const [showSuccess, setShowSuccess] = useState(false);
 const opacityAnim = useRef(new Animated.Value(0)).current; // start hidden
 const [screenload, setScreenload] = useState(false);
 const [popupVisible, setPopupVisible] = useState(false);
-const [dashboardData, setDashboardData] = useState<DashboardStartOutreachModal>({
-  status: false,
-  email_content: "",
-  email_subject: "",
-  email_conn_data: {
-    email: "",
-    provider: "",
-    status: false,
-  },
-  data: [],
-});
+// const [dashboardData, setDashboardData] = useState<DashboardStartOutreachModal>({
+//   status: false,
+//   email_content: "",
+//   email_subject: "",
+//   email_conn_data: {
+//     email: "",
+//     provider: "",
+//     status: false,
+//   },
+//   data: [],
+// });
  
+const [dashboardData, setDashboardData] = useState<DashboardStartOutreachModal | null>(null);
 
 
 const runEnterAnimation = () => {
@@ -107,8 +108,9 @@ const runEnterAnimation = () => {
 
 
     const checkOutreachRecordsExistApiRequest = async () => {
+      setDashboardData(null);
       try {
-        setLoading(true);
+         setLoading(true);
         const accessToken = getItem(PREF_KEYS.accessToken);
         const res = await httpRequest2<DashboardStartOutreachModal>(
           Api_Url.checkOutreachRecordsExist,
@@ -116,6 +118,8 @@ const runEnterAnimation = () => {
           {},
           accessToken ?? ''
         );
+
+        console.log(res);
         if (res.status) {
           setDashboardData(res);  
 
@@ -263,7 +267,7 @@ const runEnterAnimation = () => {
 )}
 
 
-{(!dashboardData?.data || dashboardData.data.length > 0) && (
+{(!dashboardData?.data || dashboardData.data.length > 0) && screenload && (
  
 
 
@@ -381,8 +385,9 @@ const runEnterAnimation = () => {
           <SuccessModal
             isVisible={showSuccess}
             onClose={() => {
-              setOffset(0);   // reset offset
+              setOffset(0);    
               setShowSuccess(false);
+              checkOutreachRecordsExistApiRequest();
               fetchColleges(0, false);
             }}
           />
@@ -393,6 +398,7 @@ const runEnterAnimation = () => {
           onClose={() => {
             setPopupVisible(false);
             setShowSuccess(true);
+              checkOutreachRecordsExistApiRequest();
           }}
           onSend={handleSendEmail}
           schools={dashboardData.data}
