@@ -54,14 +54,15 @@ export const MessagesText ={
 
 }
 
-export const Temp_KEYS = {  
-  pass: 'Dnd@123456',
-  email: 'Pardeep.Kumar@agilite.tech',
-  newpass : 'Dnd@123456',
-}as const;
+ 
 
 // export const Temp_KEYS = {  
-//   pass: '',
-//   email: '',
-//   newpass : '',
+//   pass: 'Test@234',
+//   email: 'onecommitapp@gmail.com',
+//   newpass : 'Test@234',
 // }as const;
+export const Temp_KEYS = {  
+  pass: '',
+  email: '',
+  newpass : '',
+}as const;

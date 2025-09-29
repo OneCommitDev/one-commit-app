@@ -20,7 +20,7 @@ type RootStackParamList = {
     Login: undefined;
 UserProfile : undefined;
   SuccessScreen: { message: string; title?: string };
-
+FillProfileInfoScreen : undefined;
 };
 
 type OtpVerificationRouteProp = RouteProp<RootStackParamList, 'OtpVerification'>;
@@ -165,7 +165,7 @@ if (typeis === 'register_verify' || typeis === 'login_verify') {
         await removeItem(PREF_KEYS.register_redirect);
         await setItem(PREF_KEYS.userVerification, 'success');
           if (typeis === 'login_verify') {
-          navigation.navigate('UserProfile');
+          navigation.navigate('FillProfileInfoScreen');
         } 
       else if (typeis === 'register_verify' || typeis === 'login_verify') { 
           navigation.navigate('SuccessScreen', {

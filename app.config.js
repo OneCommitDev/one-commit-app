@@ -1,10 +1,13 @@
 import * as dotenv from "dotenv";
 import fs from "fs";
+import withKeystore from "./withKeystore";
+import withSigningConfig from "./withSigningConfig";
+import { copyFileSync, mkdirSync, existsSync } from 'fs';
 
 
 
 export default ({ config }) => ({
-  
+ 
   ...config,
   // "scripts": {
   //   "build:android": "eas build --platform android --profile production",
@@ -14,6 +17,7 @@ export default ({ config }) => ({
   //   "jsEngine": "hermes"
   // },
    extra: {
+    
     appEnv: process.env.EXPO_PUBLIC_APP_ENV,
     apiUrl: process.env.EXPO_PUBLIC_API_URL,
     baseImgUrl: process.env.EXPO_PUBLIC_BASE_IMG_URL,
@@ -29,9 +33,13 @@ export default ({ config }) => ({
 
     // microssoft clinet ID
     microsoft_clinetid : 'ae251711-526a-487f-9274-d067ca936041',
-    google_web_clientid : '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com',
-    google_ios_clientid : '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com',
+    // google_web_clientid : '156935841607-s3q4q01qhosr3bviecpnuratotulsutm.apps.googleusercontent.com',
+    // google_ios_clientid : '156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31.apps.googleusercontent.com',
+
+    google_web_clientid : '429115153068-mi3i4q5h86q6l56aroiorc49jigsb7ko.apps.googleusercontent.com',
+      google_ios_clientid : '429115153068-hd2tm7fpr9g1tvrr6amcs4hdvk507iti.apps.googleusercontent.com',
     },
+     "assetBundlePatterns": ["**/*"],
   name: 'OneCommit',
   slug: 'OneCommit',
   scheme: "us.onecommit.app",
@@ -41,7 +49,7 @@ export default ({ config }) => ({
   icon: './assets/icon.png',
    "androidStatusBar": {
       "translucent": true,
-      "backgroundColor": "transparent",
+      "backgroundColor": "#023c69",
       "barStyle": "light-content"
     },
   splash: {
@@ -58,6 +66,8 @@ export default ({ config }) => ({
   },
   assetBundlePatterns: ['**/*'],
  plugins: [
+  withKeystore,
+   withSigningConfig,
   './withHermesDsyms.js',
    '@react-native-firebase/app',
     '@react-native-firebase/messaging',
@@ -80,7 +90,8 @@ export default ({ config }) => ({
   [
     '@react-native-google-signin/google-signin',
     {
-      iosUrlScheme: 'com.googleusercontent.apps.156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31'
+      // iosUrlScheme: 'com.googleusercontent.apps.156935841607-6qjtusg96ddbk3u0n87l7irgh1u3mi31'
+        iosUrlScheme: 'com.googleusercontent.apps.429115153068-hd2tm7fpr9g1tvrr6amcs4hdvk507iti'
     }
   ]
 ],

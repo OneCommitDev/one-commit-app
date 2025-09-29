@@ -333,6 +333,7 @@ export type AcademicFit = {
 export type AthleticFit = {
   event_name: string;
   within_range: boolean;
+  event_available_in_school : boolean;
   event_performance: any;
   event_school_benchmark: string;
   event_school_bm_max: any;

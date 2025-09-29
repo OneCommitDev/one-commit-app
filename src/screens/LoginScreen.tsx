@@ -68,7 +68,7 @@ const GooglesignOutApp = async () => {
     await GoogleSignin.signOut();
    } catch (error) {
    }
-};
+}; 
 
 const GooglesignInApp = async () => {
       // await GoogleSignin.signOut(); // Force clean login
@@ -90,16 +90,18 @@ const GooglesignInApp = async () => {
       const err = error as { code: string; message?: string };
       switch (err.code) {
         case statusCodes.SIGN_IN_CANCELLED:
+           console.log('Unknown error:', error);
           break;
         case statusCodes.IN_PROGRESS:
+           console.log('Unknown error:', error);
           break;
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
           break;
         default:
-         // console.log('Sign-in error full:', JSON.stringify(error, null, 2));
+          console.log('Sign-in error full:', JSON.stringify(error, null, 2));
       }
     } else {
-      //console.log('Unknown error:', error);
+       console.log('Unknown error:', error);
     }
   }
 };
@@ -261,6 +263,7 @@ if (res.status && res.data) {
 
      
         if(res.redirect == "verify"){
+           await setItem(PREF_KEYS.registerEmail, email);
             navigation.navigate('OtpVerification', {
             method: 'email',
             value: '',

@@ -126,7 +126,7 @@ const ExplorCards: React.FC<Props> = ({
       />
     )}
 
-    {item.match_criteria.academic_fit.sat_score !== null && (
+    {item.match_criteria.academic_fit.sat_score !== null &&  item.match_criteria.academic_fit.sat_score > 0 && (
       <PerformanceBar
         title="SAT:"
         score={Number(item.match_criteria.academic_fit.sat_score)}
@@ -157,6 +157,7 @@ const ExplorCards: React.FC<Props> = ({
       showsVerticalScrollIndicator={true}
     >
       {item.match_criteria.athlietic_fit.map((fit, index) => (
+       fit?.within_range === true && fit?.event_available_in_school == true ? (
         <PerformanceBar
           key={index}
           show_min={parseFloat(fit?.event_school_bm_min)}
@@ -165,6 +166,7 @@ const ExplorCards: React.FC<Props> = ({
           min={0}
           max={parseFloat(fit?.event_school_bm_max)}
         />
+         ) : null
       ))}
     </ScrollView>
   </View>

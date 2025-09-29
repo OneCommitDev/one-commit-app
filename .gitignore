@@ -5,7 +5,7 @@ node_modules/
 ios/build/
 android/app/build/
 android/build/
-# *.keystore
+*.keystore
 =.apk
 
 # Logs

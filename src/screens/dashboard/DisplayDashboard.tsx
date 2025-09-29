@@ -21,25 +21,22 @@ import SuccessModal from '~/components/SuccessModal';
 import SendDashboardPopupEmail from './SendDashboardPopupEmail';
 
 export default function DisplayDashboard() {
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  
+const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 const [matches, setMatches] = useState<SchoolMatchItem[]>([]);
 const [offset, setOffset] = useState(0);
 const [limit] = useState(5);
 const [total, setTotal] = useState(0);
 const [loading, setLoading] = useState(false);
 const [connectedEmail, setConnectedEmail] = useState(false);
-
 const [loadingMore, setLoadingMore] = useState(false);
 const [sheetVisible, setSheetVisible] = useState(false);
 const [sheetData, setSheetData] = useState<{ schoolid: string }>({ schoolid: '' });
- const [showOutreach, setShowOutreach] = useState(false);
- const [showSuccess, setShowSuccess] = useState(false);
-
+const [showOutreach, setShowOutreach] = useState(false);
+const [showSuccess, setShowSuccess] = useState(false);
  const slideAnim = useRef(new Animated.Value(50)).current; // start 50px lower
 const opacityAnim = useRef(new Animated.Value(0)).current; // start hidden
-  const [screenload, setScreenload] = useState(false);
-  const [popupVisible, setPopupVisible] = useState(false);
+const [screenload, setScreenload] = useState(false);
+const [popupVisible, setPopupVisible] = useState(false);
 const [dashboardData, setDashboardData] = useState<DashboardStartOutreachModal>({
   status: false,
   email_content: "",
@@ -73,7 +70,7 @@ const runEnterAnimation = () => {
   
     useEffect(() => {
       fetchColleges(0);
-       checkOuyreachRecorsExistApiRequest();
+       checkOutreachRecordsExistApiRequest();
     }, []);
   
   
@@ -109,12 +106,12 @@ const runEnterAnimation = () => {
     };
 
 
-    const checkOuyreachRecorsExistApiRequest = async () => {
+    const checkOutreachRecordsExistApiRequest = async () => {
       try {
         setLoading(true);
         const accessToken = getItem(PREF_KEYS.accessToken);
         const res = await httpRequest2<DashboardStartOutreachModal>(
-          Api_Url.checkOuyreachRecorsExist,
+          Api_Url.checkOutreachRecordsExist,
           'get',
           {},
           accessToken ?? ''
@@ -311,8 +308,8 @@ const runEnterAnimation = () => {
     data={matches}
     keyExtractor={(item, index) => `${item.school_id}_${index}`}
     renderItem={renderSchoolItem}
-    pagingEnabled
-    decelerationRate="fast"
+    pagingEnabled={false}
+    decelerationRate="normal"
     onEndReachedThreshold={0.8}
     onEndReached={() => {
       if (!loadingMore && matches.length < total && offset < total) {
@@ -322,7 +319,7 @@ const runEnterAnimation = () => {
     }}
     showsVerticalScrollIndicator={false}
     contentContainerStyle={{
-      paddingBottom: 0,
+      paddingBottom: 80,
       paddingTop: 0,
     }}
     ListEmptyComponent={

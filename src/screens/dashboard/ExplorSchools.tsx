@@ -131,8 +131,10 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           accessToken ?? '',
           true
         );
+
+        console.log(url);
+        console.log(res);
    
-         
         const newData = Array.isArray(res.data) ? res.data : [];
 
         if (newData.length === 0) {
@@ -352,9 +354,11 @@ const handleSlideCard = () => {
 
 const handleSelect = (item: SearchSchoolData) => {
   setSearchText(item.name);
-  setFilteredData([]); // Hide dropdown
+ // setFilteredData([]); // Hide dropdown
+ setSearchText("");
+ setShowSearch(false);
     if (item.school_id) {
-    searchschoolByID(item.school_id); // 🔥 Call API with selected ID
+    searchschoolByID(item.school_id);  
   }
 };
 
@@ -396,7 +400,9 @@ const handleSelect = (item: SearchSchoolData) => {
  
   // Animated values
   const searchAnim = useRef(new Animated.Value(0)).current; // 0 = hidden, 1 = visible
+  /*
  const toggleSearch = () => {
+ 
     if (showSearch) {
       Animated.timing(searchAnim, {
         toValue: 0,
@@ -414,6 +420,34 @@ const handleSelect = (item: SearchSchoolData) => {
       }).start();
     }
   };
+*/
+ const toggleSearch = () => {
+  if (showSearch) {
+    if (searchText.length > 0) {
+      // First click clears the text
+      setSearchText("");
+    } else {
+      // Second click closes the search bar
+      Animated.timing(searchAnim, {
+        toValue: 0,
+        duration: 300,
+        easing: Easing.ease,
+        useNativeDriver: false,
+      }).start(() => setShowSearch(false));
+    }
+  } else {
+    // Open the search bar
+    setShowSearch(true);
+    Animated.timing(searchAnim, {
+      toValue: 1,
+      duration: 250,
+      easing: Easing.circle,
+      useNativeDriver: false,
+    }).start();
+  }
+};
+
+
 
   // Interpolations
   const width = searchAnim.interpolate({
@@ -470,11 +504,11 @@ const handleSelect = (item: SearchSchoolData) => {
         className="flex-1 text-base text-gray-800"
         autoFocus
       />
-      {searchText.length > 0 && (
+      {/* {searchText.length > 0 && (
         <TouchableOpacity onPress={() => setSearchText("")}>
           <Ionicons name="close-circle" size={20} color="#888" />
         </TouchableOpacity>
-      )}
+      )} */}
       <TouchableOpacity onPress={toggleSearch}>
         <Ionicons name="close" size={22} color="#333" />
       </TouchableOpacity>
@@ -487,7 +521,7 @@ const handleSelect = (item: SearchSchoolData) => {
 
   <Loader show={loading} />
 
-  <View className="bg-white w-full flex-1 mt-4 rounded-[6]">
+  <View className="bg-white w-full flex-1 mt-4 rounded-[6] px-4">
          {/* <View className="flex-row items-center bg-gray-200 rounded-full mb-2 h-[45px] px-5">
   <Ionicons name="search" size={20} color="#888" className="mr-2" />
 
