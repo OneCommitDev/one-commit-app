@@ -12,10 +12,12 @@ import { getItem } from "expo-secure-store";
 import { PREF_KEYS } from "~/utils/Prefs";
 import { Api_Url, httpRequest2 } from "~/services/serviceRequest";
 import Loader from "~/components/Loader";
+import { Ionicons } from "@expo/vector-icons";
 
 interface Props {
   visible: boolean;
   onClose: () => void;
+  onSent: () => void;
   onSend: (email: string, onProgress?: (sentCount: number) => void) => void; // added onProgress callback
   schools: SchoolItem[];  
   subject : string;
@@ -23,7 +25,7 @@ interface Props {
 }
  
 
-const SendDashboardPopupEmail: React.FC<Props> = ({ visible, onClose, onSend, schools , subject , contentdata }) => {
+const SendDashboardPopupEmail: React.FC<Props> = ({ visible, onClose, onSent, onSend, schools , subject , contentdata }) => {
   const [email, setEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [sentCount, setSentCount] = useState(0);
@@ -71,7 +73,7 @@ const SendDashboardPopupEmail: React.FC<Props> = ({ visible, onClose, onSend, sc
            accessToken ?? ''
          );
          if (res.status) {
-              onClose();
+              onSent();
          } else {
               Alert.alert("Alert", res.message);
          }
@@ -93,9 +95,15 @@ const SendDashboardPopupEmail: React.FC<Props> = ({ visible, onClose, onSend, sc
         <Loader show={loading} />
       <View className="flex-1 bg-black/40 justify-center items-center">
         <View className="w-[95%] h-[80%] bg-background rounded-xl p-5 shadow-md">
-            <TitleText size="text-24" className=" mt-1">
-            Start Mass Outreach
-            </TitleText>
+        <View className="flex-row items-center justify-between">
+  <TitleText size="text-24" className="mt-1">
+    Start Mass Outreach
+  </TitleText>
+
+  <TouchableOpacity onPress={onClose}>
+    <Ionicons name="close" size={24} color="#000" />
+  </TouchableOpacity>
+</View>
             <View className="w-full h-[1px] bg-gray-300 mt-2 mb-4" />
 
           {/* Scrollable content */}

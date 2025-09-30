@@ -397,6 +397,10 @@ const runEnterAnimation = () => {
           visible={popupVisible}
           onClose={() => {
             setPopupVisible(false);
+            setShowSuccess(false);
+           }}
+             onSent={() => {
+            setPopupVisible(false);
             setShowSuccess(true);
               checkOutreachRecordsExistApiRequest();
           }}
