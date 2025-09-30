@@ -3,4 +3,4 @@ keytool -list -v -keystore onecommit_keystore.jks -alias key0 -storepass onecomm
 
 
 
-pardeepkumar@pardeeps-MacBook-Pro one-commit-app % sudo keytool -genkey -v -keystore onecommit.keystore -alias key0 -keyalg RSA -keysize 2048 -validity 10000
+ sudo keytool -genkey -v -keystore onecommit.keystore -alias key0 -keyalg RSA -keysize 2048 -validity 10000
