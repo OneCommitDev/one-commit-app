@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {  View,  Text,  TouchableOpacity,  ScrollView,  Image, Dimensions, Alert, InteractionManager, } from "react-native";
+import {  View,  Text,  TouchableOpacity,  ScrollView,  Image, Dimensions, Alert, InteractionManager, Platform, } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import TitleText from "~/components/TitleText";
 import AppText from "~/components/AppText";
@@ -87,16 +87,16 @@ const [schoolSizeSelected, setSchoolSizeSelected] = useState<string[]>(["small"]
   onSave: (val: string) => {},
 });
 
-  const [showTimePicker, setShowTimePicker] = useState(false);
-   const [sporteventdata, setSportsdata] = useState<SportEvent>();
-   const [modalVisible, setModalVisible] = useState(false);
- const [disunit, setdisUnit] = useState<"feet" | "meters">("feet");
+const [showTimePicker, setShowTimePicker] = useState(false);
+const [sporteventdata, setSportsdata] = useState<SportEvent>();
+const [modalVisible, setModalVisible] = useState(false);
+const [disunit, setdisUnit] = useState<"feet" | "meters">("feet");
 
-   const [sportmodalVisible, setSportModalVisible] = useState(false);
-   const [sporteventdatasection, setSportsdataSection] = useState<SportUserFormattedData>();
- 
+const [sportmodalVisible, setSportModalVisible] = useState(false);
+const [sporteventdatasection, setSportsdataSection] = useState<SportUserFormattedData>();
+const [sportsdatalength, sersportslentgh] = useState(0);
 
- const heightStr = String(profile?.height || "5'6\"");
+const heightStr = String(profile?.height || "5'6\"");
 
 
    // Handlers
@@ -140,40 +140,6 @@ const schoolSizeToggle = (key: string) => {
 };
 
 
-  // const toggleRegion = (region: string) => {
-  //   setSelectedRegion([region]); 
-  //  console.log("Regionssss:", region);
-  //    const payload = {
-  //     campus_type: region,
-  //   };
-  //  };
-/*
-const toggleCampus = (key: string) => {
-  setSelectedCampus(prev => {
-    const updated = prev.includes(key) ? prev.filter(x => x !== key) : [...prev, key];
-    
-    return updated;
-  });
-};
-*/
-
-/*
-const toggleCampus = (key: string) => {
-  setSelectedCampus((prev) => {
-    const updated = prev.includes(key)
-      ? prev.filter((x) => x !== key)
-      : [...prev, key];
-
-    // ✅ trigger save outside of setState
-    const payload = {
-      campus_type: updated.join(","),
-    };
-    SaveRequest(payload);
-
-    return updated;
-  });
-};
-*/
 
 const toggleCampus = (key: string) => {
   setSelectedCampus(prev => {
@@ -201,62 +167,6 @@ const toggleCampus = (key: string) => {
 
 
  
-/*
-useFocusEffect(
-  useCallback(() => {
-    let mounted = true;
-
-    
-
-    const fetchProfileData = async () => {
-      try {
-        setLoading(true);
-        const accessToken = getItem(PREF_KEYS.accessToken);
-        const res = await httpRequest2<Editprofilemodal>(
-          Api_Url.profileSummary,
-          'get',
-          {},
-          accessToken ?? ''
-        );
-
- 
-    if (mounted && res.status && res.data) {
-          setProfile(res.data);
-          setsportsdata(res.data.sportUserFormattedData ?? []);
-          if (res.data.school_size) {
-            const schoolArray = res.data.school_size
-                .split(",")
-                .map((s: string) => s.trim().toLowerCase())
-                .filter((s: string) => schoolOptions.some(opt => opt.key === s)); // keep only valid options
-
-              setSchoolSizeSelected(schoolArray);
-          }
-           if (res.data.campus_type) {
-            const campusArray = res.data.campus_type
-              .split(",")
-              .map((c: string) => c.trim().toLowerCase())
-              .filter((c: string) => campusOptions.some(opt => opt.key === c));  
-            setSelectedCampus(campusArray);
-          }
-      setScreenload(true);
-              
-        } 
-      } catch (err) {
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-   
-    InteractionManager.runAfterInteractions(() => {
-      fetchProfileData();
-    });
-    return () => {
-      mounted = false;
-    };
-  }, []) // include any dependencies like selectedGames
-);
-*/
 useFocusEffect(
   useCallback(() => {
     let mounted = true;
@@ -279,6 +189,7 @@ const fetchProfileData = async (showAlert = false) => {
       {},
       accessToken ?? ''
     );
+   
     if (res.status && res.data) {
       setProfile(res.data);
       setsportsdata(res.data.sportUserFormattedData ?? []);
@@ -322,6 +233,7 @@ const openBoxModal = (title: string, label: string, typeis : string , value : st
 
 
 const SaveRequest = async (payload: Record<string, any>) => {
+  setLoading(true);
   try {
      const token = await getItem(PREF_KEYS.accessToken);
 
@@ -333,6 +245,7 @@ const SaveRequest = async (payload: Record<string, any>) => {
       true
     );
 
+    console.log(payload);
     if (res.status) {
       await  fetchProfileData(true);
       //  Alert.alert("Profile Updated", "New school matches will be evaluated.");
@@ -351,6 +264,7 @@ const SaveRequest = async (payload: Record<string, any>) => {
 
 
 const DeleteApiRequest = async (sportid : string , eventid : string) => {
+   setLoading(true);
   try {
      const token = await getItem(PREF_KEYS.accessToken);
      const url = Api_Url.quickProfileEventDelete(sportid , eventid);
@@ -393,18 +307,23 @@ useEffect(() => {
 
   return (
     
-    <View className="flex-1 bg-background px-1">
+    // <View className="flex-1 bg-background px-1">
+     <View
+              className={`flex-1 bg-background  ${
+                Platform.OS === "ios" ? "pt-14" : "pt-4"
+              }`}
+            >
       <Loader show={loading} />
 
       {/* Header */}
-      <View className="px-4 mb-6 pt-14">
+      <View className="px-4 mb-6">
         <TitleText size="text-24">Profile Settings</TitleText>
       </View>
 {screenload ? (
    <> 
       <ScrollView
         contentContainerStyle={{ paddingBottom: 40 }}
-        className="px-4"
+        className="px-5"
       >
       {/* Profile Card */}
         <View className="flex-row justify-between bg-primary py-3 rounded-2xl mb-6 shadow-sm h-[120px]">
@@ -426,7 +345,7 @@ useEffect(() => {
         {/* Right Side - Settings Icon */}
         <TouchableOpacity
         onPress={() => navigation.navigate("AppSystemSettings" as never)}
-        className="mr-4 items-center justify-center">
+        className="mr-6 items-center justify-center">
             <Ionicons name="settings-outline" size={18} color="white" />
         </TouchableOpacity>
         </View>
@@ -477,7 +396,7 @@ useEffect(() => {
 
  
 
-    <View className="flex-row flex-wrap">
+    {/* <View className="flex-row flex-wrap">
  {section.events.map((item, index) => (
   <InfoCard
     key={index}
@@ -485,12 +404,14 @@ useEffect(() => {
     value={item.eventValue?.toString() || '0'}
     onPressEdit={() => {
         item.sport_id = section.sport_id;
-    //  console.log('itemitemitemitem ' , item);
+      sersportslentgh(section.events.length);
+
       setSportsdata(item);  
       if(item.measurement_type === 'time' ){
           setShowTimePicker(true);
        }
       else if(item.measurement_type === 'points'){ 
+         sersportslentgh(section.events.length);
         openBoxModal(
           section.display_name,
           item.event_name.replaceAll("_", " "),
@@ -501,25 +422,52 @@ useEffect(() => {
         );
       }
          else if(item.measurement_type === 'distance' || item.measurement_type === 'height'){
+           sersportslentgh(section.events.length);
            setModalVisible(true);
-          // setShowHeightModal(true);
       }
-      // else if(item.measurement_type === 'meters'){
-      //     // setShowMeterModal(true);
-      // }
-      // else if(item.measurement_type === 'feet_inches'){
-      //     // setShowHeightModal(true);
-      // }
-    
-
-      
     }}
     className={index % 2 === 0 ? "mr-[14px]" : ""} // 👈 add conditional margin
   />
 ))}
 
 
-    </View>
+    </View> */}
+    <View className="flex-row flex-wrap">
+  {section.events.map((item, index) => (
+    <InfoCard
+      key={index}
+      label={capitalizeWords(item.event_name).replaceAll('_', ' ')}
+      value={item.eventValue?.toString() || '0'}
+      onPressEdit={() => {
+        item.sport_id = section.sport_id;
+        sersportslentgh(section.events.length);
+        setSportsdata(item);  
+
+        if (item.measurement_type === 'time') {
+          setShowTimePicker(true);
+        } else if (item.measurement_type === 'points') {
+          sersportslentgh(section.events.length);
+          openBoxModal(
+            section.display_name,
+            item.event_name.replaceAll("_", " "),
+            item.event_name.toLowerCase(),
+            item.eventUnit?.toString() ?? '',
+            "sports",
+            (val) => console.log("Saved Name:", val)
+          );
+        } else if (
+          item.measurement_type === 'distance' ||
+          item.measurement_type === 'height'
+        ) {
+          sersportslentgh(section.events.length);
+          setModalVisible(true);
+        }
+      }}
+      className={`w-[48%] mb-4 ${index % 2 === 0 ? "mr-[4%]" : ""}`}
+    />
+  ))}
+</View>
+
   </View>
 ))}
  
@@ -800,7 +748,11 @@ useEffect(() => {
           milliseconds: Number(sporteventdata?.eventValue?.split(":")[2] ?? 0),
                 }}
                 onClose={() => setShowTimePicker(false)}
-                  onDelete={() =>
+                  onDelete={() => {
+                      if (sportsdatalength === 1) {
+                   Alert.alert('At least one sport events is required to create match list. It cannot be deleted. If you want to delete it, please add another event first.');
+      
+            } else {
               Alert.alert(
                 "Confirm Delete",
                  "Are you sure you want to delete " + capitalizeWords(sporteventdata?.event_name).replace('_', ' ') + " event?",
@@ -817,6 +769,7 @@ useEffect(() => {
                 ]
               )
             }
+             }}
                 onSave={(selected) => {
                   const formatted = `${selected.minutes
                     .toString()
@@ -831,7 +784,10 @@ useEffect(() => {
                                 sport_id: sporteventdata?.sport_id,  
                                 event_id: sporteventdata?.event_id,  
                                 eventValue: formatted,  
-                                eventUnit: sporteventdata?.eventUnit,  
+                                eventUnit:
+                      sporteventdata?.eventUnit && sporteventdata?.eventUnit.trim() !== ""
+                        ? sporteventdata?.eventUnit
+                        : "seconds", 
                               },
                             };
 
@@ -843,66 +799,72 @@ useEffect(() => {
 
   
 
-
-        <FeetMeterPickerModal
+          <FeetMeterPickerModal
             title={sporteventdata?.display_name ?? ''}
             visible={modalVisible}
             onClose={() => setModalVisible(false)}
-           onDelete={() =>
-              Alert.alert(
-                "Confirm Delete",
-                 "Are you sure you want to delete " + capitalizeWords(sporteventdata?.event_name).replace('_', ' ') + " event?",
-                [
-                  { text: "Cancel", style: "cancel" },
-                  {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: () => {
-                      setModalVisible(false);
-                        
-                        DeleteApiRequest(sporteventdata?.sport_id ?? '' , sporteventdata?.event_id ?? '');
+            onDelete={() => {
+              if (sportsdatalength === 1) {
+                            Alert.alert('At least one sport events is required to create match list. It cannot be deleted. If you want to delete it, please add another event first.');
+              } else {
+                Alert.alert(
+                  "Confirm Delete",
+                  "Are you sure you want to delete " +
+                    capitalizeWords(sporteventdata?.event_name).replace("_", " ") +
+                    " event?",
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                      text: "Delete",
+                      style: "destructive",
+                      onPress: () => {
+                        setModalVisible(false);
+                        DeleteApiRequest(
+                          sporteventdata?.sport_id ?? "",
+                          sporteventdata?.event_id ?? ""
+                        );
+                      },
                     },
-                  },
-                ]
-              )
-            }
+                  ]
+                );
+              }
+            }}
             selectedUnit={disunit}
             onUnitChange={(u) => setdisUnit(u)}
-            // onUnitChange={(u) => setdisUnit(u)}
             initialMainValue={Number(sporteventdata?.eventValue?.split(".")[0] ?? 0)}
-            initialDecimalValue={Number(sporteventdata?.eventValue?.split(".")[1] ?? 0)}     
+            initialDecimalValue={Number(sporteventdata?.eventValue?.split(".")[1] ?? 0)}
             onSave={(main, decimal, unit) => {
-            const values = `${main}.${decimal}`;   
-          
-            const payload = {
-              sport_event: {
-                sport_id: sporteventdata?.sport_id,  
-                event_id: sporteventdata?.event_id,  
-                eventValue: values,  
-                  eventUnit: unit === "feet" ? "feet_inches" : "metres",  
-              },
-            };
+              const values = `${main}.${decimal}`;
 
-                      SaveRequest(payload);
+              const payload = {
+                sport_event: {
+                  sport_id: sporteventdata?.sport_id,
+                  event_id: sporteventdata?.event_id,
+                  eventValue: values,
+                  eventUnit: unit === "feet" ? "feet_inches" : "metres",
+                },
+              };
+              SaveRequest(payload);
+            }}
+          />
+
+        
+ 
 
 
-         // console.log('payload_',payload);      
+
+        <CheckboxModal
+          visible={sportmodalVisible}
+          onClose={async () => {
+            setSportModalVisible(false);
+            await fetchProfileData(true);
           }}
+          onSelect={(ids) =>
+            setSelectedsportid(sporteventdatasection?.sport_id?.toString() ?? '')
+          }
+          sportName={sporteventdatasection?.sport_name?.toString().replace('_', ' ') ?? ''}
+          sportId={sporteventdatasection?.sport_id?.toString() ?? ''}
         />
-
-
- <CheckboxModal
-  visible={sportmodalVisible}
-  onClose={async () => {
-    setSportModalVisible(false);
-    await fetchProfileData(true);
-  }}
-  onSelect={(ids) =>
-    setSelectedsportid(sporteventdatasection?.sport_id?.toString() ?? '')
-  }
-  sportName={sporteventdatasection?.sport_name?.toString().replace('_', ' ') ?? ''}
-  sportId={sporteventdatasection?.sport_id?.toString() ?? ''}
-/>
  
 
     </View>

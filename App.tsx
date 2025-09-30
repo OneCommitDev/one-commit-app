@@ -22,19 +22,19 @@ import OfflineScreen from '~/components/OfflineScreen';
 import { GlobalErrorBoundary } from '~/services/GlobalErrorBoundary';
 import { navigationRef } from "~/navigation/NavigationService";
 
-// ✅ Global navigation ref (use only once)
+//  Global navigation ref (use only once)
 // export const navigationRef = createNavigationContainerRef<RootStackParamList>(); // if got issue then remove thsi line comment and remove the import { navigationRef } from "~/navigation/NavigationService";
 
-// ✅ Sentry setup
+//  Sentry setup
 Sentry.init({
   dsn: 'https://8cf1cc2321c3876b50ee5e39ed4b8fa8@o4509863657144320.ingest.us.sentry.io/4509863663632384',
-  sendDefaultPii: true,
+  sendDefaultPii: false,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1,
   debug: false,
   tracesSampleRate: 1.0,
-  enableAutoPerformanceTracing: true,
-  enableAppHangTracking: true,
+  enableAutoPerformanceTracing: false,
+  enableAppHangTracking: false,
   integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
 });
 
@@ -139,6 +139,9 @@ export default Sentry.wrap(function App() {
  
   if (__DEV__) {
     // dev logging allowed
+    //  console.log = () => {};
+    // console.warn = () => {};
+    // console.error = () => {};
   } else {
     console.log = () => {};
     console.warn = () => {};
@@ -214,7 +217,8 @@ function AppContent({ reloadKey, onRetry }: { reloadKey: number; onRetry: () => 
 
   return (
     <>
-      <StatusBar backgroundColor="#235D48" barStyle="light-content" />
+      {/* <StatusBar backgroundColor="#235D48" barStyle="light-content" /> */}
+       <StatusBar backgroundColor="white" barStyle="dark-content" />
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <NavigationContainer  ref={navigationRef}>

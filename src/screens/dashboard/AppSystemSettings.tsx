@@ -45,11 +45,11 @@ export default function AppSystemSettings() {
   const [showModal, setShowModal] = useState(false);
 
  const loadConnectedEmail = async () => {
-  const provider = await getItem(PREF_KEYS.connected_id_provider);
+  const connected_id_provider = await getItem(PREF_KEYS.connected_id_provider);
   const email = await getItem(PREF_KEYS.connected_id);
 
-  if (provider) {
-    setConnectedProvider(provider ?? "");
+  if (connected_id_provider) {
+    setConnectedProvider(connected_id_provider ?? "");
     setConnectedEmail(email ?? "");
     setEmailAccount(true);
    } else {
@@ -74,7 +74,7 @@ useFocusEffect(
     const accessToken = getItem(PREF_KEYS.accessToken);
     const decoded = decodeAccessToken(accessToken!);
     setprovider(decoded.provider)
-
+console.log(decoded.provider);
     return () => {
       
       //console.log("Screen is unfocused");
@@ -83,16 +83,18 @@ useFocusEffect(
 );
 
  const settings = useMemo(() => [
-    {
+  {
       key: "account",
       title: "Account",
-          subtitle: provider === "oc-use"
-    ? "Personal info, Passwords"
-    : ["Personal info"], 
+      subtitle:
+        provider === "oc-user"
+          ? "Personal info, Passwords"
+          : "Personal info",
       route: "Account",
-      dataIs: provider === "oc-use"
-    ? ["Personal info", "Change Password"]
-    : ["Personal info"],  
+      dataIs:
+        provider === "oc-user"
+          ? ["Personal info", "Change Password"]
+          : ["Personal info"],
     },
     {
     key: "integrations",
@@ -250,12 +252,17 @@ const handleEmailDelete = () => {
 
 
   return (
-    <View className="flex-1 bg-background h-full">
+    // <View className="flex-1 bg-background h-full mt-14">
+     <View
+              className={`flex-1 bg-background  ${
+                Platform.OS === "ios" ? "pt-14" : "pt-1"
+              }`}
+            >
       {/* Header */}
-      <View className="flex-row mt-14 items-center px-4 mb-2">
+      <View className="flex-row  items-center px-4 mb-2">
         <TouchableOpacity
           onPress={handleBack}
-          className="w-11 h-11 rounded-full bg-gray-200 items-center justify-center"
+          className="w-12 h-12 rounded-full bg-gray-200 items-center justify-center"
         >
           <Ionicons name="chevron-back" size={24} color="#1A322E" />
         </TouchableOpacity>

@@ -1,0 +1,6 @@
+keytool -list -v -keystore onecommit_keystore.jks -alias key0 -storepass onecommit -keypass onecommit
+
+
+
+
+ sudo keytool -genkey -v -keystore onecommit.keystore -alias key0 -keyalg RSA -keysize 2048 -validity 10000

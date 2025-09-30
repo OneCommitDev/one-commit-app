@@ -284,6 +284,7 @@ export type SchoolMatchItem = {
   state: string;
   region: string;
   img_path: string;
+  banner_path : string;
   school_size: string;
   overall_match_percent: string;
   match_criteria: MatchCriteria;
@@ -333,6 +334,7 @@ export type AcademicFit = {
 export type AthleticFit = {
   event_name: string;
   within_range: boolean;
+  event_available_in_school : boolean;
   event_performance: any;
   event_school_benchmark: string;
   event_school_bm_max: any;
@@ -396,6 +398,7 @@ export type ProfileComplitionData = {
   email_connect_address: string;
   full_name: string;
   preferred_name: string;
+  email: string;
   phone: string;
   dob: string;
     gender: string;
@@ -552,7 +555,7 @@ export type CommunicationHistory = {
   email_from: string;
   email_sent_date: string;
   email_status: string;
-  provideris? : string; // this is not the part of api call
+  providers? : string; // this is not the part of api call
 };
 
 
@@ -571,3 +574,25 @@ export type Editprofilemodal ={
   };
   data: ProfileComplitionData;
 }
+
+
+export type DashboardStartOutreachModal = {
+  status: boolean;
+  email_content : string;
+  email_subject : string;
+  email_conn_data: {
+    email: string;
+    provider: string;
+    status: boolean;
+  };
+  data: SchoolItem[];
+};
+
+export interface SchoolItem {
+  coach_email: string;
+  coach_id: string;
+  coach_name: string;
+  name: string;       // school name
+  school_id: string;
+}
+

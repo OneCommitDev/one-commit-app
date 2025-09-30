@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import ArrowButton from '~/components/ArrowButton';
@@ -38,19 +38,27 @@ const handleSubmit = () => {
   ];
 
   return (
-    <View className="flex-1 bg-background px-6 pt-14">
+    
+   <View
+      className={`flex-1 bg-background px-6 ${
+        Platform.OS === "ios" ? "pt-14" : "pt-5"
+      }`}
+    >
       {/* Back Button */}
       <TouchableOpacity
         onPress={() => navigation.goBack()}
-        className="w-16 h-16 rounded-3xl bg-[#E3E9E5] items-center justify-center mb-6"
+        className="w-12 h-12 rounded-3xl bg-[#E3E9E5] items-center justify-center mb-6"
       >
         <Ionicons name="chevron-back" size={24} color="#1A322E" />
       </TouchableOpacity>
-
+    <ScrollView 
+             contentContainerStyle={{ flexGrow: 1,  paddingHorizontal: 4 }}
+             showsVerticalScrollIndicator={false}
+             >
       {/* Centered Title and Subtitle */}
-      <View className="items-center mb-8">
+      <View className="items-center mb-8 -mt-3">
         <TitleText  size='text-20'>Forgot Password</TitleText>
-        <AppText className="text-center">
+        <AppText className="text-center -mt-2">
           Select which method you’d like to reset.
         </AppText>
       </View>
@@ -93,6 +101,7 @@ const handleSubmit = () => {
           disabled={selectedMethod === null}
         />
       </View>
+      </ScrollView>
     </View>
-  );
+   );
 }

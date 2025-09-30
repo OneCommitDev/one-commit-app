@@ -115,7 +115,7 @@ const isDisabled = !inputValue || hasError;
                         }
                         const num = parseFloat(gpa);
                         if (!isNaN(num)) {
-                          if (num < 0) gpa = "0.0";
+                          if (num <= 0) gpa = "0.0";
                           if (num > 4.5) gpa = "4.5";
                         }
                         const fixed = validateGPA(gpa, setErrors);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Alert, Platform, ScrollView } from 'react-native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation, NavigationProp, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import ArrowButton from '~/components/ArrowButton';
@@ -89,7 +89,11 @@ useFocusEffect(
 );
 
   return (
-    <View className="flex-1 bg-background px-6 pt-14">
+      <View
+         className={`flex-1 bg-background px-6 ${
+           Platform.OS === "ios" ? "pt-14" : "pt-5"
+         }`}
+       >
       {/* Back Button */}
       <TouchableOpacity
         onPress={() => navigation.goBack()}
@@ -97,6 +101,11 @@ useFocusEffect(
       >
         <Ionicons name="chevron-back" size={24} color="#1A322E" />
       </TouchableOpacity>
+
+        <ScrollView 
+                   contentContainerStyle={{ flexGrow: 1,  paddingHorizontal: 4 }}
+                   showsVerticalScrollIndicator={false}
+                   >
 
       {/* Centered Title and Subtitle */}
       <View className="items-center mb-8">
@@ -155,8 +164,9 @@ useFocusEffect(
                 <View className="my-4">
                 <ArrowButton text="Continue" onPress={handleSubmit} fullWidth disabled={!isFormValid} />
                 </View>
-                 <Loader show={loading} />
-   
+   </ScrollView>
+                    <Loader show={loading} />
+
     </View>
   );
 }

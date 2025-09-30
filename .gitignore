@@ -5,7 +5,8 @@ node_modules/
 ios/build/
 android/app/build/
 android/build/
-*.keystore
+# *.keystore
+=.apk
 
 # Logs
 npm-debug.log*
@@ -38,5 +39,6 @@ __tests__/
 # macOS
 *.swp
 .idea/
+app-release.apk
 
 # .env.local

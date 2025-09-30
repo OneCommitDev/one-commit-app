@@ -158,7 +158,7 @@ useEffect(() => {
 
      const EmilgetApiRequest = async () => {
        try {
-          setLoading(true);
+          
          const accessToken = await getItem(PREF_KEYS.accessToken); // await required
          const res = await httpRequest2<EmailConnectionResponse>(
            Api_Url.get_email_connection,
@@ -187,7 +187,7 @@ useEffect(() => {
        } catch (err) {
          Alert.alert('Error', 'Unexpected error occurred.');
        } finally {
-          
+          setLoading(false);
        }
      };
 

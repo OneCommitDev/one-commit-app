@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {  View,  Text,  TouchableOpacity,  TextInput,  Alert,} from 'react-native';
+import {  View,  Text,  TouchableOpacity,  TextInput,  Alert, Platform,} from 'react-native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import {  useNavigation,  NavigationProp,  useRoute,  RouteProp, useFocusEffect,} from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -10,7 +10,7 @@ import { LoginResponse, ResetPasswordResponse, SimpleResponse } from '~/services
 import { getItem, setItem } from 'expo-secure-store';
 import { PREF_KEYS, Temp_KEYS } from '~/utils/Prefs';
 import Loader from '~/components/Loader';
-import { removeItem } from '~/utils/storage';
+import { clearAllPrefss, removeItem } from '~/utils/storage';
 import AppText from '~/components/AppText';
 import TitleText from '~/components/TitleText';
 
@@ -78,8 +78,9 @@ const OTP = await getItem(PREF_KEYS.forgot_otp);
         removeItem(PREF_KEYS.forgot_email);
         removeItem(PREF_KEYS.forgot_otp);
         // navigation.reset({ index: 0, routes: [{ name: 'Login' }], });
+        clearAllPrefss();
        navigation.navigate('Success', {
-          message: 'Password Reset successfully!',
+          message: 'Password Reset successfully! Please login again',
         });
      } else {
        Alert.alert('Error', res.message ?? 'Request failed');
@@ -105,9 +106,14 @@ const OTP = await getItem(PREF_KEYS.forgot_otp);
   };
 
   return (
-    <View className="flex-1 bg-background h-full">
+    // <View className="flex-1 bg-background h-full">
+     <View
+                  className={`flex-1 bg-background px-4 ${
+                    Platform.OS === "ios" ? "pt-14" : "pt-1"
+                  }`}
+                >
         {/* Header */}
-            <View className="flex-row mt-14 items-center px-4 mb-2">
+      <View className="flex-row  items-center  mb-2">
               <TouchableOpacity
                 onPress={handleBack}
                 className="w-11 h-11 rounded-full bg-gray-200 items-center justify-center"

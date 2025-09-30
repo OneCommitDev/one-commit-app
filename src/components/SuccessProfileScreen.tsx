@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 import ArrowButton from '~/components/ArrowButton';
 import LottieView from 'lottie-react-native';
 import TitleText from '~/components/TitleText';
@@ -45,9 +45,21 @@ const SuccessProfileScreen = () => {
       </AppText>
 
    <View className='w-full'>
-      <ArrowButton text={'Continue'}  
+      {/* <ArrowButton text={'Continue'}  
       onPress={() => navigation.replace('Dashboard')}
-      fullWidth ></ArrowButton>
+      fullWidth ></ArrowButton> */}
+      <ArrowButton
+  text="Continue"
+  onPress={() => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Dashboard' }],
+      })
+    );
+  }}
+  fullWidth
+/>
    </View>
     </View>
   );

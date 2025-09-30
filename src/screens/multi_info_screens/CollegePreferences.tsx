@@ -59,6 +59,8 @@ const [campusType, setCampusType] = useState<string>("");
   const [actRigorType, setActRigorType] = useState<'Low' | 'Medium' | 'High'>('Low');
   const [selectedReligious, setSelectedReligious] = useState('Doesn’t matter');
   const [regions, setRegions] = useState<string[]>([]);
+    //const [regions, setRegions] = useState<string>("");
+
   const [divisionsData, setDivisions] = useState<string[]>([]);
   const [showRegionModal, setShowRegionModal] = useState(false);
   const [showAdvice, setShowAdvice] = useState(false);
@@ -115,11 +117,7 @@ const showDivisionAdvice = (
   message?: string,
   buttonText?: string
 ) => {
-  // Alert.alert(
-  //   title || 'Advice',
-  //   message || 'We don’t recommend limiting yourself to just one division.',
-  //   [{ text: buttonText || 'OK' }]
-  // );
+
     setAdviceModal({
     visible: true,
     title: title || 'Advice',
@@ -129,10 +127,7 @@ const showDivisionAdvice = (
 
 };
 
-// const capitalize = (value: string | null | undefined): string | undefined => {
-//   if (!value) return undefined;
-//   return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-// };
+ 
 
 const capitalize = (value: string | null | undefined): string => {
   if (!value) return "";
@@ -183,7 +178,6 @@ const safeCapitalize = (val?: string, fallback: string = ''): string => {
               academic_rigor: prefData?.academic_rigor
               ? capitalize(prefData.academic_rigor)
               : 'Low',
-
               campus_type: capitalize(prefData.campus_type) ?? '',
               need_financial_aid: prefData.need_financial_aid ?? '0',
               early_decision_willingness: prefData.early_decision_willingness ?? 'Yes',
@@ -197,7 +191,7 @@ const safeCapitalize = (val?: string, fallback: string = ''): string => {
             const matchedOption = mattersObject.find(opt => opt.key === prefData.what_matter_most);
             if (matchedOption) setSelectedOption(matchedOption.key);
 
- 
+ /*
             let divisions: string[] = [];
             if (Array.isArray(prefData.ncaa_division)) {
               divisions = prefData.ncaa_division;
@@ -205,23 +199,64 @@ const safeCapitalize = (val?: string, fallback: string = ''): string => {
              divisions = prefData.ncaa_division.split(',');
             }
             setSelectedDivisions(divisions);
+ */
+
+                    let divisions: string[] = [];
+                    if (Array.isArray(prefData.ncaa_division) && prefData.ncaa_division.length > 0) {
+                      divisions = prefData.ncaa_division;
+                    } else if (typeof prefData.ncaa_division === 'string' && prefData.ncaa_division.trim() !== '') {
+                      divisions = prefData.ncaa_division.split(',').map(d => d.trim());
+                    } else {
+                      divisions = divisionsList; 
+                       const asString = divisions.join(',');  
+                    
+                    }
+
+                    setSelectedDivisions(divisions);
+                  
+          
 
 
-      // setSchoolType(
-      //     (capitalize(prefData.school_size) ?? 'Small') as 'Small' | 'Medium' | 'Large'
-      //   );
-                setSchoolType(capitalize(prefData.school_size));
+                  if (!prefData.school_size || prefData.school_size === '') {
+                    const defaultSchool = 'small,medium,large';
+                    setSchoolType('Small, Medium, Large');  
+                    handleChange('school_size', defaultSchool);  
+                    // console.log('school_size set to:', defaultSchool);
+                  } else {
+                    const formattedSchoolSize = capitalize(prefData.school_size);
+                    setSchoolType(formattedSchoolSize);
+                    handleChange('school_size', formattedSchoolSize);  
+                    // console.log('school_size set to:', formattedSchoolSize);
+                  }
 
+                if (!prefData.campus_type || prefData.campus_type === '') {
+                  const defaultCampus = 'urban,suburban,rural';
+                  setCampusType('Urban, Suburban, Rural');  
+                  handleChange('campus_type', defaultCampus);  
+                  // console.log('campus_type set to:', defaultCampus);
+                } else {
+                  const formattedCampusType = capitalize(prefData.campus_type);
+                  setCampusType(formattedCampusType);
+                  handleChange('campus_type', formattedCampusType);  
+                  // console.log('campus_type set to:', formattedCampusType);
+                }
 
-        // setActRigorType(
-        //   (capitalize(prefData.academic_rigor) ?? 'Low') as 'Low' | 'Medium' | 'High'
-        // );
+                if (!prefData.preferred_region || prefData.preferred_region === '') {
+                  const defaultRegions = 'midwest,northeast,west,southeast';
+                  handleChange('preferred_region', defaultRegions);
+                  // console.log('preferred_region set to:', defaultRegions);
+                } else {
+                  handleChange('preferred_region', prefData.preferred_region);
+                  // console.log('preferred_region set to:', prefData.preferred_region);
+                }
+
+    
              setActRigorType(
             (safeCapitalize(prefData.academic_rigor, 'Low') as 'Low' | 'Medium' | 'High')
           );   
 
        
-          setCampusType(capitalize(prefData.campus_type));
+          console.log(form);
 
  
         setDecisionType(
@@ -230,7 +265,6 @@ const safeCapitalize = (val?: string, fallback: string = ''): string => {
 
             setSelectedReligious(prefData.religious_affiliation);
             setSelectedValue(formatNumber(prefData.required_financial_aid));
-            // setAidType(prefData.need_financial_aid as 'yes' | 'no' | 'not sure');
           }
         }
       } catch (err) {
@@ -319,7 +353,7 @@ const parseShortNumber = (num: number): number => {
 
   return (
     <>
-        <View className="flex-1 bg-background px-2 pt-14"> 
+        <View className="flex-1 bg-background px-4 pt-14"> 
     
           <View className="flex-row items-center justify-between mb-1">
     
@@ -437,7 +471,7 @@ const parseShortNumber = (num: number): number => {
           {/* Preferred Region */}
           <View className="mt-3">
             <TitleText >Preferred Region *</TitleText>
-            <TouchableOpacity onPress={() => setShowRegionModal(true)}>
+            {/* <TouchableOpacity onPress={() => setShowRegionModal(true)}>
               <AppInput
                 value={form.preferred_region}
                 placeholder="Select Preferred Region"
@@ -445,7 +479,21 @@ const parseShortNumber = (num: number): number => {
                 pointerEvents="none"
                 onChangeValue={() => {}}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
+
+               <MultiSelectToggle
+                  options={['Midwest', 'Northeast', 'West', 'Southeast' ]}
+                    initialValues={
+                            form?.preferred_region
+                              ? form.preferred_region.split(",").map((s) => s.trim().toLowerCase())
+                              : []
+                          }
+                  onSelect={(selected) => {
+                    const asString = selected.join(", ");
+                    handleChange('preferred_region', asString);
+                    console.log(asString);
+                  }}
+                />
           </View>
 
           <View className="flex-1 mt-3">
@@ -579,7 +627,7 @@ const parseShortNumber = (num: number): number => {
       </ScrollView>
 
       {/* Modal for Region Selection */}
-   <Modal
+   {/* <Modal
   animationType="slide"
   transparent
   visible={showRegionModal}
@@ -628,7 +676,7 @@ const parseShortNumber = (num: number): number => {
    </View>
     </View>
   </View>
-</Modal>
+</Modal> */}
 
         <Loader show={loading} />
 

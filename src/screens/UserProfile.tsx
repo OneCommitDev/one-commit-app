@@ -298,20 +298,35 @@ const fetchCityStateFromZip = async (zip: string): Promise<CityState> => {
   };
 
   return (
-    <View className="flex-1 px-2 pt-7">
+    // <View className="flex-1 px-2 pt-7">
+     <View
+          className={`flex-1 bg-background px-2 ${
+            Platform.OS === "ios" ? "pt-7" : "pt-2"
+          }`}
+        >
       <View className="flex-row mt-5">
-        <TouchableOpacity
+        {src?.trim() != '' ? (
+            <TouchableOpacity
+              onPress={handleBack}
+              className="w-12 h-12 rounded-full bg-[#E3E9E5] items-center justify-center"
+            >
+              <Ionicons name="chevron-back" size={24} color="#1A322E" />
+            </TouchableOpacity>
+          ) : null}
+
+        
+        {/* <TouchableOpacity
           onPress={handleBack}
           className="w-12 h-12 rounded-full bg-[#E3E9E5] items-center justify-center"
         >
           <Ionicons name="chevron-back" size={24} color="#1A322E" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <View className="flex-1 justify-center ml-3">
-          <Text className="text-16 font-nunitoextrabold text-title">
-            {src?.trim() === '' ? 'Create Profile' : 'Edit Profile Info'}
+          <TitleText>
+            {src?.trim() === '' ? 'Create Your Profile' : 'Edit Profile Info'}
 
-          </Text>
+          </TitleText>
         </View>
       </View>
 

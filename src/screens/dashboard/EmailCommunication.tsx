@@ -8,6 +8,7 @@ import {
   Pressable,
   ScrollView,
   Animated,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
@@ -18,12 +19,7 @@ import Loader from '~/components/Loader';
 import { getItem } from 'expo-secure-store';
 import { PREF_KEYS } from '~/utils/Prefs';
 import { Api_Url, httpRequest2 } from '~/services/serviceRequest';
-import {
-  CommunicationHistory,
-  email_conn_data,
-  Emaildatamodal,
-  school_details,
-} from '~/services/DataModals';
+import { CommunicationHistory,  email_conn_data,  Emaildatamodal,  school_details,} from '~/services/DataModals';
 import OutreachSheet from '../multi_info_screens/OutreachSheet';
 import EmailDetails from './EmilDetails';
 import SuccessModal from '~/components/SuccessModal';
@@ -74,14 +70,17 @@ const opacityAnim = useRef(new Animated.Value(0)).current; // hidden at start
       if (res.status && res.data) {
         setschooldetails(res.data.school_details);
        // setemails(res.data.communication_history);
-       const provider = res.email_conn_data?.provider ?? "";
-       const updatedHistory = res.data.communication_history.map(
-        (item: CommunicationHistory) => ({
-          ...item,
-          provider, // add provider field manually
-        })
-      );
+    const providers = String(res.email_conn_data?.provider ?? "");
+const updatedHistory = res.data.communication_history.map(
+  (item: CommunicationHistory) => ({
+    ...item,
+    providers, // now guaranteed to be a string
+  })
+);
+setemails(updatedHistory);
+
       setemails(updatedHistory);
+      console.log(updatedHistory);
  
 
           Animated.parallel([
@@ -136,10 +135,15 @@ const opacityAnim = useRef(new Animated.Value(0)).current; // hidden at start
   };
 
   return (
-    <View className="flex-1 bg-background">
+    // <View className="flex-1 bg-background">
+     <View
+              className={`flex-1 bg-background px-4 ${
+                Platform.OS === "ios" ? "pt-14" : "pt-5"
+              }`}
+            >
       <Loader show={loading} />
    {/* Header */}
-        <View className="flex-row items-center justify-between px-3 pt-12 mb-4 mt-2">
+        <View className="flex-row items-center justify-between px-3  mb-4 mt-2">
           <View className="flex-row items-center">
             <TouchableOpacity
               onPress={handleBack}

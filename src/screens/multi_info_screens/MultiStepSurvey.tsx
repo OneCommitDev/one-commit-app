@@ -189,7 +189,7 @@ export default function MultiStepSurvey() {
     };
 
   return (
-    <View className="flex-1 px-3 pt-12">
+    <View className="flex-1 px-4 pt-12">
       {/* Header */}
       <View className="flex-row items-center justify-between mb-1 mt-6">
         {/* <TouchableOpacity

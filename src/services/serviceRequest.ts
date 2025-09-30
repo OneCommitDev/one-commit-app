@@ -17,12 +17,15 @@ export const base_url =  apiUrl;
 
  
 const api = axios.create({
-  // baseURL: "https://devapi.onecommit.us:443/v1", 
-      baseURL: apiUrl,
+//  baseURL: "https://devapi.onecommit.us:443/v1", 
+ baseURL: apiUrl,
   timeout: 60000,
   headers: {
     'Content-Type': 'application/json',  
     'x-api-key' : xKey,
+    "Cache-Control": "no-cache, no-store, must-revalidate", // 🚫 prevent caching
+    "Pragma": "no-cache",
+    "Expires": "0",
   },
 });
 
@@ -291,6 +294,8 @@ export async function httpRequest_social_token<T>(
       ]);
     }
 
+    
+
     const fallback: T = {
       status: false,
       message:
@@ -455,13 +460,13 @@ export const Api_Url = {
   removeEmailApi : '/dashboard/remove-email',
    changePassword: '/change-pass',
       quickEditapi: '/user/profile-quick-edit',
+       checkOutreachRecordsExist: '/dashboard/schools',
  
   quickProfileEventDelete : (sport_id: string, event_id: string) =>
     `/user/profile/sports/${sport_id}/${event_id}`,
    logout: '/logout',
 };
-
-
+ 
 
 export interface RegisterRequest {
   email: string;

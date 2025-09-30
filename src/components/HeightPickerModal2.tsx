@@ -119,7 +119,9 @@ export const HeightPickerModal2: React.FC<HeightPickerModalProps> = ({
   initialFeet = 5,    // default 5'
   initialInches = 6,  // default 6"
 }) => {
-  const feetRaw = [1, 2, 3, 4, 5, 6, 7 ,8 , 9 , 10 , 11 , 12];
+  // const feetRaw = [1, 2, 3, 4, 5, 6, 7 ,8 , 9 , 10 , 11 , 12];
+    const feetRaw = Array.from({ length: 37 }, (_, i) => i);
+
   const inchRaw = Array.from({ length: 12 }, (_, i) => i);
 
   const feetItems = feetRaw.map((val) => ({

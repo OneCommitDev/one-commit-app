@@ -4,6 +4,7 @@ import {
   Alert,
   TouchableOpacity,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProp } from '@react-navigation/native';
@@ -63,9 +64,14 @@ export default function DeleteAccount() {
   };
 
   return (
-    <View className="flex-1 bg-[#F9FAFB] pt-14">
+    // <View className="flex-1 bg-[#F9FAFB] pt-14">
+       <View
+          className={`flex-1 bg-background px-4 ${
+            Platform.OS === "ios" ? "pt-14" : "pt-1"
+          }`}
+        >
       {/* Header */}
-      <View className="flex-row items-center px-4 mb-4">
+      <View className="flex-row items-center mb-4">
         <TouchableOpacity
           onPress={handleBack}
           className="w-10 h-10 rounded-full bg-[#E3E9E5] items-center justify-center"

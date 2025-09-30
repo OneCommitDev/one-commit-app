@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {  View,  Text,  FlatList,  TouchableOpacity,  Image,  Alert,  ActivityIndicator,  Animated,  Easing,  Dimensions, InteractionManager, TextInput, Platform, UIManager, LayoutAnimation,
+import {  View,  Text,  FlatList,  TouchableOpacity,  Image,  Alert,  ActivityIndicator,  Animated,  Easing,  Dimensions, InteractionManager, TextInput, Platform, UIManager, LayoutAnimation, Keyboard, TouchableWithoutFeedback,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -94,6 +94,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
         accessToken ?? '',
         true
       );
+         
      if (res?.status && Array.isArray(res.data)) {
       setAllSchools(res.data);        
       setFilteredData(res.data);       
@@ -131,8 +132,10 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           accessToken ?? '',
           true
         );
+
+        // console.log(url);
+        // console.log(res);
    
-         
         const newData = Array.isArray(res.data) ? res.data : [];
 
         if (newData.length === 0) {
@@ -316,7 +319,6 @@ const handleSlideCard = () => {
       if (!noMoreData) {
          setOffset(offset + limit);
         await fetchColleges(offset, true);
-        // Increment index to show the newly loaded card
         setCurrentIndex(prev => prev + 1);
       }
     } else {
@@ -333,13 +335,15 @@ const handleSlideCard = () => {
 };
 
 
- 
+ const [showDropdown, setShowDropdown] = useState(false);
+
 
  const handleSearch = (text: string) => {
   setSearchText(text);
 
   if (!text.trim()) {
-    setFilteredData([]);
+     setFilteredData([]);
+       setShowDropdown(false);
     return;
   }
 
@@ -347,16 +351,28 @@ const handleSlideCard = () => {
     item.name.toLowerCase().includes(text.toLowerCase())
   );
   setFilteredData(results);
+  setShowDropdown(results.length > 0);
+};
+
+
+const handleRowPress = (item: SearchSchoolData) => {
+  Keyboard.dismiss();
+  setTimeout(() => {
+    handleSelect(item);
+  }, 100); // 👈 small delay gives time for keyboard blur
 };
 
 
 const handleSelect = (item: SearchSchoolData) => {
-  setSearchText(item.name);
-  setFilteredData([]); // Hide dropdown
-    if (item.school_id) {
-    searchschoolByID(item.school_id); // 🔥 Call API with selected ID
+  // setSearchText(item.name);
+  setFilteredData([]); 
+  setShowSearch(false);
+
+  if (item.school_id) {
+    searchschoolByID(item.school_id);
   }
 };
+
 
  const searchschoolByID = async (schoolId: string) => {
   setLoading(true);
@@ -369,7 +385,8 @@ const handleSelect = (item: SearchSchoolData) => {
     const url = Api_Url.searchSchoolByID;
     const res = await httpRequest2<SchoolsMatches>(
       url,      'post',      {school_id : schoolId},      accessToken ?? '',      true    );
-
+     console.log(url);
+        console.log(res);
     const resultData = Array.isArray(res.data) ? res.data : [];
     if (resultData.length === 0) {
       setNoMoreData(true);
@@ -396,7 +413,9 @@ const handleSelect = (item: SearchSchoolData) => {
  
   // Animated values
   const searchAnim = useRef(new Animated.Value(0)).current; // 0 = hidden, 1 = visible
+  /*
  const toggleSearch = () => {
+ 
     if (showSearch) {
       Animated.timing(searchAnim, {
         toValue: 0,
@@ -414,6 +433,34 @@ const handleSelect = (item: SearchSchoolData) => {
       }).start();
     }
   };
+*/
+ const toggleSearch = () => {
+  if (showSearch) {
+    if (searchText.length > 0) {
+      // First click clears the text
+      setSearchText("");
+    } else {
+      // Second click closes the search bar
+      Animated.timing(searchAnim, {
+        toValue: 0,
+        duration: 300,
+        easing: Easing.ease,
+        useNativeDriver: false,
+      }).start(() => setShowSearch(false));
+    }
+  } else {
+    // Open the search bar
+    setShowSearch(true);
+    Animated.timing(searchAnim, {
+      toValue: 1,
+      duration: 250,
+      easing: Easing.circle,
+      useNativeDriver: false,
+    }).start();
+  }
+};
+
+
 
   // Interpolations
   const width = searchAnim.interpolate({
@@ -427,8 +474,13 @@ const handleSelect = (item: SearchSchoolData) => {
   });
 
    return (
-  <View className="flex-1 bg-background px-4 pb-6 pt-2">
- <View className="mt-14 flex-row items-center justify-between px-4">
+  // <View className="flex-1 bg-background px-4 pb-6 pt-2">
+   <View
+            className={`flex-1 bg-background px-0 ${
+              Platform.OS === "ios" ? "pt-14" : "pt-4"
+            }`}
+          >
+ <View className=" flex-row items-center justify-between px-4">
   {!showSearch ? (
     <>
     
@@ -459,17 +511,18 @@ const handleSelect = (item: SearchSchoolData) => {
       <Ionicons name="search" size={20} color="#888" className="mr-2" />
       <TextInput
         value={searchText}
-        onChangeText={setSearchText}
+        // onChangeText={setSearchText}
+         onChangeText={handleSearch}  
         placeholder="Search schools..."
         placeholderTextColor="#888"
         className="flex-1 text-base text-gray-800"
         autoFocus
       />
-      {searchText.length > 0 && (
+      {/* {searchText.length > 0 && (
         <TouchableOpacity onPress={() => setSearchText("")}>
           <Ionicons name="close-circle" size={20} color="#888" />
         </TouchableOpacity>
-      )}
+      )} */}
       <TouchableOpacity onPress={toggleSearch}>
         <Ionicons name="close" size={22} color="#333" />
       </TouchableOpacity>
@@ -482,7 +535,7 @@ const handleSelect = (item: SearchSchoolData) => {
 
   <Loader show={loading} />
 
-  <View className="bg-white w-full flex-1 mt-4 rounded-[6]">
+  <View className="bg-white w-full flex-1 mt-4 rounded-[6] px-4">
          {/* <View className="flex-row items-center bg-gray-200 rounded-full mb-2 h-[45px] px-5">
   <Ionicons name="search" size={20} color="#888" className="mr-2" />
 
@@ -501,20 +554,39 @@ const handleSelect = (item: SearchSchoolData) => {
   )}
 </View> */}
 
-{searchText.trim().length > 0 && filteredData.length > 0 && (
+{showDropdown && (
   <View
     className="absolute left-4 right-4 top-[0px] bg-white rounded-lg shadow-lg max-h-60 z-50"
     style={{ elevation: 10 }} // For Android shadow
   >
-    <FlatList
+    {/* <FlatList
       data={filteredData}
       keyExtractor={(item, index) => `${item}_${index}`}
+      keyboardShouldPersistTaps="handled"
       renderItem={({ item }) => (
         <TouchableOpacity onPress={() => handleSelect(item)} className="p-3 border-b border-gray-100">
           <Text className="text-gray-800">{item.name}</Text>
         </TouchableOpacity>
       )}
-    />
+    /> */}
+<ScrollView
+  keyboardShouldPersistTaps="always"
+  className="max-h-60"
+>
+  {filteredData.map((item, index) => (
+    <TouchableOpacity
+  key={item.school_id || index}
+  activeOpacity={0.7}
+  onPress={() => handleRowPress(item)}
+  className="p-3 border-b border-gray-100"
+>
+  <Text className="text-gray-800">{item.name}</Text>
+</TouchableOpacity>
+
+  ))}
+</ScrollView>
+
+
   </View>
 )}
 

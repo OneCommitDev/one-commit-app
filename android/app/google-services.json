@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "429115153068-74smcispvrg6od4b2li9vdasheqt1g8q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "us.onecommit.app",
+            "certificate_hash": "f5000a69cedad1904c3a2935f81f636327e10bf0"
+          }
+        },
+        {
+          "client_id": "429115153068-smk6bff8aps3su2dnp33a3hav5i7ml19.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "us.onecommit.app",
+            "certificate_hash": "32673ac4648d749c5ed086d0f9160e87b8dd029f"
+          }
+        },
+        {
           "client_id": "429115153068-mi3i4q5h86q6l56aroiorc49jigsb7ko.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -31,10 +47,11 @@
               "client_type": 3
             },
             {
-              "client_id": "429115153068-8n42o6qr0dnknd5nce4k73doai84l762.apps.googleusercontent.com",
+              "client_id": "429115153068-hd2tm7fpr9g1tvrr6amcs4hdvk507iti.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "OneCommit"
+                "bundle_id": "us.onecommit.app",
+                "app_store_id": "6752233901"
               }
             }
           ]

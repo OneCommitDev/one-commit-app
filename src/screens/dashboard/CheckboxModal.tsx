@@ -129,6 +129,7 @@ export default function CheckboxModal({
 
       const payload = {
         sports_profile: JSON.stringify(allData),
+        ui_flow : 'profile_quick_edit'
       };
 
       const res = await httpRequest2<SavedSportResponse>(
@@ -138,7 +139,7 @@ export default function CheckboxModal({
         accessToken ?? "",
         true
       );
-      console.log(res);
+     // console.log(res);
       if (res.status) {
         setLoading(false);
         setTimeout(() => {

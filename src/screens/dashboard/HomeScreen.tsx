@@ -300,8 +300,10 @@ setScreenload(true);
             visibleBase.map((todoItem, idx) => (
               <TouchableOpacity key={`base-${idx}`} onPress={() => handleTodoClick(todoItem)}>
                 <View className="flex-row items-start mt-1">
-      <TitleText className="ml-5 -mt-2" size="text-24">•</TitleText>
-                  <AppText className="ml-5">{todoItem.notification}</AppText>
+                   <TitleText className="ml-5 -mt-2" size="text-24">•</TitleText>
+                  <View className="flex-1 mr-4">
+                    <AppText className="ml-5 pr-1">{todoItem.notification}</AppText>
+                  </View>
                 </View>
               </TouchableOpacity>
             ))
@@ -327,7 +329,7 @@ setScreenload(true);
           >
             {extras.map((todoItem, idx) => (
               <View key={`measure-extra-${idx}`} className="flex-row items-start mt-1">
-                <AppText className="ml-5">•</AppText>
+                <TitleText className="ml-5" size="text-24">•</TitleText>
                 <AppText className="ml-5">{todoItem.notification}</AppText>
               </View>
             ))}
@@ -345,9 +347,11 @@ setScreenload(true);
             {/* The actual visible extras (same markup as measurement) */}
             {extras.map((todoItem, idx) => (
               <TouchableOpacity key={`extra-${idx}`} onPress={() => handleTodoClick(todoItem)}>
-                <View className="flex-row items-start mt-1">
-                  <AppText className="ml-5">•</AppText>
-                  <AppText className="ml-5">{todoItem.notification}</AppText>
+                <View className="flex-row items-start">
+                  <TitleText className="ml-5 -mt-2" size="text-24">•</TitleText>
+                  <View className="w-full mr-3">
+                  <AppText className="ml-5 mr-1">{todoItem.notification}</AppText>
+                  </View>
                 </View>
               </TouchableOpacity>
             ))}
@@ -546,7 +550,12 @@ setScreenload(true);
   };
 
   return (
-    <View className="flex-1 bg-background pt-14 px-4">
+    // <View className="flex-1 bg-background pt-14 px-4">
+     <View
+          className={`flex-1 bg-background px-4 ${
+            Platform.OS === "ios" ? "pt-14" : "pt-5"
+          }`}
+        >
       <View className="px-4 mb-6">
         <TitleText size="text-24">Hi, {capitalizeWords(todoList?.data?.profile?.name) ?? ""} 👋</TitleText>
         <AppText className="-mt-4">{formattedDate}</AppText>

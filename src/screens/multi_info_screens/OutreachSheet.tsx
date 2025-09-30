@@ -163,7 +163,7 @@ useEffect(() => {
                   email_content : form.message_txt
             };
 
-            console.log('payload', Api_Url.send_email_outReach);
+            // console.log('payload', Api_Url.send_email_outReach);
             
             const accessToken = await getItem(PREF_KEYS.accessToken);  
             const res = await httpRequest2<SimpleResponse>(

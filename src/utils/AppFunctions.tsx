@@ -131,7 +131,8 @@ export const validateGPA = (
   }
 
   // Regex: allow 0–4.5 with up to 2 decimals
-  const regex = /^(?:[0-3](?:\.\d{1,2})?|4(?:\.(?:[0-4]\d?|50?))?)$/;
+  // const regex = /^(?:[0-3](?:\.\d{1,2})?|4(?:\.(?:[0-4]\d?|50?))?)$/;
+  const regex = /^(?:0\.[1-9]\d?|[1-3](?:\.\d{1,2})?|4(?:\.(?:[0-4]\d?|50?))?)$/;
 
   if (fixedValue === "") {
     setErrors((e) => ({ ...e, unweighted_gpa: "" }));

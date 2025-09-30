@@ -27,8 +27,8 @@ export const NumberPickerModal: React.FC<NumberPickerModalProps> = ({
   onSave,
   title,
 }) => {
-  const wholeRaw = Array.from({ length: 31 }, (_, i) => i); // 0 to 30
-  const decimalRaw = Array.from({ length: 12 }, (_, i) => i); // 0 to 11
+  const wholeRaw = Array.from({ length: 13 }, (_, i) => i); // 0 to 30
+  const decimalRaw = Array.from({ length: 10 }, (_, i) => i); // 0 to 11
 
   const wholeItems = wholeRaw.map((val) => ({
     label: `${val}`,

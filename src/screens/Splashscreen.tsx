@@ -61,6 +61,8 @@ useEffect(() => {
 
   return (
     <View className="flex-1 bg-primary justify-between py-10">
+           <StatusBar backgroundColor="#235D48" barStyle="light-content" />
+
       <View className="flex-1 justify-center items-center">
              <View className="items-center mb-6">
         <View className="mt-img-lg">
