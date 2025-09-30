@@ -139,9 +139,9 @@ export default Sentry.wrap(function App() {
  
   if (__DEV__) {
     // dev logging allowed
-     console.log = () => {};
-    console.warn = () => {};
-    console.error = () => {};
+    //  console.log = () => {};
+    // console.warn = () => {};
+    // console.error = () => {};
   } else {
     console.log = () => {};
     console.warn = () => {};

@@ -94,6 +94,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
         accessToken ?? '',
         true
       );
+         
      if (res?.status && Array.isArray(res.data)) {
       setAllSchools(res.data);        
       setFilteredData(res.data);       
@@ -132,7 +133,7 @@ const [isArchiveData, setIsArchiveData] = useState(false);
           true
         );
 
-        console.log(url);
+        // console.log(url);
         // console.log(res);
    
         const newData = Array.isArray(res.data) ? res.data : [];
@@ -384,7 +385,8 @@ const handleSelect = (item: SearchSchoolData) => {
     const url = Api_Url.searchSchoolByID;
     const res = await httpRequest2<SchoolsMatches>(
       url,      'post',      {school_id : schoolId},      accessToken ?? '',      true    );
-
+     console.log(url);
+        console.log(res);
     const resultData = Array.isArray(res.data) ? res.data : [];
     if (resultData.length === 0) {
       setNoMoreData(true);

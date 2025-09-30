@@ -284,6 +284,7 @@ export type SchoolMatchItem = {
   state: string;
   region: string;
   img_path: string;
+  banner_path : string;
   school_size: string;
   overall_match_percent: string;
   match_criteria: MatchCriteria;

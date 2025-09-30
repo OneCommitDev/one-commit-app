@@ -71,8 +71,8 @@ const ExplorCards: React.FC<Props> = ({
         <View className="relative mb-10">
           <Image
             source={{
-            // uri: item.img_path,
-              uri: 'https://images.unsplash.com/photo-1542404937-2132aa1fa6fc?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+              uri: item.banner_path,
+              // uri: 'https://images.unsplash.com/photo-1542404937-2132aa1fa6fc?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
             }}
             className="w-full h-[200px] rounded-[10px]"
             resizeMode="cover"
