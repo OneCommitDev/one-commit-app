@@ -5,7 +5,7 @@ export type RootStackParamList = {
   Splash: undefined;
   Intro: undefined;
   Login: undefined;
-  EditProfileInfo : {src :string};
+  EditProfileInfo : undefined;
   AppSystemSettings : undefined;
   AppPreferences : undefined;
   ChangePassword : undefined;

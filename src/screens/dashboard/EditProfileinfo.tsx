@@ -91,42 +91,21 @@ const [showTimePicker, setShowTimePicker] = useState(false);
 const [sporteventdata, setSportsdata] = useState<SportEvent>();
 const [modalVisible, setModalVisible] = useState(false);
 const [disunit, setdisUnit] = useState<"feet" | "meters">("feet");
-
 const [sportmodalVisible, setSportModalVisible] = useState(false);
 const [sporteventdatasection, setSportsdataSection] = useState<SportUserFormattedData>();
 const [sportsdatalength, sersportslentgh] = useState(0);
-
 const heightStr = String(profile?.height || "5'6\"");
 
 
-   // Handlers
-   /*
- const schoolSizeToggle = (key: string) => {
-  setSchoolSizeSelected(prev => {
-    const updated = prev.includes(key)
-      ? prev.filter(x => x !== key)  
-      : [...prev, key];              
-   console.log("School Size:", updated);
-   const payload = {
-      school_size: updated.join(","),
-    };
-    SaveRequest(payload);
-    return updated;
-  });
-};
-*/
 const schoolSizeToggle = (key: string) => {
   setSchoolSizeSelected(prev => {
     let updated: string[];
-
     if (prev.includes(key)) {
-      // trying to deselect
       if (prev.length === 1) {
-        return prev; // 🚫 don't allow removing the last one
+        return prev; //  don't allow removing the last one
       }
       updated = prev.filter(x => x !== key);
     } else {
-      // add new selection
       updated = [...prev, key];
     }
 
@@ -834,7 +813,7 @@ useEffect(() => {
             initialMainValue={Number(sporteventdata?.eventValue?.split(".")[0] ?? 0)}
             initialDecimalValue={Number(sporteventdata?.eventValue?.split(".")[1] ?? 0)}
             onSave={(main, decimal, unit) => {
-              const values = `${main}.${decimal}`;
+              const values = `${main}'${decimal}`;
 
               const payload = {
                 sport_event: {

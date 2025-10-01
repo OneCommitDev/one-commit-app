@@ -17,7 +17,7 @@ import TitleText from '~/components/TitleText';
 type RootStackParamList = {
   ResetPasswordScreen: { userid: any };
   Login: undefined;
-  Success: { message: string; title?: string };
+  SuccessScreen: { message: string; title?: string };
 };
 
 export default function ResetPasswordScreen() {
@@ -80,8 +80,7 @@ const OTP = await getItem(PREF_KEYS.forgot_otp);
      if (res.status) {
         removeItem(PREF_KEYS.forgot_email);
         removeItem(PREF_KEYS.forgot_otp);
-        // navigation.reset({ index: 0, routes: [{ name: 'Login' }], });
-       navigation.navigate('Success', {
+       navigation.navigate('SuccessScreen', {
           message: 'Password Reset successfully!',
         });
      } else {
