@@ -31,7 +31,6 @@ import CollegePreferences from '~/screens/multi_info_screens/CollegePreferences'
 import Athletic from '~/screens/multi_info_screens/Athletic';
 import Academic from '~/screens/multi_info_screens/Academic';
 import ContactUs from '~/screens/dashboard/ContactUs';
-import EditProfileinfo from '~/screens/dashboard/EditProfileinfo';
 import EditProfileInfo from '~/screens/dashboard/EditProfileinfo';
 import AppSystemSettings from '~/screens/dashboard/AppSystemSettings';
 import AppPreferences from '~/screens/dashboard/AppPreferences';

@@ -1,6 +1,7 @@
 // src/navigation/NavigationService.ts
 import { CommonActions, createNavigationContainerRef } from "@react-navigation/native";
 import { RootStackParamList } from "./types";
+import { clearAllPrefss } from "~/utils/storage";
 
 // Create a global ref
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -8,6 +9,7 @@ export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 // Reset navigation to login
 export function resetToLogin() {
   if (navigationRef.isReady()) {
+    clearAllPrefss();
     navigationRef.dispatch(
       CommonActions.reset({
         index: 0,
